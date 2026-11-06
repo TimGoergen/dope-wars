@@ -1,0 +1,327 @@
+# Build & Deploy pipeline for Dope Wars: Omaha Metro Edition.
+#
+# Cloned from the proven American Tycoon pipeline (Godot 4.5.1, Linux cross-export
+# for Windows + Android, Inno Setup Windows installer on main, and Firebase App
+# Distribution APK push on both main and feature/** branches).
+#
+# Required GitHub Secrets (Settings > Secrets and variables > Actions):
+#   ANDROID_KEYSTORE_BASE64      — base64-encoded keystore file
+#   ANDROID_KEYSTORE_PASS        — keystore and key password
+#   FIREBASE_APP_ID              — Firebase Android App ID
+#                                  Leave unset to skip Firebase deployment.
+#   FIREBASE_SERVICE_ACCOUNT_KEY — Service account JSON with Firebase App Distribution Admin role
+
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main, 'feature/**']
+
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.5.1"
+  GODOT_CHANNEL: "stable"
+
+jobs:
+  export:
+    name: Export (Windows + Android)
+    runs-on: ubuntu-latest
+    outputs:
+      sha:       ${{ steps.version.outputs.sha }}
+      build_num: ${{ steps.version.outputs.build_num }}
+      branch:    ${{ steps.version.outputs.branch }}
+      msg:       ${{ steps.version.outputs.msg }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute short SHA for version stamping
+        id: version
+        run: |
+          SHA="${GITHUB_SHA:0:7}"
+          BUILD_NUM=$(printf '%04d' "$GITHUB_RUN_NUMBER")
+          echo "sha=$SHA"                             >> "$GITHUB_OUTPUT"
+          echo "build_num=$BUILD_NUM"                 >> "$GITHUB_OUTPUT"
+          echo "branch=${GITHUB_REF_NAME}"            >> "$GITHUB_OUTPUT"
+          echo "msg=$(git log -1 --format='%s')"      >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+
+      - name: Restore Godot binary and export templates from cache
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/godot-ci/
+            ~/.local/share/godot/export_templates/
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_CHANNEL }}-v1
+
+      - name: Download Godot Linux headless binary
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          BASE="https://github.com/godotengine/godot/releases/download"
+          VER="${GODOT_VERSION}-${GODOT_CHANNEL}"
+          ZIP="Godot_v${VER}_linux.x86_64.zip"
+          wget -q "${BASE}/${VER}/${ZIP}" -O /tmp/godot.zip
+          mkdir -p ~/.local/godot-ci
+          unzip -q /tmp/godot.zip -d ~/.local/godot-ci/
+          chmod +x ~/.local/godot-ci/Godot_v${VER}_linux.x86_64
+
+      - name: Download Godot export templates
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          BASE="https://github.com/godotengine/godot/releases/download"
+          VER="${GODOT_VERSION}-${GODOT_CHANNEL}"
+          TPZ="Godot_v${VER}_export_templates.tpz"
+          wget -q "${BASE}/${VER}/${TPZ}" -O /tmp/templates.tpz
+          TEMPLATES_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_CHANNEL}"
+          mkdir -p "$TEMPLATES_DIR"
+          unzip -q /tmp/templates.tpz -d /tmp/templates_extract/
+          cp -r /tmp/templates_extract/templates/* "$TEMPLATES_DIR/"
+
+      - name: Decode Android release keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p build
+          python3 -c "
+          import base64, os
+          data = os.environ['KEYSTORE_B64']
+          data = data.encode('ascii', errors='ignore').decode()
+          data = ''.join(data.split())
+          open('build/android_release.keystore', 'wb').write(base64.b64decode(data))
+          "
+
+      - name: Inject Android keystore password into export presets
+        env:
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          python3 - <<'EOF'
+          import os
+          path = "game/export_presets.cfg"
+          content = open(path).read()
+          password = os.environ["KEYSTORE_PASS"]
+          content = content.replace(
+              'keystore/release_password=""',
+              f'keystore/release_password="{password}"'
+          )
+          open(path, "w").write(content)
+          EOF
+
+      - name: Stamp build version into Android export preset
+        run: |
+          python3 - <<'EOF'
+          import os, re
+          path = "game/export_presets.cfg"
+          content = open(path).read()
+          run_num = int(os.environ["GITHUB_RUN_NUMBER"])
+          build_num = f"{run_num:04d}"
+          content = re.sub(r'^version/code=\d+',           f'version/code={run_num}',             content, flags=re.MULTILINE)
+          content = re.sub(r'^version/name="[^"]*"',       f'version/name="0.0.0.{build_num}"',   content, flags=re.MULTILINE)
+          open(path, "w").write(content)
+          print(f"Android version: 0.0.0.{build_num} (code {run_num})")
+          pg_path = "game/project.godot"
+          pg = open(pg_path).read()
+          pg = re.sub(r'^config/version="[^"]*"', f'config/version="0.0.0.{build_num}"', pg, flags=re.MULTILINE)
+          open(pg_path, "w").write(pg)
+          EOF
+
+      - name: Configure Godot editor settings
+        run: |
+          python3 - <<'PYEOF'
+          import os
+          java_home = os.environ.get('JAVA_HOME', '')
+          sdk_path = '/usr/local/lib/android/sdk'
+          settings = (
+              '[gd_resource type="EditorSettings" format=3]\n\n'
+              '[resource]\n'
+              f'export/android/android_sdk_path = "{sdk_path}"\n'
+              f'export/android/java_sdk_path = "{java_home}"\n'
+              'export/android/debug_keystore = ""\n'
+              'export/android/debug_keystore_user = ""\n'
+              'export/android/debug_keystore_pass = ""\n'
+          )
+          dest = os.path.expanduser('~/.config/godot')
+          os.makedirs(dest, exist_ok=True)
+          path = os.path.join(dest, 'editor_settings-4.5.tres')
+          open(path, 'w').write(settings)
+          PYEOF
+
+      - name: Create output directory
+        run: mkdir -p dist
+
+      - name: Export — Windows Desktop
+        working-directory: game
+        run: |
+          GODOT="$HOME/.local/godot-ci/Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_linux.x86_64"
+          "$GODOT" --headless --export-release "Windows Desktop" "../dist/dope_wars_win.exe"
+
+      - name: Export — Android APK (unsigned, sign manually)
+        working-directory: game
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          rm -f ~/.android/debug.keystore
+          python3 -c "
+          path = 'export_presets.cfg'
+          content = open(path).read()
+          content = content.replace('package/signed=true', 'package/signed=false')
+          open(path, 'w').write(content)
+          "
+          GODOT="$HOME/.local/godot-ci/Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_linux.x86_64"
+          "$GODOT" --headless --export-release "Android" "../dist/dope_wars_raw.apk" 2>&1 | tee /tmp/godot_out.txt; GODOT_EXIT=${PIPESTATUS[0]}
+          if [ $GODOT_EXIT -ne 0 ]; then
+            cat -A /tmp/godot_out.txt | tail -50
+            exit $GODOT_EXIT
+          fi
+          CLEAN_PASS=$(printf '%s' "$KEYSTORE_PASS" | tr -cd '[:print:]')
+          BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools/" | sort -V | tail -1)
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" sign \
+            --ks ../build/android_release.keystore \
+            --ks-key-alias american_tycoon \
+            --ks-pass "pass:$CLEAN_PASS" \
+            --key-pass "pass:$CLEAN_PASS" \
+            --out ../dist/dope_wars.apk \
+            ../dist/dope_wars_raw.apk
+          rm ../dist/dope_wars_raw.apk
+
+      - name: Stamp version into filenames
+        run: |
+          SHA="${{ steps.version.outputs.sha }}"
+          mv dist/dope_wars_win.exe  "dist/dope_wars_${SHA}_win.exe"
+          mv dist/dope_wars.apk      "dist/dope_wars_${SHA}.apk"
+
+      - name: Upload Windows exe
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: dist/dope_wars_*_win.exe
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: dist/dope_wars_*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-installer:
+    name: Windows Installer
+    needs: export
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Windows exe artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-exe
+          path: dist\
+
+      - name: Build installer with Inno Setup
+        shell: pwsh
+        run: |
+          $sha      = "${{ needs.export.outputs.sha }}"
+          $buildNum = "${{ needs.export.outputs.build_num }}"
+          $version  = "0.0.0.$buildNum"
+          $srcExe   = (Get-ChildItem "dist\dope_wars_*_win.exe" | Select-Object -First 1).FullName
+          $outputDir = (Resolve-Path "dist").Path
+
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" `
+            "/DAppVersion=$version" `
+            "/DSourceExe=$srcExe" `
+            "/DOutputDir=$outputDir" `
+            "/DOutputFilename=dope_wars_setup_$sha" `
+            "build\setup.iss"
+
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist\dope_wars_setup_*.exe
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Publish Release
+    needs: [export, windows-installer]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-files/
+
+      - name: Create GitHub pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "build-${{ needs.export.outputs.sha }}"
+          name: "Build ${{ needs.export.outputs.sha }}"
+          prerelease: true
+          body: |
+            Automated build from commit ${{ github.sha }}.
+
+            **Install — Windows:** run `dope_wars_setup_*.exe`
+            **Install — Android:** install `dope_wars_*.apk` on your Pixel 10 Pro XL
+          files: |
+            release-files/windows-installer/*.exe
+            release-files/android-apk/*.apk
+
+  firebase-deploy:
+    name: Deploy to Firebase
+    needs: export
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Firebase configured
+        id: check
+        run: |
+          if [ -n "${{ secrets.FIREBASE_APP_ID }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "FIREBASE_APP_ID not set — skipping Firebase deploy"
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download Android APK artifact
+        if: steps.check.outputs.configured == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: dist/
+
+      - name: Resolve APK path
+        if: steps.check.outputs.configured == 'true'
+        id: apk
+        run: |
+          APK=$(ls dist/*.apk | head -1)
+          echo "path=$APK" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to Firebase App Distribution
+        if: steps.check.outputs.configured == 'true'
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+          groups: testers
+          file: ${{ steps.apk.outputs.path }}
+          releaseNotes: "[${{ needs.export.outputs.branch }}] ${{ needs.export.outputs.sha }}: ${{ needs.export.outputs.msg }}"
