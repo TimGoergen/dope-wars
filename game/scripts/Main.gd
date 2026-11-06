@@ -1,8 +1,8 @@
 extends Control
 
 # Root 1080x2400 Portrait Dashboard for Dope Wars: Omaha Metro Edition.
-# Uses a clean 3-Tab Bottom Navigation Bar (like American Tycoon) with large, legible controls:
-#   Tab 0: MARKET (12-Row Trading Board + Travel button)
+# Uses a high-contrast 3-Tab Bottom Navigation Bar (like American Tycoon) with large, legible controls:
+#   Tab 0: MARKET (Filtered 7-11 Active Product Rows with 2-line details + Enhanced Travel popup)
 #   Tab 1: SPOT & BANK (Current District Facility + First National Bank / Big Sal inline)
 #   Tab 2: KINGPIN (Status, Perks, New Run, Hall of Fame, Sound, Dev Tuning)
 
@@ -27,7 +27,9 @@ var _heat_lbl: Label
 # Market Tab Controls
 var _travel_btn: Button
 var _finish_run_btn: Button
+var _scanner_card: PanelContainer
 var _log_line_1: Label
+var _log_line_2: Label
 var _product_rows: Dictionary = {} # product_id -> Dictionary of nodes
 
 # Spot & Bank Tab Dynamic VBox
@@ -76,10 +78,10 @@ func _build_dashboard_ui() -> void:
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 18)
-	margin.add_theme_constant_override("margin_right", 18)
-	margin.add_theme_constant_override("margin_top", 20)
-	margin.add_theme_constant_override("margin_bottom", 20)
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_right", 16)
+	margin.add_theme_constant_override("margin_top", 18)
+	margin.add_theme_constant_override("margin_bottom", 18)
 	add_child(margin)
 
 	var root_vbox := VBoxContainer.new()
@@ -88,7 +90,7 @@ func _build_dashboard_ui() -> void:
 	root_vbox.add_theme_constant_override("separation", 12)
 	margin.add_child(root_vbox)
 
-	# 1. COMPACT 2-ROW HERO HEADER (Always visible)
+	# 1. HIGH-CONTRAST 2-ROW HERO HEADER (Always visible)
 	_build_hero_header(root_vbox)
 
 	# 2. CENTER TAB CONTENT AREA
@@ -175,7 +177,7 @@ func _build_dashboard_ui() -> void:
 func _build_hero_header(parent: VBoxContainer) -> void:
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 2, 18, 12))
+	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_BRIGHT, 16, 3, 20, 14))
 	parent.add_child(card)
 
 	var vbox := VBoxContainer.new()
@@ -183,35 +185,35 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	vbox.add_theme_constant_override("separation", 8)
 	card.add_child(vbox)
 
-	# Row 1: Big Cash | Bank | Debt
+	# Row 1: Huge Cash | Bank | Debt
 	var r1 := HBoxContainer.new()
 	r1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	r1.add_theme_constant_override("separation", 10)
+	r1.add_theme_constant_override("separation", 12)
 	vbox.add_child(r1)
 
-	_cash_lbl = UiPalette.add_label(r1, "💵 $2,000", UiPalette.FONT_SUBHEAD, UiPalette.CASH_EMERALD, false)
+	_cash_lbl = UiPalette.add_label(r1, "💵 $2,000", UiPalette.FONT_HERO, UiPalette.CASH_EMERALD, false, true)
 	_cash_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	_bank_lbl = UiPalette.add_label(r1, "🏦 $0", UiPalette.FONT_ROW_MAIN, UiPalette.BANK_CYAN, false)
+	_bank_lbl = UiPalette.add_label(r1, "🏦 $0", UiPalette.FONT_SUBHEAD, UiPalette.BANK_CYAN, false, true)
 	_bank_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_bank_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-	_debt_lbl = UiPalette.add_label(r1, "🦈 $5,500", UiPalette.FONT_ROW_MAIN, UiPalette.DEBT_CRIMSON, false)
+	_debt_lbl = UiPalette.add_label(r1, "🦈 $5,500", UiPalette.FONT_SUBHEAD, UiPalette.DEBT_CRIMSON, false, true)
 	_debt_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_debt_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 	# Row 2: Location + Day | Coat Space | HP | Heat
 	var r2 := HBoxContainer.new()
 	r2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	r2.add_theme_constant_override("separation", 10)
+	r2.add_theme_constant_override("separation", 14)
 	vbox.add_child(r2)
 
-	_loc_day_lbl = UiPalette.add_label(r2, "📍 North O • Day 1/31", UiPalette.FONT_ROW_SUB, UiPalette.GOLD_ACCENT, false)
+	_loc_day_lbl = UiPalette.add_label(r2, "📍 North O • Day 1/31", UiPalette.FONT_BUTTON, UiPalette.GOLD_ACCENT, false, true)
 	_loc_day_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	_space_lbl = UiPalette.add_label(r2, "🧥 0/100", UiPalette.FONT_ROW_SUB, UiPalette.TEXT_PRIMARY, false)
-	_hp_lbl = UiPalette.add_label(r2, "❤️ 100", UiPalette.FONT_ROW_SUB, UiPalette.CASH_EMERALD, false)
-	_heat_lbl = UiPalette.add_label(r2, "🚨 0%", UiPalette.FONT_ROW_SUB, UiPalette.SPIKE_AMBER, false)
+	_space_lbl = UiPalette.add_label(r2, "🧥 0/100", UiPalette.FONT_BUTTON, UiPalette.TEXT_PRIMARY, false, true)
+	_hp_lbl = UiPalette.add_label(r2, "❤️ 100", UiPalette.FONT_BUTTON, UiPalette.CASH_EMERALD, false, true)
+	_heat_lbl = UiPalette.add_label(r2, "🚨 0%", UiPalette.FONT_BUTTON, UiPalette.SPIKE_AMBER, false, true)
 
 
 func _build_market_tab() -> Control:
@@ -220,17 +222,17 @@ func _build_market_tab() -> Control:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 10)
 
-	# Action Row: Big Travel button + ATM button (+ Finish Run on Final Day)
+	# Action Row: Prominent Travel Bar (+ Finish Run on Final Day)
 	var act_row := HBoxContainer.new()
 	act_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	act_row.add_theme_constant_override("separation", 12)
 	vbox.add_child(act_row)
 
 	_travel_btn = Button.new()
-	_travel_btn.text = "🚗 TRAVEL (North Omaha)"
+	_travel_btn.text = "🚗 TRAVEL — North Omaha 🏦"
 	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_travel_btn.custom_minimum_size = Vector2(0, 82)
-	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SUBHEAD)
+	_travel_btn.custom_minimum_size = Vector2(0, 88)
+	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SUBHEAD, 14)
 	_travel_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		_open_travel_modal()
@@ -240,28 +242,33 @@ func _build_market_tab() -> Control:
 	_finish_run_btn = Button.new()
 	_finish_run_btn.text = "🏁 FINISH RUN"
 	_finish_run_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_finish_run_btn.custom_minimum_size = Vector2(0, 82)
+	_finish_run_btn.custom_minimum_size = Vector2(0, 88)
 	_finish_run_btn.visible = false
-	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SUBHEAD)
+	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SUBHEAD, 14)
 	_finish_run_btn.pressed.connect(func() -> void:
 		_on_finish_run_pressed()
 	)
 	act_row.add_child(_finish_run_btn)
 
-	# Compact 1-Line Live Scanner Ticker
-	var scanner_card := PanelContainer.new()
-	scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_ALT_BG, UiPalette.BORDER_SLATE, 12, 2, 16, 10))
-	vbox.add_child(scanner_card)
+	# High-Visibility 2-Line Police Scanner & Spike/Flood Alert Banner
+	_scanner_card = PanelContainer.new()
+	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 18, 10))
+	vbox.add_child(_scanner_card)
 
-	_log_line_1 = UiPalette.add_label(scanner_card, "📻 > Welcome to Omaha.", UiPalette.FONT_SMALL, UiPalette.GOLD_ACCENT, false)
-	_log_line_1.clip_text = true
+	var scan_vbox := VBoxContainer.new()
+	scan_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scan_vbox.add_theme_constant_override("separation", 4)
+	_scanner_card.add_child(scan_vbox)
 
-	# 12-Row Trading Board
+	_log_line_1 = UiPalette.add_label(scan_vbox, "📻 Welcome to Omaha.", UiPalette.FONT_ROW_SUB, UiPalette.GOLD_ACCENT, true, true)
+	_log_line_2 = UiPalette.add_label(scan_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, true, false)
+
+	# Filtered Active Product Board (Only shows available or held products so rows expand ~35% taller)
 	var board := PanelContainer.new()
 	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	board.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 2, 14, 12))
+	board.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 3, 12, 10))
 	vbox.add_child(board)
 
 	var board_vbox := VBoxContainer.new()
@@ -278,16 +285,16 @@ func _build_market_tab() -> Control:
 		var row_panel := PanelContainer.new()
 		row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		row_panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg_col, UiPalette.BORDER_SLATE, 10, 1, 14, 6))
+		row_panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg_col, UiPalette.BORDER_SLATE, 12, 2, 16, 8))
 		board_vbox.add_child(row_panel)
 
 		var row_hbox := HBoxContainer.new()
 		row_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		row_hbox.add_theme_constant_override("separation", 10)
+		row_hbox.add_theme_constant_override("separation", 12)
 		row_panel.add_child(row_hbox)
 
-		# Left/Middle clickable button to open the Trade Slider Modal
+		# Left/Middle clickable area to open the Trade Slider Modal
 		var row_tap_btn := Button.new()
 		row_tap_btn.flat = true
 		row_tap_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -300,25 +307,35 @@ func _build_market_tab() -> Control:
 
 		var info_hbox := HBoxContainer.new()
 		info_hbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		info_hbox.add_theme_constant_override("separation", 10)
+		info_hbox.add_theme_constant_override("separation", 12)
 		info_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row_tap_btn.add_child(info_hbox)
 
-		var name_lbl := UiPalette.add_label(info_hbox, String(p_def["name"]), UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY, false)
-		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		name_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		# 2-Line Left Column: Line 1 = Drug Name + Spike/Flood Badge; Line 2 = Held/Avg/P&L or Normal Range
+		var left_vbox := VBoxContainer.new()
+		left_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		left_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		left_vbox.add_theme_constant_override("separation", 2)
+		left_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		info_hbox.add_child(left_vbox)
+
+		var name_lbl := UiPalette.add_label(left_vbox, String(p_def["name"]), UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY, false, true)
 		name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		var price_lbl := UiPalette.add_label(info_hbox, "$0", UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY, false)
+		var sub_lbl := UiPalette.add_label(left_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, false, false)
+		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		# Big Price Display
+		var price_lbl := UiPalette.add_label(info_hbox, "$0", UiPalette.FONT_HEADER, UiPalette.TEXT_PRIMARY, false, true)
 		price_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		price_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		price_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		# Right-edge 1-Tap Quick Action Button ([Buy N] / [Sell N] / [Dump N])
+		# Right-edge 1-Tap Quick Action Button ([BUY N] / [SELL N] / [DUMP N])
 		var quick_btn := Button.new()
-		quick_btn.custom_minimum_size = Vector2(240, 0)
+		quick_btn.custom_minimum_size = Vector2(248, 0)
 		quick_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 10)
+		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON, 12)
 		quick_btn.pressed.connect(func() -> void:
 			_on_quick_action_pressed(pid)
 		)
@@ -328,8 +345,11 @@ func _build_market_tab() -> Control:
 			"panel": row_panel,
 			"base_bg": row_bg_col,
 			"name_lbl": name_lbl,
+			"sub_lbl": sub_lbl,
 			"price_lbl": price_lbl,
-			"quick_btn": quick_btn
+			"quick_btn": quick_btn,
+			"min_price": int(tuning.get(String(p_def["min_prop"]))),
+			"max_price": int(tuning.get(String(p_def["max_prop"])))
 		}
 
 	return vbox
@@ -377,7 +397,7 @@ func _build_bottom_tab_bar(parent: VBoxContainer) -> void:
 		var btn := Button.new()
 		btn.text = String(t_def[0])
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size = Vector2(0, 96)
+		btn.custom_minimum_size = Vector2(0, 98)
 		var idx := int(t_def[1])
 		btn.pressed.connect(func() -> void:
 			Audio.play(&"tap")
@@ -403,16 +423,24 @@ func _show_tab(tab_idx: int) -> void:
 		_rebuild_kingpin_tab()
 
 
+func _format_product_list_short(ids: Array) -> String:
+	var names: Array[String] = []
+	for id_val in ids:
+		var p := OmahaCatalog.get_product(String(id_val))
+		names.append(String(p.get("name", id_val)))
+	return ", ".join(names)
+
+
 func _open_travel_modal() -> void:
 	for c in _travel_overlay.get_children():
 		c.queue_free()
 
-	var vbox := UiPalette.build_modal_shell(_travel_overlay, "🚗 CHOOSE NEIGHBORHOOD", UiPalette.GOLD_ACCENT, true)
+	var vbox := UiPalette.build_modal_shell(_travel_overlay, "🚗 OMAHA METRO TRANSIT", UiPalette.GOLD_ACCENT, true)
 
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
-	UiPalette.add_label(vbox, "Current Location: %s %s\nTraveling advances 1 Day and rolls fresh street prices." % [
+	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Tap any destination to drive (advances 1 Day)." % [
 		cur_d["icon"], cur_d["name"]
-	], UiPalette.FONT_ROW_SUB, UiPalette.TEXT_SECONDARY)
+	], UiPalette.FONT_SMALL, UiPalette.TEXT_SECONDARY)
 
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -424,24 +452,49 @@ func _open_travel_modal() -> void:
 	for d_def in OmahaCatalog.DISTRICTS:
 		var did := String(d_def["id"])
 		var is_here := (did == state.current_district_id)
-		var btn := Button.new()
-		btn.text = "%s %s\n(%s)" % [
-			"📍" if is_here else String(d_def["icon"]),
-			String(d_def["name"]),
-			String(d_def["facility_btn"]).substr(2).strip_edges()
-		]
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size = Vector2(0, 112)
-		btn.disabled = is_here or state.is_final_day()
-		if is_here:
-			UiPalette.style_button(btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SMALL)
-		else:
-			UiPalette.style_button(btn, UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-		btn.pressed.connect(func() -> void:
+		var card := PanelContainer.new()
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var card_bg := UiPalette.BTN_PRIMARY if is_here else UiPalette.CARD_BG
+		var card_border := UiPalette.GOLD_ACCENT if is_here else UiPalette.BORDER_BRIGHT
+		card.add_theme_stylebox_override("panel", UiPalette.make_box(card_bg, card_border, 16, 3, 16, 14))
+		grid.add_child(card)
+
+		var cv := VBoxContainer.new()
+		cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cv.add_theme_constant_override("separation", 6)
+		cv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(cv)
+
+		var title_str := ("📍 %s (HERE)" % d_def["name"]) if is_here else ("%s %s" % [d_def["icon"], d_def["name"]])
+		UiPalette.add_label(cv, title_str, UiPalette.FONT_BUTTON, UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY, true, true)
+
+		var spot_str := String(d_def["facility_btn"])
+		UiPalette.add_label(cv, spot_str, UiPalette.FONT_TINY, UiPalette.BANK_CYAN, true, false)
+
+		var cheap_ids: Array = d_def.get("cheap_products", [])
+		var high_ids: Array = d_def.get("pricy_products", [])
+		var cheap_str := _format_product_list_short(cheap_ids) if not cheap_ids.is_empty() else "Standard"
+		var high_str := "All +20%" if bool(d_def.get("west_o_pricy", false)) else (_format_product_list_short(high_ids) if not high_ids.is_empty() else "Standard")
+		UiPalette.add_label(cv, "🏷️ Cheap: %s" % cheap_str, UiPalette.FONT_TINY, UiPalette.CASH_EMERALD, true, false)
+		UiPalette.add_label(cv, "📈 Pricy: %s" % high_str, UiPalette.FONT_TINY, UiPalette.SPIKE_AMBER, true, false)
+
+		var go_btn := Button.new()
+		go_btn.text = "📍 CURRENT SPOT" if is_here else "🚗 DRIVE HERE"
+		go_btn.custom_minimum_size = Vector2(0, 68)
+		go_btn.disabled = is_here or state.is_final_day()
+		UiPalette.style_button(
+			go_btn,
+			UiPalette.BTN_DISABLED if is_here else UiPalette.BTN_SUCCESS,
+			UiPalette.GOLD_ACCENT if is_here else UiPalette.CASH_EMERALD,
+			UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY,
+			UiPalette.FONT_SMALL,
+			10
+		)
+		go_btn.pressed.connect(func() -> void:
 			_travel_overlay.visible = false
 			_on_district_button_pressed(did)
 		)
-		grid.add_child(btn)
+		cv.add_child(go_btn)
 
 	_travel_overlay.visible = true
 
@@ -452,7 +505,6 @@ func _rebuild_spot_tab() -> void:
 
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
 
-	# Top Location + Travel button row inside Spot tab
 	var top_row := HBoxContainer.new()
 	top_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_row.add_theme_constant_override("separation", 12)
@@ -461,9 +513,9 @@ func _rebuild_spot_tab() -> void:
 	var loc_btn := Button.new()
 	loc_btn.text = "🚗 Travel from %s (%s)" % [cur_d["name"], cur_d["icon"]]
 	loc_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	loc_btn.custom_minimum_size = Vector2(0, 82)
+	loc_btn.custom_minimum_size = Vector2(0, 86)
 	loc_btn.disabled = state.is_final_day()
-	UiPalette.style_button(loc_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_BUTTON)
+	UiPalette.style_button(loc_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SUBHEAD)
 	loc_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		_open_travel_modal()
@@ -480,10 +532,9 @@ func _rebuild_kingpin_tab() -> void:
 	for c in _kingpin_vbox.get_children():
 		c.queue_free()
 
-	# 1. Kingpin Status & Arsenal Summary Card
 	var status_card := PanelContainer.new()
 	status_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	status_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 16, 2, 20, 18))
+	status_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 16, 3, 20, 18))
 	_kingpin_vbox.add_child(status_card)
 
 	var sv := VBoxContainer.new()
@@ -502,7 +553,6 @@ func _rebuild_kingpin_tab() -> void:
 		v_name, state.weapons.size(), state.get_max_weapon_slots(), top_gun, state.crew_count, state.armor
 	], UiPalette.FONT_ROW_SUB, UiPalette.TEXT_PRIMARY)
 
-	# 2. Quick Utility Buttons (Hall of Fame | Balance Tuning | Mute)
 	var util_row := HBoxContainer.new()
 	util_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	util_row.add_theme_constant_override("separation", 12)
@@ -511,7 +561,7 @@ func _rebuild_kingpin_tab() -> void:
 	var hof_btn := Button.new()
 	hof_btn.text = "🏆 Hall of Fame"
 	hof_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hof_btn.custom_minimum_size = Vector2(0, 80)
+	hof_btn.custom_minimum_size = Vector2(0, 84)
 	UiPalette.style_button(hof_btn, UiPalette.CARD_BG, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SMALL)
 	hof_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
@@ -522,7 +572,7 @@ func _rebuild_kingpin_tab() -> void:
 	var tune_btn := Button.new()
 	tune_btn.text = "⚙️ Tuning"
 	tune_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tune_btn.custom_minimum_size = Vector2(0, 80)
+	tune_btn.custom_minimum_size = Vector2(0, 84)
 	UiPalette.style_button(tune_btn, UiPalette.CARD_BG, UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, UiPalette.FONT_SMALL)
 	tune_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
@@ -533,7 +583,7 @@ func _rebuild_kingpin_tab() -> void:
 	var mute_btn := Button.new()
 	mute_btn.text = "🔇 Muted" if Audio.muted else "🔊 Audio ON"
 	mute_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mute_btn.custom_minimum_size = Vector2(0, 80)
+	mute_btn.custom_minimum_size = Vector2(0, 84)
 	UiPalette.style_button(mute_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
 	mute_btn.pressed.connect(func() -> void:
 		Audio.muted = not Audio.muted
@@ -543,10 +593,9 @@ func _rebuild_kingpin_tab() -> void:
 	)
 	util_row.add_child(mute_btn)
 
-	# 3. Legacy Perks & New Run Launcher Card
 	var legacy_card := PanelContainer.new()
 	legacy_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	legacy_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 2, 20, 18))
+	legacy_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 3, 20, 18))
 	_kingpin_vbox.add_child(legacy_card)
 
 	var lv := VBoxContainer.new()
@@ -672,14 +721,31 @@ func _refresh_all() -> void:
 	_heat_lbl.text = "🚨 %.0f%%" % state.heat
 	_heat_lbl.add_theme_color_override("font_color", UiPalette.POLICE_RED if state.heat >= 35.0 else UiPalette.SPIKE_AMBER)
 
-	# 2. Market Tab Travel & Scanner
-	_travel_btn.text = "🚗 TRAVEL (%s %s)" % [cur_d["name"], cur_d["icon"]]
+	# 2. Market Tab Travel & High-Contrast Scanner Alert Banner
+	_travel_btn.text = "🚗 TRAVEL — %s %s" % [cur_d["name"], cur_d["icon"]]
 	_travel_btn.disabled = state.is_final_day()
 	_finish_run_btn.visible = state.is_final_day() and not state.run_completed and not state.game_over
 
-	_log_line_1.text = "📻 " + (state.scanner_log[0] if state.scanner_log.size() > 0 else "Ready.")
+	var has_spike := state.active_market_events.values().has("spike")
+	var has_flood := state.active_market_events.values().has("flood")
+	if has_spike:
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.SPIKE_BG, UiPalette.SPIKE_AMBER, 14, 4, 18, 10))
+		_log_line_1.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER)
+	elif has_flood:
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.FLOOD_BG, UiPalette.FLOOD_CYAN, 14, 4, 18, 10))
+		_log_line_1.add_theme_color_override("font_color", UiPalette.FLOOD_CYAN)
+	else:
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 18, 10))
+		_log_line_1.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
 
-	# 3. Unified 12-Row Trading Board (Clean 3-part row)
+	_log_line_1.text = "📻 " + (state.scanner_log[0] if state.scanner_log.size() > 0 else "Ready.")
+	if state.scanner_log.size() > 1 and not String(state.scanner_log[1]).is_empty():
+		_log_line_2.visible = true
+		_log_line_2.text = "↳ " + String(state.scanner_log[1])
+	else:
+		_log_line_2.visible = false
+
+	# 3. Filtered Active Product Board (Only show available or held products so rows expand ~35% taller)
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
 		var ui: Dictionary = _product_rows[pid]
@@ -692,69 +758,92 @@ func _refresh_all() -> void:
 
 		var panel: PanelContainer = ui["panel"]
 		var name_lbl: Label = ui["name_lbl"]
+		var sub_lbl: Label = ui["sub_lbl"]
 		var price_lbl: Label = ui["price_lbl"]
 		var quick_btn: Button = ui["quick_btn"]
 
+		# Hide unlisted rows unless the player is carrying that product
+		var show_row := (price > 0) or (held > 0)
+		panel.visible = show_row
+		if not show_row:
+			continue
+
 		var row_bg: Color = ui["base_bg"]
 		var row_border := UiPalette.BORDER_SLATE
+		var bw := 2
 		if sig == "spike":
 			row_bg = UiPalette.SPIKE_BG
 			row_border = UiPalette.SPIKE_AMBER
+			bw = 4
 		elif sig == "flood":
 			row_bg = UiPalette.FLOOD_BG
 			row_border = UiPalette.FLOOD_CYAN
+			bw = 4
 		elif held > 0:
 			row_border = UiPalette.CASH_EMERALD
-		panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg, row_border, 10, 2 if sig in ["spike", "flood"] or held > 0 else 1, 14, 6))
+			bw = 3
+		panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg, row_border, 12, bw, 16, 8))
 
-		# Product Name + Event Badge (only show badge when non-normal)
+		# Line 1: Product Name + Event Badge
 		var badge := ""
 		match sig:
 			"spike":
-				badge = " 🔥4×"
+				badge = "  🔥 4× SPIKE!"
 			"flood":
-				badge = " ❄️¼"
+				badge = "  ❄️ 1/4 FLOOD!"
 			"high":
-				badge = " 📈"
+				badge = "  📈 PRICY"
 			"low":
-				badge = " 🏷️"
-		var held_tag := (" [%d]" % held) if held > 0 else ""
-		name_lbl.text = "%s%s%s" % [p_def["name"], badge, held_tag]
+				badge = "  🏷️ CHEAP"
+		name_lbl.text = "%s%s" % [p_def["name"], badge]
 
+		# Line 2: Held Qty + Avg Paid + P/L (if owned) OR Normal Price Range (if unowned)
+		if held > 0 and price > 0:
+			var pl := held * (price - avg_paid)
+			sub_lbl.text = "Held: %d  •  Avg %s  •  %s" % [held, Money.format_short(avg_paid), Money.format_pl(pl)]
+			sub_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD if pl >= 0 else UiPalette.SPIKE_AMBER)
+		elif held > 0 and price <= 0:
+			sub_lbl.text = "Held: %d (Avg %s)  •  No Local Buyers" % [held, Money.format_short(avg_paid)]
+			sub_lbl.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
+		else:
+			sub_lbl.text = "Norm: %s–%s" % [Money.format_short(int(ui["min_price"])), Money.format_short(int(ui["max_price"]))]
+			sub_lbl.add_theme_color_override("font_color", UiPalette.TEXT_SECONDARY)
+
+		# Price Column
 		if price > 0:
 			name_lbl.add_theme_color_override("font_color", UiPalette.TEXT_PRIMARY)
 			price_lbl.text = Money.format(price)
 			price_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if sig == "spike" else (UiPalette.FLOOD_CYAN if sig == "flood" else (UiPalette.CASH_EMERALD if held > 0 else UiPalette.TEXT_PRIMARY)))
 		else:
-			name_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
-			price_lbl.text = "—"
+			name_lbl.add_theme_color_override("font_color", UiPalette.TEXT_SECONDARY)
+			price_lbl.text = "No Buyers"
 			price_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
 
 		# Smart Quick Action Button
 		if held > 0 and price > 0:
 			var pl := held * (price - avg_paid)
-			quick_btn.text = "Sell %d" % held
+			quick_btn.text = "SELL %d" % held
 			quick_btn.disabled = false
 			UiPalette.style_button(
 				quick_btn,
 				UiPalette.BTN_SUCCESS if pl >= 0 else UiPalette.BTN_AMBER,
 				UiPalette.CASH_EMERALD if pl >= 0 else UiPalette.SPIKE_AMBER,
 				UiPalette.TEXT_PRIMARY,
-				UiPalette.FONT_SMALL,
-				10
+				UiPalette.FONT_BUTTON,
+				12
 			)
 		elif held > 0 and price <= 0:
-			quick_btn.text = "Dump %d" % held
+			quick_btn.text = "DUMP %d" % held
 			quick_btn.disabled = false
-			UiPalette.style_button(quick_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 10)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON, 12)
 		elif price > 0 and max_buy > 0:
-			quick_btn.text = "Buy %d" % max_buy
+			quick_btn.text = "BUY %d" % max_buy
 			quick_btn.disabled = false
-			UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 10)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON, 12)
 		else:
-			quick_btn.text = "—"
+			quick_btn.text = "MAX 0"
 			quick_btn.disabled = true
-			UiPalette.style_button(quick_btn, UiPalette.BTN_DISABLED, UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, UiPalette.FONT_SMALL, 10)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_DISABLED, UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, UiPalette.FONT_SMALL, 12)
 
 	# 4. Update Spot & Kingpin Tabs if visible
 	if _current_tab == 1:
