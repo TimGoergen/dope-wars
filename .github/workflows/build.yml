@@ -170,9 +170,13 @@ jobs:
         run: |
           rm -f ~/.android/debug.keystore
           python3 -c "
+          import re
           path = 'export_presets.cfg'
           content = open(path).read()
           content = content.replace('package/signed=true', 'package/signed=false')
+          content = re.sub(r'^keystore/release=.*$', 'keystore/release=\"\"', content, flags=re.MULTILINE)
+          content = re.sub(r'^keystore/release_user=.*$', 'keystore/release_user=\"\"', content, flags=re.MULTILINE)
+          content = re.sub(r'^keystore/release_password=.*$', 'keystore/release_password=\"\"', content, flags=re.MULTILINE)
           open(path, 'w').write(content)
           "
           GODOT="$HOME/.local/godot-ci/Godot_v${GODOT_VERSION}-${GODOT_CHANNEL}_linux.x86_64"
