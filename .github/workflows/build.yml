@@ -185,7 +185,7 @@ jobs:
           BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools/" | sort -V | tail -1)
           "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" sign \
             --ks ../build/android_release.keystore \
-            --ks-key-alias american_tycoon \
+            --ks-key-alias dope_wars \
             --ks-pass "pass:$CLEAN_PASS" \
             --key-pass "pass:$CLEAN_PASS" \
             --out ../dist/dope_wars.apk \
