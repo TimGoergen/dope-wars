@@ -38,7 +38,11 @@ const BTN_AMBER := Color("#D97706")
 const BTN_DISABLED := Color("#17202E")
 
 # Chunky, high-visibility font scale for 1080x2400 portrait viewport (Pixel 10 Pro XL)
-const FONT_HERO := 42
+const FONT_HERO_CASH := 64
+const FONT_HERO_DEBT := 56
+const FONT_HERO_ROW2 := 46
+const FONT_HERO_ROW3 := 44
+const FONT_HERO := 48
 const FONT_TITLE := 46
 const FONT_HEADER := 38
 const FONT_SUBHEAD := 34
@@ -130,6 +134,44 @@ static func add_label(
 	return lbl
 
 
+static func add_hero_label(
+	parent: Node,
+	text: String,
+	font_sz: int,
+	col: Color,
+	align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT
+) -> Label:
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.horizontal_alignment = align
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", font_sz)
+	lbl.add_theme_color_override("font_color", col)
+	lbl.add_theme_font_override("font", make_bold_font())
+	lbl.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.90))
+	lbl.add_theme_constant_override("shadow_offset_x", 2)
+	lbl.add_theme_constant_override("shadow_offset_y", 3)
+	lbl.add_theme_constant_override("shadow_outline_size", 4)
+	parent.add_child(lbl)
+	return lbl
+
+
+static func make_hero_header_box() -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color("#111B29")
+	sb.border_color = GOLD_ACCENT
+	sb.set_border_width_all(4)
+	sb.corner_radius_top_left = 64
+	sb.corner_radius_top_right = 64
+	sb.corner_radius_bottom_left = 24
+	sb.corner_radius_bottom_right = 24
+	sb.content_margin_left = 28
+	sb.content_margin_right = 28
+	sb.content_margin_top = 24
+	sb.content_margin_bottom = 22
+	return sb
+
+
 ## Builds a strictly screen-bounded modal card inside `overlay` (never uses CenterContainer,
 ## so children can NEVER exceed the 1080px screen width).
 static func build_modal_shell(
@@ -156,7 +198,7 @@ static func build_modal_shell(
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 20)
 	margin.add_theme_constant_override("margin_right", 20)
-	margin.add_theme_constant_override("margin_top", 56)
+	margin.add_theme_constant_override("margin_top", 96)
 	margin.add_theme_constant_override("margin_bottom", 56)
 	margin.mouse_filter = Control.MOUSE_FILTER_PASS
 	overlay.add_child(margin)

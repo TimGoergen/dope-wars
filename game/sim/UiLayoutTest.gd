@@ -17,8 +17,19 @@ func _initialize() -> void:
 	await process_frame
 	print("main.size=", main.size, " main.min=", main.get_combined_minimum_size())
 
-	# 1. Check Tab 0 (Market)
+	# 1. Check Tab 0 (Market) + Hero Header geometry & camera-cutout clearance
 	_assert_tree_within_bounds(main, "Tab 0 (Market)")
+	var hero_rect: Rect2 = (main._hero_card as Control).get_global_rect()
+	if hero_rect.position.y < 44.0 or hero_rect.size.y < 260.0:
+		push_error("FAIL [Hero Header]: rect=%s (expected y >= 44 and height >= 260)" % str(hero_rect))
+		quit(1)
+		return
+	var cash_rect: Rect2 = (main._cash_lbl as Control).get_global_rect()
+	var debt_rect: Rect2 = (main._debt_lbl as Control).get_global_rect()
+	if cash_rect.end.x > 470.0 or debt_rect.position.x < 610.0:
+		push_error("FAIL [Camera Cutout Clearance]: cash_rect=%s debt_rect=%s overlap center cutout (470..610)" % [str(cash_rect), str(debt_rect)])
+		quit(1)
+		return
 
 	# 2. Check Travel Modal
 	main._open_travel_modal()

@@ -16,6 +16,7 @@ var _tab_containers: Array[Control] = []
 var _tab_buttons: Array[Button] = []
 
 # Top Hero Telemetry Controls
+var _hero_card: PanelContainer
 var _cash_lbl: Label
 var _bank_lbl: Label
 var _debt_lbl: Label
@@ -78,10 +79,10 @@ func _build_dashboard_ui() -> void:
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 16)
-	margin.add_theme_constant_override("margin_right", 16)
-	margin.add_theme_constant_override("margin_top", 18)
-	margin.add_theme_constant_override("margin_bottom", 18)
+	margin.add_theme_constant_override("margin_left", 20)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_top", 48)
+	margin.add_theme_constant_override("margin_bottom", 28)
 	add_child(margin)
 
 	var root_vbox := VBoxContainer.new()
@@ -177,43 +178,65 @@ func _build_dashboard_ui() -> void:
 func _build_hero_header(parent: VBoxContainer) -> void:
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_BRIGHT, 16, 3, 20, 14))
+	card.custom_minimum_size = Vector2(0, 284)
+	card.add_theme_stylebox_override("panel", UiPalette.make_hero_header_box())
 	parent.add_child(card)
+	_hero_card = card
 
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 8)
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 14)
 	card.add_child(vbox)
 
-	# Row 1: Huge Cash | Bank | Debt
+	# Row 1: Edge-Pinned Left (Cash) and Right (Debt) with a wide empty center gap
+	# so nothing ever renders under the Pixel 10 Pro XL's center punch-hole camera cutout.
 	var r1 := HBoxContainer.new()
 	r1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	r1.add_theme_constant_override("separation", 12)
+	r1.add_theme_constant_override("separation", 16)
 	vbox.add_child(r1)
 
-	_cash_lbl = UiPalette.add_label(r1, "💵 $2,000", UiPalette.FONT_HERO, UiPalette.CASH_EMERALD, false, true)
-	_cash_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_cash_lbl = UiPalette.add_hero_label(r1, "💵 $2,000", UiPalette.FONT_HERO_CASH, UiPalette.CASH_EMERALD, HORIZONTAL_ALIGNMENT_LEFT)
 
-	_bank_lbl = UiPalette.add_label(r1, "🏦 $0", UiPalette.FONT_SUBHEAD, UiPalette.BANK_CYAN, false, true)
-	_bank_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_bank_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var camera_gap := Control.new()
+	camera_gap.custom_minimum_size = Vector2(150, 0)
+	camera_gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r1.add_child(camera_gap)
 
-	_debt_lbl = UiPalette.add_label(r1, "🦈 $5,500", UiPalette.FONT_SUBHEAD, UiPalette.DEBT_CRIMSON, false, true)
-	_debt_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_debt_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_debt_lbl = UiPalette.add_hero_label(r1, "🦈 $5,500", UiPalette.FONT_HERO_DEBT, UiPalette.DEBT_CRIMSON, HORIZONTAL_ALIGNMENT_RIGHT)
 
-	# Row 2: Location + Day | Coat Space | HP | Heat
+	# Row 2 (Below camera cutout): Left (Bank) | Right (Location & Day)
 	var r2 := HBoxContainer.new()
 	r2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	r2.add_theme_constant_override("separation", 14)
+	r2.add_theme_constant_override("separation", 16)
 	vbox.add_child(r2)
 
-	_loc_day_lbl = UiPalette.add_label(r2, "📍 North O • Day 1/31", UiPalette.FONT_BUTTON, UiPalette.GOLD_ACCENT, false, true)
-	_loc_day_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_bank_lbl = UiPalette.add_hero_label(r2, "🏦 $0", UiPalette.FONT_HERO, UiPalette.BANK_CYAN, HORIZONTAL_ALIGNMENT_LEFT)
+	_bank_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	_space_lbl = UiPalette.add_label(r2, "🧥 0/100", UiPalette.FONT_BUTTON, UiPalette.TEXT_PRIMARY, false, true)
-	_hp_lbl = UiPalette.add_label(r2, "❤️ 100", UiPalette.FONT_BUTTON, UiPalette.CASH_EMERALD, false, true)
-	_heat_lbl = UiPalette.add_label(r2, "🚨 0%", UiPalette.FONT_BUTTON, UiPalette.SPIKE_AMBER, false, true)
+	_loc_day_lbl = UiPalette.add_hero_label(r2, "📍 North O • Day 1/31", UiPalette.FONT_HERO_ROW2, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_RIGHT)
+
+	var divider := ColorRect.new()
+	divider.color = UiPalette.BORDER_SLATE
+	divider.custom_minimum_size = Vector2(0, 3)
+	divider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_child(divider)
+
+	# Row 3: Coat Space (Left) | HP (Center) | Heat (Right)
+	var r3 := HBoxContainer.new()
+	r3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r3.add_theme_constant_override("separation", 16)
+	vbox.add_child(r3)
+
+	_space_lbl = UiPalette.add_hero_label(r3, "🧥 0/100", UiPalette.FONT_HERO_ROW3, UiPalette.TEXT_PRIMARY, HORIZONTAL_ALIGNMENT_LEFT)
+	_space_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	_hp_lbl = UiPalette.add_hero_label(r3, "❤️ 100", UiPalette.FONT_HERO_ROW3, UiPalette.CASH_EMERALD, HORIZONTAL_ALIGNMENT_CENTER)
+	_hp_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	_heat_lbl = UiPalette.add_hero_label(r3, "🚨 0%", UiPalette.FONT_HERO_ROW3, UiPalette.SPIKE_AMBER, HORIZONTAL_ALIGNMENT_RIGHT)
+	_heat_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 
 func _build_market_tab() -> Control:
@@ -710,6 +733,7 @@ func _refresh_all() -> void:
 	_cash_lbl.text = "💵 %s" % Money.format_short(state.cash)
 	_bank_lbl.text = "🏦 %s" % Money.format_short(state.bank)
 	_debt_lbl.text = "🦈 %s" % Money.format_short(state.debt)
+	_debt_lbl.add_theme_color_override("font_color", UiPalette.DEBT_CRIMSON if state.debt > 0 else UiPalette.CASH_EMERALD)
 
 	var day_str := ("Day %d" % state.day) if state.is_endless else ("Day %d/%d" % [state.day, state.max_days])
 	_loc_day_lbl.text = "📍 %s • %s" % [cur_d["short_name"], day_str]
