@@ -1,40 +1,43 @@
 extends Control
 
-# Root 1080x2400 Zero-Scroll Portrait Dashboard for Dope Wars: Omaha Metro Edition.
-# Connects the headless GameState engine to the Sleek Dark OLED "Omaha Street Noir" UI.
+# Root 1080x2400 Portrait Dashboard for Dope Wars: Omaha Metro Edition.
+# Uses a clean 3-Tab Bottom Navigation Bar (like American Tycoon) with large, legible controls:
+#   Tab 0: MARKET (12-Row Trading Board + Travel button)
+#   Tab 1: SPOT & BANK (Current District Facility + First National Bank / Big Sal inline)
+#   Tab 2: KINGPIN (Status, Perks, New Run, Hall of Fame, Sound, Dev Tuning)
 
 var tuning: TuningConfig
 var meta: Dictionary
 var state: GameState
 
-# Top Bar Controls
-var _day_label: Label
-var _mute_btn: Button
+# Active Tab Index (0 = Market, 1 = Spot & Bank, 2 = Kingpin)
+var _current_tab: int = 0
+var _tab_containers: Array[Control] = []
+var _tab_buttons: Array[Button] = []
 
-# Telemetry Labels
+# Top Hero Telemetry Controls
 var _cash_lbl: Label
 var _bank_lbl: Label
 var _debt_lbl: Label
-var _net_lbl: Label
-var _hp_lbl: Label
-var _armor_lbl: Label
-var _heat_lbl: Label
+var _loc_day_lbl: Label
 var _space_lbl: Label
-var _arsenal_lbl: Label
+var _hp_lbl: Label
+var _heat_lbl: Label
 
-# Map & Facility Controls
-var _district_btns: Dictionary = {} # district_id -> Button
-var _facility_btn: Button
+# Market Tab Controls
+var _travel_btn: Button
 var _finish_run_btn: Button
-
-# Scanner Log Labels
 var _log_line_1: Label
-var _log_line_2: Label
+var _product_rows: Dictionary = {} # product_id -> Dictionary of nodes
 
-# Unified 12-Row Trading Board UI references: product_id -> Dictionary of nodes
-var _product_rows: Dictionary = {}
+# Spot & Bank Tab Dynamic VBox
+var _spot_vbox: VBoxContainer
+
+# Kingpin Tab Dynamic VBox
+var _kingpin_vbox: VBoxContainer
 
 # Modal Overlays
+var _travel_overlay: ColorRect
 var _trade_overlay: TradeOverlay
 var _facility_overlay: FacilityOverlay
 var _combat_overlay: CombatOverlay
@@ -61,6 +64,7 @@ func _ready() -> void:
 		_auto_save()
 
 	_build_dashboard_ui()
+	_show_tab(0)
 	_refresh_all()
 
 
@@ -72,32 +76,46 @@ func _build_dashboard_ui() -> void:
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 16)
-	margin.add_theme_constant_override("margin_right", 16)
-	margin.add_theme_constant_override("margin_top", 14)
-	margin.add_theme_constant_override("margin_bottom", 14)
+	margin.add_theme_constant_override("margin_left", 18)
+	margin.add_theme_constant_override("margin_right", 18)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_bottom", 20)
 	add_child(margin)
 
 	var root_vbox := VBoxContainer.new()
-	root_vbox.add_theme_constant_override("separation", 10)
+	root_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root_vbox.add_theme_constant_override("separation", 12)
 	margin.add_child(root_vbox)
 
-	# 1. TOP HEADER BAR
-	_build_top_bar(root_vbox)
+	# 1. COMPACT 2-ROW HERO HEADER (Always visible)
+	_build_hero_header(root_vbox)
 
-	# 2. TELEMETRY & ARSENAL CARD
-	_build_telemetry_card(root_vbox)
+	# 2. CENTER TAB CONTENT AREA
+	var content_holder := Control.new()
+	content_holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content_holder.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root_vbox.add_child(content_holder)
 
-	# 3. 8-DISTRICT OMAHA METRO MAP & FACILITY BAR
-	_build_map_and_facility_card(root_vbox)
+	var market_tab := _build_market_tab()
+	var spot_tab := _build_spot_tab()
+	var kingpin_tab := _build_kingpin_tab()
+	_tab_containers = [market_tab, spot_tab, kingpin_tab]
+	for t in _tab_containers:
+		t.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		content_holder.add_child(t)
 
-	# 4. LIVE METRO SCANNER TICKER
-	_build_scanner_card(root_vbox)
+	# 3. BOTTOM TAB BAR (American Tycoon style)
+	_build_bottom_tab_bar(root_vbox)
 
-	# 5. UNIFIED 12-ROW FIXED-POSITION TRADING BOARD
-	_build_unified_trading_board(root_vbox)
+	# 4. MODAL OVERLAYS
+	_travel_overlay = ColorRect.new()
+	_travel_overlay.color = UiPalette.MODAL_BACKDROP
+	_travel_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_travel_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_travel_overlay.visible = false
+	add_child(_travel_overlay)
 
-	# 6. MODAL OVERLAYS
 	_trade_overlay = TradeOverlay.new()
 	_trade_overlay.trade_committed.connect(func() -> void:
 		_auto_save()
@@ -134,19 +152,16 @@ func _build_dashboard_ui() -> void:
 	_legacy_overlay = LegacyOverlay.new()
 	_legacy_overlay.meta_updated.connect(func() -> void:
 		SaveManager.save_data(meta)
+		_refresh_all()
 	)
 	_legacy_overlay.start_new_run_requested.connect(func(mode_days: int) -> void:
-		meta["preferred_mode_days"] = mode_days
-		var perks: Array = meta.get("active_perks", [])
-		state.new_run(mode_days, perks)
-		_auto_save()
-		_refresh_all()
+		_start_new_run(mode_days)
 	)
 	add_child(_legacy_overlay)
 
 	_summary_overlay = RunSummaryOverlay.new()
 	_summary_overlay.play_again_requested.connect(func() -> void:
-		_legacy_overlay.open_modal(meta)
+		_show_tab(2)
 	)
 	add_child(_summary_overlay)
 
@@ -157,224 +172,119 @@ func _build_dashboard_ui() -> void:
 	add_child(_dev_tuning_overlay)
 
 
-func _build_top_bar(parent: VBoxContainer) -> void:
-	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 12, 2, 16, 10))
-	parent.add_child(bar)
-
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 8)
-	bar.add_child(hbox)
-
-	var title := UiPalette.add_label(hbox, "DOPE WARS: OMAHA", UiPalette.FONT_HEADER, UiPalette.GOLD_ACCENT)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	_day_label = UiPalette.add_label(hbox, "Day 1/31", UiPalette.FONT_SUBHEAD, UiPalette.TEXT_PRIMARY)
-
-	var atm_btn := Button.new()
-	atm_btn.text = "🏧 ATM"
-	atm_btn.custom_minimum_size = Vector2(115, 52)
-	UiPalette.style_button(atm_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-	atm_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		_facility_overlay.open_atm(state)
-	)
-	hbox.add_child(atm_btn)
-
-	var legacy_btn := Button.new()
-	legacy_btn.text = "🎖️ New/Perks"
-	legacy_btn.custom_minimum_size = Vector2(155, 52)
-	UiPalette.style_button(legacy_btn, UiPalette.CARD_BG, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SMALL)
-	legacy_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		_legacy_overlay.open_modal(meta)
-	)
-	hbox.add_child(legacy_btn)
-
-	var hof_btn := Button.new()
-	hof_btn.text = "🏆"
-	hof_btn.custom_minimum_size = Vector2(60, 52)
-	UiPalette.style_button(hof_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-	hof_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		_summary_overlay.open_summary(state, meta, false)
-	)
-	hbox.add_child(hof_btn)
-
-	var tune_btn := Button.new()
-	tune_btn.text = "⚙️"
-	tune_btn.custom_minimum_size = Vector2(60, 52)
-	UiPalette.style_button(tune_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-	tune_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		_dev_tuning_overlay.open_panel(tuning)
-	)
-	hbox.add_child(tune_btn)
-
-	_mute_btn = Button.new()
-	_mute_btn.text = "🔇" if Audio.muted else "🔊"
-	_mute_btn.custom_minimum_size = Vector2(60, 52)
-	UiPalette.style_button(_mute_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-	_mute_btn.pressed.connect(func() -> void:
-		Audio.muted = not Audio.muted
-		meta["muted"] = Audio.muted
-		_mute_btn.text = "🔇" if Audio.muted else "🔊"
-		SaveManager.save_data(meta)
-	)
-	hbox.add_child(_mute_btn)
-
-
-func _build_telemetry_card(parent: VBoxContainer) -> void:
+func _build_hero_header(parent: VBoxContainer) -> void:
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 12, 2, 16, 10))
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 2, 18, 12))
 	parent.add_child(card)
 
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 6)
-	card.add_child(vbox)
-
-	# Row 1: Cash | Bank | Debt | Net Worth
-	var r1 := HBoxContainer.new()
-	vbox.add_child(r1)
-	_cash_lbl = UiPalette.add_label(r1, "💵 Cash: $2,000", UiPalette.FONT_ROW_MAIN, UiPalette.CASH_EMERALD)
-	_cash_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_bank_lbl = UiPalette.add_label(r1, "🏦 Bank: $0 (+5%)", UiPalette.FONT_ROW_MAIN, UiPalette.BANK_CYAN)
-	_bank_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_debt_lbl = UiPalette.add_label(r1, "🦈 Debt: $5,500", UiPalette.FONT_ROW_MAIN, UiPalette.DEBT_CRIMSON)
-	_debt_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_net_lbl = UiPalette.add_label(r1, "💎 Net: -$3,500", UiPalette.FONT_ROW_MAIN, UiPalette.GOLD_ACCENT)
-	_net_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-
-	# Row 2: HP | Armor | Heat & Pursuing Unit
-	var r2 := HBoxContainer.new()
-	vbox.add_child(r2)
-	_hp_lbl = UiPalette.add_label(r2, "❤️ HP: 100/100", UiPalette.FONT_ROW_SUB, UiPalette.CASH_EMERALD)
-	_hp_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_armor_lbl = UiPalette.add_label(r2, "🛡️ Armor: 0", UiPalette.FONT_ROW_SUB, UiPalette.BANK_CYAN)
-	_armor_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_heat_lbl = UiPalette.add_label(r2, "🚨 Heat: 0% (OPD Patrol)", UiPalette.FONT_ROW_SUB, UiPalette.SPIKE_AMBER)
-	_heat_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-
-	# Row 3: Space & Vehicle | Arsenal & Crew
-	var r3 := HBoxContainer.new()
-	vbox.add_child(r3)
-	_space_lbl = UiPalette.add_label(r3, "🧥 Space: 0 / 100 (ORBT Bus)", UiPalette.FONT_ROW_SUB, UiPalette.TEXT_PRIMARY)
-	_space_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_arsenal_lbl = UiPalette.add_label(r3, "🔫 Guns: 0/1 (Unarmed)  |  👥 Crew: 0", UiPalette.FONT_ROW_SUB, UiPalette.GOLD_ACCENT)
-	_arsenal_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-
-
-func _build_map_and_facility_card(parent: VBoxContainer) -> void:
-	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 12, 2, 14, 10))
-	parent.add_child(card)
-
-	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 8)
 	card.add_child(vbox)
 
-	var grid := GridContainer.new()
-	grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
-	vbox.add_child(grid)
+	# Row 1: Big Cash | Bank | Debt
+	var r1 := HBoxContainer.new()
+	r1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r1.add_theme_constant_override("separation", 10)
+	vbox.add_child(r1)
 
-	for d_def in OmahaCatalog.DISTRICTS:
-		var did := String(d_def["id"])
-		var btn := Button.new()
-		btn.text = "%s %s" % [d_def["short_name"], d_def["icon"]]
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size = Vector2(0, 62)
-		UiPalette.style_button(btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-		btn.pressed.connect(func() -> void:
-			_on_district_button_pressed(did)
-		)
-		grid.add_child(btn)
-		_district_btns[did] = btn
+	_cash_lbl = UiPalette.add_label(r1, "💵 $2,000", UiPalette.FONT_SUBHEAD, UiPalette.CASH_EMERALD, false)
+	_cash_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
+	_bank_lbl = UiPalette.add_label(r1, "🏦 $0", UiPalette.FONT_ROW_MAIN, UiPalette.BANK_CYAN, false)
+	_bank_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_bank_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	_debt_lbl = UiPalette.add_label(r1, "🦈 $5,500", UiPalette.FONT_ROW_MAIN, UiPalette.DEBT_CRIMSON, false)
+	_debt_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_debt_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+
+	# Row 2: Location + Day | Coat Space | HP | Heat
+	var r2 := HBoxContainer.new()
+	r2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r2.add_theme_constant_override("separation", 10)
+	vbox.add_child(r2)
+
+	_loc_day_lbl = UiPalette.add_label(r2, "📍 North O • Day 1/31", UiPalette.FONT_ROW_SUB, UiPalette.GOLD_ACCENT, false)
+	_loc_day_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	_space_lbl = UiPalette.add_label(r2, "🧥 0/100", UiPalette.FONT_ROW_SUB, UiPalette.TEXT_PRIMARY, false)
+	_hp_lbl = UiPalette.add_label(r2, "❤️ 100", UiPalette.FONT_ROW_SUB, UiPalette.CASH_EMERALD, false)
+	_heat_lbl = UiPalette.add_label(r2, "🚨 0%", UiPalette.FONT_ROW_SUB, UiPalette.SPIKE_AMBER, false)
+
+
+func _build_market_tab() -> Control:
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 10)
+
+	# Action Row: Big Travel button + ATM button (+ Finish Run on Final Day)
 	var act_row := HBoxContainer.new()
-	act_row.add_theme_constant_override("separation", 10)
+	act_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	act_row.add_theme_constant_override("separation", 12)
 	vbox.add_child(act_row)
 
-	_facility_btn = Button.new()
-	_facility_btn.text = "🏦 Visit First National Bank & Big Sal's Loans"
-	_facility_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_facility_btn.custom_minimum_size = Vector2(0, 64)
-	UiPalette.style_button(_facility_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_ROW_MAIN)
-	_facility_btn.pressed.connect(func() -> void:
+	_travel_btn = Button.new()
+	_travel_btn.text = "🚗 TRAVEL (North Omaha)"
+	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_travel_btn.custom_minimum_size = Vector2(0, 82)
+	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SUBHEAD)
+	_travel_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
-		Haptics.pulse(20.0)
-		_facility_overlay.open_district_facility(state)
+		_open_travel_modal()
 	)
-	act_row.add_child(_facility_btn)
+	act_row.add_child(_travel_btn)
 
 	_finish_run_btn = Button.new()
-	_finish_run_btn.text = "🏁 FINISH RUN & SETTLE"
-	_finish_run_btn.custom_minimum_size = Vector2(340, 64)
+	_finish_run_btn.text = "🏁 FINISH RUN"
+	_finish_run_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_finish_run_btn.custom_minimum_size = Vector2(0, 82)
 	_finish_run_btn.visible = false
-	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_ROW_MAIN)
+	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SUBHEAD)
 	_finish_run_btn.pressed.connect(func() -> void:
 		_on_finish_run_pressed()
 	)
 	act_row.add_child(_finish_run_btn)
 
+	# Compact 1-Line Live Scanner Ticker
+	var scanner_card := PanelContainer.new()
+	scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_ALT_BG, UiPalette.BORDER_SLATE, 12, 2, 16, 10))
+	vbox.add_child(scanner_card)
 
-func _build_scanner_card(parent: VBoxContainer) -> void:
-	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_ALT_BG, UiPalette.BORDER_SLATE, 10, 2, 14, 8))
-	parent.add_child(card)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 4)
-	card.add_child(vbox)
-
-	_log_line_1 = UiPalette.add_label(vbox, "📻 > Welcome to Omaha.", UiPalette.FONT_ROW_SUB, UiPalette.GOLD_ACCENT)
+	_log_line_1 = UiPalette.add_label(scanner_card, "📻 > Welcome to Omaha.", UiPalette.FONT_SMALL, UiPalette.GOLD_ACCENT, false)
 	_log_line_1.clip_text = true
-	_log_line_2 = UiPalette.add_label(vbox, "   > Tap any product row for slider or tap Buy Max / Sell.", UiPalette.FONT_SMALL, UiPalette.TEXT_SECONDARY)
-	_log_line_2.clip_text = true
 
-
-func _build_unified_trading_board(parent: VBoxContainer) -> void:
+	# 12-Row Trading Board
 	var board := PanelContainer.new()
+	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	board.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 12, 2, 12, 10))
-	parent.add_child(board)
+	board.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 2, 14, 12))
+	vbox.add_child(board)
 
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 6)
-	board.add_child(vbox)
+	var board_vbox := VBoxContainer.new()
+	board_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	board_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	board_vbox.add_theme_constant_override("separation", 8)
+	board.add_child(board_vbox)
 
-	# Column Header Bar
-	var hdr := HBoxContainer.new()
-	hdr.add_theme_constant_override("separation", 8)
-	vbox.add_child(hdr)
-
-	var h_prod := UiPalette.add_label(hdr, "PRODUCT", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY)
-	h_prod.custom_minimum_size = Vector2(215, 0)
-	var h_price := UiPalette.add_label(hdr, "MKT PRICE", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY)
-	h_price.custom_minimum_size = Vector2(165, 0)
-	var h_sig := UiPalette.add_label(hdr, "SIGNAL", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY)
-	h_sig.custom_minimum_size = Vector2(125, 0)
-	var h_held := UiPalette.add_label(hdr, "HELD (AVG / LIVE P&L)", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY)
-	h_held.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var h_act := UiPalette.add_label(hdr, "QUICK ACT", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY)
-	h_act.custom_minimum_size = Vector2(210, 0)
-	h_act.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-
-	# 12 Fixed-Position Product Rows
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
 		var row_idx := int(p_def["row"])
 		var row_bg_col := UiPalette.CARD_BG if (row_idx % 2 == 1) else UiPalette.CARD_ALT_BG
 
 		var row_panel := PanelContainer.new()
+		row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		row_panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg_col, UiPalette.BORDER_SLATE, 8, 1, 10, 4))
-		vbox.add_child(row_panel)
+		row_panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg_col, UiPalette.BORDER_SLATE, 10, 1, 14, 6))
+		board_vbox.add_child(row_panel)
 
 		var row_hbox := HBoxContainer.new()
-		row_hbox.add_theme_constant_override("separation", 8)
+		row_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		row_hbox.add_theme_constant_override("separation", 10)
 		row_panel.add_child(row_hbox)
 
 		# Left/Middle clickable button to open the Trade Slider Modal
@@ -390,31 +300,25 @@ func _build_unified_trading_board(parent: VBoxContainer) -> void:
 
 		var info_hbox := HBoxContainer.new()
 		info_hbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		info_hbox.add_theme_constant_override("separation", 8)
+		info_hbox.add_theme_constant_override("separation", 10)
 		info_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row_tap_btn.add_child(info_hbox)
 
-		var name_lbl := UiPalette.add_label(info_hbox, "%d. %s" % [row_idx, p_def["name"]], UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY)
-		name_lbl.custom_minimum_size = Vector2(210, 0)
+		var name_lbl := UiPalette.add_label(info_hbox, String(p_def["name"]), UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY, false)
+		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		var price_lbl := UiPalette.add_label(info_hbox, "$0", UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY)
-		price_lbl.custom_minimum_size = Vector2(165, 0)
+		var price_lbl := UiPalette.add_label(info_hbox, "$0", UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY, false)
+		price_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		price_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		price_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		var sig_lbl := UiPalette.add_label(info_hbox, "Normal", UiPalette.FONT_SMALL, UiPalette.TEXT_SECONDARY)
-		sig_lbl.custom_minimum_size = Vector2(125, 0)
-		sig_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-		var held_lbl := UiPalette.add_label(info_hbox, "—", UiPalette.FONT_SMALL, UiPalette.TEXT_SECONDARY)
-		held_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		held_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-		# Right-edge 1-Tap Quick Action Button ([Buy Max] / [Sell Qty] / [Dump Qty])
+		# Right-edge 1-Tap Quick Action Button ([Buy N] / [Sell N] / [Dump N])
 		var quick_btn := Button.new()
-		quick_btn.custom_minimum_size = Vector2(210, 0)
+		quick_btn.custom_minimum_size = Vector2(240, 0)
 		quick_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 8)
+		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 10)
 		quick_btn.pressed.connect(func() -> void:
 			_on_quick_action_pressed(pid)
 		)
@@ -425,10 +329,249 @@ func _build_unified_trading_board(parent: VBoxContainer) -> void:
 			"base_bg": row_bg_col,
 			"name_lbl": name_lbl,
 			"price_lbl": price_lbl,
-			"sig_lbl": sig_lbl,
-			"held_lbl": held_lbl,
 			"quick_btn": quick_btn
 		}
+
+	return vbox
+
+
+func _build_spot_tab() -> Control:
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	_spot_vbox = VBoxContainer.new()
+	_spot_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_spot_vbox.add_theme_constant_override("separation", 16)
+	scroll.add_child(_spot_vbox)
+	return scroll
+
+
+func _build_kingpin_tab() -> Control:
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	_kingpin_vbox = VBoxContainer.new()
+	_kingpin_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_kingpin_vbox.add_theme_constant_override("separation", 16)
+	scroll.add_child(_kingpin_vbox)
+	return scroll
+
+
+func _build_bottom_tab_bar(parent: VBoxContainer) -> void:
+	var bar := HBoxContainer.new()
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_theme_constant_override("separation", 12)
+	parent.add_child(bar)
+
+	var tab_defs := [
+		["💊 MARKET", 0],
+		["🏦 SPOT & BANK", 1],
+		["👑 KINGPIN", 2]
+	]
+
+	for t_def in tab_defs:
+		var btn := Button.new()
+		btn.text = String(t_def[0])
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.custom_minimum_size = Vector2(0, 96)
+		var idx := int(t_def[1])
+		btn.pressed.connect(func() -> void:
+			Audio.play(&"tap")
+			_show_tab(idx)
+		)
+		bar.add_child(btn)
+		_tab_buttons.append(btn)
+
+
+func _show_tab(tab_idx: int) -> void:
+	_current_tab = clampi(tab_idx, 0, _tab_containers.size() - 1)
+	for i in range(_tab_containers.size()):
+		_tab_containers[i].visible = (i == _current_tab)
+		var btn := _tab_buttons[i]
+		if i == _current_tab:
+			UiPalette.style_button(btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_BUTTON, 14)
+		else:
+			UiPalette.style_button(btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_SECONDARY, UiPalette.FONT_BUTTON, 14)
+
+	if _current_tab == 1:
+		_rebuild_spot_tab()
+	elif _current_tab == 2:
+		_rebuild_kingpin_tab()
+
+
+func _open_travel_modal() -> void:
+	for c in _travel_overlay.get_children():
+		c.queue_free()
+
+	var vbox := UiPalette.build_modal_shell(_travel_overlay, "🚗 CHOOSE NEIGHBORHOOD", UiPalette.GOLD_ACCENT, true)
+
+	var cur_d := OmahaCatalog.get_district(state.current_district_id)
+	UiPalette.add_label(vbox, "Current Location: %s %s\nTraveling advances 1 Day and rolls fresh street prices." % [
+		cur_d["icon"], cur_d["name"]
+	], UiPalette.FONT_ROW_SUB, UiPalette.TEXT_SECONDARY)
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 14)
+	vbox.add_child(grid)
+
+	for d_def in OmahaCatalog.DISTRICTS:
+		var did := String(d_def["id"])
+		var is_here := (did == state.current_district_id)
+		var btn := Button.new()
+		btn.text = "%s %s\n(%s)" % [
+			"📍" if is_here else String(d_def["icon"]),
+			String(d_def["name"]),
+			String(d_def["facility_btn"]).substr(2).strip_edges()
+		]
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.custom_minimum_size = Vector2(0, 112)
+		btn.disabled = is_here or state.is_final_day()
+		if is_here:
+			UiPalette.style_button(btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SMALL)
+		else:
+			UiPalette.style_button(btn, UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
+		btn.pressed.connect(func() -> void:
+			_travel_overlay.visible = false
+			_on_district_button_pressed(did)
+		)
+		grid.add_child(btn)
+
+	_travel_overlay.visible = true
+
+
+func _rebuild_spot_tab() -> void:
+	for c in _spot_vbox.get_children():
+		c.queue_free()
+
+	var cur_d := OmahaCatalog.get_district(state.current_district_id)
+
+	# Top Location + Travel button row inside Spot tab
+	var top_row := HBoxContainer.new()
+	top_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_row.add_theme_constant_override("separation", 12)
+	_spot_vbox.add_child(top_row)
+
+	var loc_btn := Button.new()
+	loc_btn.text = "🚗 Travel from %s (%s)" % [cur_d["name"], cur_d["icon"]]
+	loc_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	loc_btn.custom_minimum_size = Vector2(0, 82)
+	loc_btn.disabled = state.is_final_day()
+	UiPalette.style_button(loc_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_BUTTON)
+	loc_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		_open_travel_modal()
+	)
+	top_row.add_child(loc_btn)
+
+	FacilityOverlay.build_district_facility_cards(_spot_vbox, state, func() -> void:
+		_auto_save()
+		_refresh_all()
+	)
+
+
+func _rebuild_kingpin_tab() -> void:
+	for c in _kingpin_vbox.get_children():
+		c.queue_free()
+
+	# 1. Kingpin Status & Arsenal Summary Card
+	var status_card := PanelContainer.new()
+	status_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 16, 2, 20, 18))
+	_kingpin_vbox.add_child(status_card)
+
+	var sv := VBoxContainer.new()
+	sv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sv.add_theme_constant_override("separation", 10)
+	status_card.add_child(sv)
+
+	var nw := state.get_net_worth()
+	UiPalette.add_label(sv, "💎 Net Worth: %s" % Money.format(nw), UiPalette.FONT_HEADER, UiPalette.CASH_EMERALD if nw >= 0 else UiPalette.DEBT_CRIMSON)
+
+	var v_name: String = OmahaCatalog.get_vehicle(state.vehicle_tier)["name"]
+	var top_gun := "Unarmed"
+	if not state.weapons.is_empty():
+		top_gun = String(OmahaCatalog.get_weapon(state.weapons[0])["name"])
+	UiPalette.add_label(sv, "🚗 Ride: %s\n🔫 Guns: %d/%d (%s)  •  👥 Crew: %d\n🛡️ Armor: %d" % [
+		v_name, state.weapons.size(), state.get_max_weapon_slots(), top_gun, state.crew_count, state.armor
+	], UiPalette.FONT_ROW_SUB, UiPalette.TEXT_PRIMARY)
+
+	# 2. Quick Utility Buttons (Hall of Fame | Balance Tuning | Mute)
+	var util_row := HBoxContainer.new()
+	util_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	util_row.add_theme_constant_override("separation", 12)
+	_kingpin_vbox.add_child(util_row)
+
+	var hof_btn := Button.new()
+	hof_btn.text = "🏆 Hall of Fame"
+	hof_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hof_btn.custom_minimum_size = Vector2(0, 80)
+	UiPalette.style_button(hof_btn, UiPalette.CARD_BG, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SMALL)
+	hof_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		_summary_overlay.open_summary(state, meta, false)
+	)
+	util_row.add_child(hof_btn)
+
+	var tune_btn := Button.new()
+	tune_btn.text = "⚙️ Tuning"
+	tune_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tune_btn.custom_minimum_size = Vector2(0, 80)
+	UiPalette.style_button(tune_btn, UiPalette.CARD_BG, UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, UiPalette.FONT_SMALL)
+	tune_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		_dev_tuning_overlay.open_panel(tuning)
+	)
+	util_row.add_child(tune_btn)
+
+	var mute_btn := Button.new()
+	mute_btn.text = "🔇 Muted" if Audio.muted else "🔊 Audio ON"
+	mute_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mute_btn.custom_minimum_size = Vector2(0, 80)
+	UiPalette.style_button(mute_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
+	mute_btn.pressed.connect(func() -> void:
+		Audio.muted = not Audio.muted
+		meta["muted"] = Audio.muted
+		SaveManager.save_data(meta)
+		_rebuild_kingpin_tab()
+	)
+	util_row.add_child(mute_btn)
+
+	# 3. Legacy Perks & New Run Launcher Card
+	var legacy_card := PanelContainer.new()
+	legacy_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	legacy_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 2, 20, 18))
+	_kingpin_vbox.add_child(legacy_card)
+
+	var lv := VBoxContainer.new()
+	lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lv.add_theme_constant_override("separation", 14)
+	legacy_card.add_child(lv)
+
+	LegacyOverlay.build_legacy_section(
+		lv,
+		meta,
+		func() -> void:
+			SaveManager.save_data(meta)
+			_rebuild_kingpin_tab(),
+		func(days_val: int) -> void:
+			_start_new_run(days_val)
+			_show_tab(0)
+	)
+
+
+func _start_new_run(mode_days: int) -> void:
+	meta["preferred_mode_days"] = mode_days
+	var perks: Array = meta.get("active_perks", [])
+	state.new_run(mode_days, perks)
+	_auto_save()
+	_refresh_all()
 
 
 # --- Dashboard Interactions & State Refresh -----------------------------------------------------
@@ -512,60 +655,31 @@ func _on_finish_run_pressed() -> void:
 
 
 func _refresh_all() -> void:
-	# 1. Top Bar
-	if state.is_endless:
-		_day_label.text = "Day %d (Endless)" % state.day
-	else:
-		_day_label.text = "Day %d / %d" % [state.day, state.max_days]
-	_day_label.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if state.is_final_day() else UiPalette.TEXT_PRIMARY)
+	var cur_d := OmahaCatalog.get_district(state.current_district_id)
 
-	# 2. Telemetry Strip
-	var bank_rate_pct := int(round(state.get_bank_interest_rate() * 100.0))
-	var debt_rate_pct := int(round(state.get_loan_interest_rate() * 100.0))
-	_cash_lbl.text = "💵 Cash: %s" % Money.format_short(state.cash)
-	_bank_lbl.text = "🏦 Bank: %s (+%d%%)" % [Money.format_short(state.bank), bank_rate_pct]
-	_debt_lbl.text = "🦈 Debt: %s (+%d%%)" % [Money.format_short(state.debt), debt_rate_pct]
-	var nw := state.get_net_worth()
-	_net_lbl.text = "💎 Net: %s" % Money.format_short(nw)
-	_net_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD if nw >= 0 else UiPalette.DEBT_CRIMSON)
+	# 1. Hero Header
+	_cash_lbl.text = "💵 %s" % Money.format_short(state.cash)
+	_bank_lbl.text = "🏦 %s" % Money.format_short(state.bank)
+	_debt_lbl.text = "🦈 %s" % Money.format_short(state.debt)
 
-	_hp_lbl.text = "❤️ HP: %d/%d" % [state.health, state.max_health]
+	var day_str := ("Day %d" % state.day) if state.is_endless else ("Day %d/%d" % [state.day, state.max_days])
+	_loc_day_lbl.text = "📍 %s • %s" % [cur_d["short_name"], day_str]
+	_loc_day_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if state.is_final_day() else UiPalette.GOLD_ACCENT)
+
+	_space_lbl.text = "🧥 %d/%d" % [state.get_used_capacity(), state.get_max_capacity()]
+	_hp_lbl.text = "❤️ %d" % state.health
 	_hp_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD if state.health > 40 else UiPalette.DEBT_CRIMSON)
-	_armor_lbl.text = "🛡️ Armor: %d" % state.armor
-	var cop_tier := CombatEngine.get_cop_tier_for_heat(state.heat)
-	_heat_lbl.text = "🚨 Heat: %.0f%% (%s)" % [state.heat, cop_tier["short_badge"]]
+	_heat_lbl.text = "🚨 %.0f%%" % state.heat
 	_heat_lbl.add_theme_color_override("font_color", UiPalette.POLICE_RED if state.heat >= 35.0 else UiPalette.SPIKE_AMBER)
 
-	var v_name: String = OmahaCatalog.get_vehicle(state.vehicle_tier)["short_name"]
-	_space_lbl.text = "🧥 Space: %d / %d (%s)" % [state.get_used_capacity(), state.get_max_capacity(), v_name]
-	var top_gun := "Unarmed"
-	if not state.weapons.is_empty():
-		top_gun = String(OmahaCatalog.get_weapon(state.weapons[0])["short_name"])
-	_arsenal_lbl.text = "🔫 %d/%d (%s)  |  👥 Crew: %d" % [
-		state.weapons.size(), state.get_max_weapon_slots(), top_gun, state.crew_count
-	]
-
-	# 3. 8-Button Omaha Metro Map & Local Facility Bar
-	for d_def in OmahaCatalog.DISTRICTS:
-		var did := String(d_def["id"])
-		var btn: Button = _district_btns[did]
-		var is_here := (did == state.current_district_id)
-		btn.text = ("📍 %s" % d_def["name"]) if is_here else ("%s %s" % [d_def["short_name"], d_def["icon"]])
-		btn.disabled = is_here or state.is_final_day()
-		if is_here:
-			UiPalette.style_button(btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SMALL)
-		else:
-			UiPalette.style_button(btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-
-	var cur_d := OmahaCatalog.get_district(state.current_district_id)
-	_facility_btn.text = "📍 %s:  %s" % [cur_d["name"], cur_d["facility_btn"]]
+	# 2. Market Tab Travel & Scanner
+	_travel_btn.text = "🚗 TRAVEL (%s %s)" % [cur_d["name"], cur_d["icon"]]
+	_travel_btn.disabled = state.is_final_day()
 	_finish_run_btn.visible = state.is_final_day() and not state.run_completed and not state.game_over
 
-	# 4. Scanner Log
-	_log_line_1.text = "📻 > " + (state.scanner_log[0] if state.scanner_log.size() > 0 else "Ready.")
-	_log_line_2.text = "   > " + (state.scanner_log[1] if state.scanner_log.size() > 1 else "")
+	_log_line_1.text = "📻 " + (state.scanner_log[0] if state.scanner_log.size() > 0 else "Ready.")
 
-	# 5. Unified 12-Row Fixed-Position Trading Board
+	# 3. Unified 12-Row Trading Board (Clean 3-part row)
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
 		var ui: Dictionary = _product_rows[pid]
@@ -579,11 +693,8 @@ func _refresh_all() -> void:
 		var panel: PanelContainer = ui["panel"]
 		var name_lbl: Label = ui["name_lbl"]
 		var price_lbl: Label = ui["price_lbl"]
-		var sig_lbl: Label = ui["sig_lbl"]
-		var held_lbl: Label = ui["held_lbl"]
 		var quick_btn: Button = ui["quick_btn"]
 
-		# Row highlight for 4x Spikes & 1/4 Floods
 		var row_bg: Color = ui["base_bg"]
 		var row_border := UiPalette.BORDER_SLATE
 		if sig == "spike":
@@ -594,48 +705,30 @@ func _refresh_all() -> void:
 			row_border = UiPalette.FLOOD_CYAN
 		elif held > 0:
 			row_border = UiPalette.CASH_EMERALD
-		panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg, row_border, 8, 2 if sig in ["spike", "flood"] or held > 0 else 1, 10, 4))
+		panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg, row_border, 10, 2 if sig in ["spike", "flood"] or held > 0 else 1, 14, 6))
+
+		# Product Name + Event Badge (only show badge when non-normal)
+		var badge := ""
+		match sig:
+			"spike":
+				badge = " 🔥4×"
+			"flood":
+				badge = " ❄️¼"
+			"high":
+				badge = " 📈"
+			"low":
+				badge = " 🏷️"
+		var held_tag := (" [%d]" % held) if held > 0 else ""
+		name_lbl.text = "%s%s%s" % [p_def["name"], badge, held_tag]
 
 		if price > 0:
 			name_lbl.add_theme_color_override("font_color", UiPalette.TEXT_PRIMARY)
 			price_lbl.text = Money.format(price)
-			price_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if sig == "spike" else (UiPalette.FLOOD_CYAN if sig == "flood" else UiPalette.TEXT_PRIMARY))
+			price_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if sig == "spike" else (UiPalette.FLOOD_CYAN if sig == "flood" else (UiPalette.CASH_EMERALD if held > 0 else UiPalette.TEXT_PRIMARY)))
 		else:
 			name_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
-			price_lbl.text = "— (No Mkt)"
+			price_lbl.text = "—"
 			price_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
-
-		match sig:
-			"spike":
-				sig_lbl.text = "🔥 4x!"
-				sig_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER)
-			"flood":
-				sig_lbl.text = "❄️ 1/4!"
-				sig_lbl.add_theme_color_override("font_color", UiPalette.FLOOD_CYAN)
-			"high":
-				sig_lbl.text = "📈 Pricy"
-				sig_lbl.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
-			"low":
-				sig_lbl.text = "🏷️ Cheap"
-				sig_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD)
-			"unlisted":
-				sig_lbl.text = "—"
-				sig_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
-			_:
-				sig_lbl.text = "Normal"
-				sig_lbl.add_theme_color_override("font_color", UiPalette.TEXT_SECONDARY)
-
-		if held > 0:
-			if price > 0:
-				var pl := held * (price - avg_paid)
-				held_lbl.text = "%d (%s | %s)" % [held, Money.format_short(avg_paid), Money.format_pl(pl)]
-				held_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD if pl >= 0 else UiPalette.SPIKE_AMBER)
-			else:
-				held_lbl.text = "%d (Avg %s)" % [held, Money.format_short(avg_paid)]
-				held_lbl.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
-		else:
-			held_lbl.text = ("Can Buy: %d" % max_buy) if max_buy > 0 else "—"
-			held_lbl.add_theme_color_override("font_color", UiPalette.TEXT_SECONDARY if max_buy > 0 else UiPalette.TEXT_MUTED)
 
 		# Smart Quick Action Button
 		if held > 0 and price > 0:
@@ -648,20 +741,30 @@ func _refresh_all() -> void:
 				UiPalette.CASH_EMERALD if pl >= 0 else UiPalette.SPIKE_AMBER,
 				UiPalette.TEXT_PRIMARY,
 				UiPalette.FONT_SMALL,
-				8
+				10
 			)
 		elif held > 0 and price <= 0:
 			quick_btn.text = "Dump %d" % held
 			quick_btn.disabled = false
-			UiPalette.style_button(quick_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 8)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 10)
 		elif price > 0 and max_buy > 0:
-			quick_btn.text = "Buy Max (%d)" % max_buy
+			quick_btn.text = "Buy %d" % max_buy
 			quick_btn.disabled = false
-			UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 8)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL, 10)
 		else:
 			quick_btn.text = "—"
 			quick_btn.disabled = true
-			UiPalette.style_button(quick_btn, UiPalette.BTN_DISABLED, UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, UiPalette.FONT_SMALL, 8)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_DISABLED, UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, UiPalette.FONT_SMALL, 10)
+
+	# 4. Update Spot & Kingpin Tabs if visible
+	if _current_tab == 1:
+		_rebuild_spot_tab()
+	elif _current_tab == 2:
+		_rebuild_kingpin_tab()
+
+	# 5. Update Tab 1 button label with current neighborhood spot icon
+	if _tab_buttons.size() >= 2:
+		_tab_buttons[1].text = "%s SPOT & BANK" % cur_d["icon"]
 
 	# 6. Refresh Active Modals (Combat or Street Encounter)
 	_combat_overlay.refresh(state)

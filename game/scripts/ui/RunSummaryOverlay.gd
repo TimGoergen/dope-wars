@@ -22,48 +22,30 @@ func open_summary(state: GameState, meta: Dictionary, show_run_banner: bool = tr
 	for c in get_children():
 		c.queue_free()
 
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-
-	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(960, 0)
-	card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 18, 3, 32, 28))
-	center.add_child(card)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	card.add_child(vbox)
-
-	var header := HBoxContainer.new()
-	vbox.add_child(header)
 	var header_text := "🏆 OMAHA HALL OF FAME"
 	if show_run_banner and (_state.run_completed or _state.game_over):
 		header_text = "🏆 RUN COMPLETE!" if _state.run_completed else "💀 WASTED IN OMAHA"
-	var title := UiPalette.add_label(header, header_text, UiPalette.FONT_TITLE, UiPalette.GOLD_ACCENT if not _state.game_over else UiPalette.DEBT_CRIMSON)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	var close_btn := Button.new()
-	close_btn.text = "✕"
-	close_btn.custom_minimum_size = Vector2(64, 54)
-	UiPalette.style_button(close_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE)
-	close_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		visible = false
+	var vbox := UiPalette.build_modal_shell(
+		self,
+		header_text,
+		UiPalette.GOLD_ACCENT if not _state.game_over else UiPalette.DEBT_CRIMSON,
+		true
 	)
-	header.add_child(close_btn)
 
 	if show_run_banner and (_state.run_completed or _state.game_over):
 		var summary_box := PanelContainer.new()
-		summary_box.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 12, 2, 20, 16))
+		summary_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		summary_box.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 2, 20, 16))
 		vbox.add_child(summary_box)
 		var sv := VBoxContainer.new()
-		sv.add_theme_constant_override("separation", 8)
+		sv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		sv.add_theme_constant_override("separation", 10)
 		summary_box.add_child(sv)
 
 		UiPalette.add_label(sv, "Final Net Worth: %s" % Money.format(_state.final_net_worth), UiPalette.FONT_HEADER, UiPalette.CASH_EMERALD if _state.final_net_worth >= 0 else UiPalette.DEBT_CRIMSON)
 		UiPalette.add_label(sv, "Fate: %s" % _state.end_fate, UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY)
-		UiPalette.add_label(sv, "Street Cred Earned: +%d ⭐ (Total Available: %d ⭐)" % [_state.street_cred_earned, int(_meta.get("street_cred", 0))], UiPalette.FONT_SUBHEAD, UiPalette.GOLD_ACCENT)
+		UiPalette.add_label(sv, "Street Cred Earned: +%d ⭐ (Total: %d ⭐)" % [_state.street_cred_earned, int(_meta.get("street_cred", 0))], UiPalette.FONT_SUBHEAD, UiPalette.GOLD_ACCENT)
 
 	# Hall of Fame Table
 	UiPalette.add_label(vbox, "Top Omaha Metro Runs:", UiPalette.FONT_SUBHEAD, UiPalette.BANK_CYAN)
@@ -75,20 +57,23 @@ func open_summary(state: GameState, meta: Dictionary, show_run_banner: bool = tr
 		for i in range(max_rows):
 			var entry: Dictionary = hof[i]
 			var r_box := PanelContainer.new()
-			r_box.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_ALT_BG, UiPalette.BORDER_SLATE, 8, 1, 14, 8))
+			r_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			r_box.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_ALT_BG, UiPalette.BORDER_SLATE, 10, 1, 16, 10))
 			vbox.add_child(r_box)
 			var r_hb := HBoxContainer.new()
+			r_hb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			r_hb.add_theme_constant_override("separation", 12)
 			r_box.add_child(r_hb)
 
-			var rank_lbl := UiPalette.add_label(r_hb, "#%d  %s" % [i + 1, Money.format(int(entry.get("net_worth", 0)))], UiPalette.FONT_ROW_MAIN, UiPalette.CASH_EMERALD if bool(entry.get("survived", true)) else UiPalette.DEBT_CRIMSON)
-			rank_lbl.custom_minimum_size = Vector2(280, 0)
+			var rank_lbl := UiPalette.add_label(r_hb, "#%d  %s" % [i + 1, Money.format_short(int(entry.get("net_worth", 0)))], UiPalette.FONT_ROW_MAIN, UiPalette.CASH_EMERALD if bool(entry.get("survived", true)) else UiPalette.DEBT_CRIMSON, false)
+			rank_lbl.custom_minimum_size = Vector2(240, 0)
 
 			var fate_lbl := UiPalette.add_label(r_hb, "%s (Day %d)" % [String(entry.get("fate", "")), int(entry.get("days", 31))], UiPalette.FONT_SMALL, UiPalette.TEXT_SECONDARY)
 			fate_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var new_btn := Button.new()
-	new_btn.text = "🚗 START NEW RUN / LEGACY PERKS"
-	new_btn.custom_minimum_size = Vector2(0, 78)
+	new_btn.text = "🚗 NEW RUN / PERKS"
+	new_btn.custom_minimum_size = Vector2(0, 88)
 	UiPalette.style_button(new_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_HEADER)
 	new_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")

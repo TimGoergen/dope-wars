@@ -23,7 +23,8 @@ $headless = @(
     "CombatAndHeatTest",
     "FacilitiesAndEventsTest",
     "LegacyAndSaveTest",
-    "FullRunSimTest"
+    "FullRunSimTest",
+    "UiLayoutTest"
 )
 
 if (-not (Test-Path $Godot)) {
