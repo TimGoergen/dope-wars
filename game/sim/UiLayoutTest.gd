@@ -47,15 +47,17 @@ func _initialize() -> void:
 	await process_frame
 	_assert_tree_within_bounds(main, "Tab 2 (Kingpin)")
 
-	# 5. Check TradeOverlay, LegacyOverlay, RunSummaryOverlay, DevTuningOverlay
+	# 5. Check TradeOverlay (both unowned and owned with 3rd DROP tab), LegacyOverlay, RunSummaryOverlay, DevTuningOverlay
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
 		if int(main.state.market_prices.get(pid, 0)) > 0:
+			main.state.inventory[pid] = {"qty": 10, "avg_paid": 100}
 			main._trade_overlay.open_for_product(main.state, pid)
 			await process_frame
 			await process_frame
-			_assert_tree_within_bounds(main._trade_overlay, "TradeOverlay (%s)" % pid)
+			_assert_tree_within_bounds(main._trade_overlay, "TradeOverlay (%s with DROP tab)" % pid)
 			main._trade_overlay.visible = false
+			main.state.inventory[pid] = {"qty": 0, "avg_paid": 0}
 			break
 
 	main._legacy_overlay.open_modal(main.meta)

@@ -841,7 +841,7 @@ func _refresh_all() -> void:
 			quick_btn.disabled = false
 			UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON, 12)
 		else:
-			quick_btn.text = "MAX 0"
+			quick_btn.text = "Coat Full" if state.get_free_capacity() <= 0 else "Too Pricy"
 			quick_btn.disabled = true
 			UiPalette.style_button(quick_btn, UiPalette.BTN_DISABLED, UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, UiPalette.FONT_SMALL, 12)
 
