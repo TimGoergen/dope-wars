@@ -309,7 +309,7 @@ func _build_market_tab() -> Control:
 	)
 	_scanner_card.add_child(news_hold_btn)
 
-	# Right 2/3: Top half = Red Pin + Full Location Name; Bottom half = 🚗 TRAVEL button
+	# Right 2/3: Top half = Red Pin + Full Location Name (no background or outline); Bottom half = 🚗 TRAVEL button
 	var right_col := VBoxContainer.new()
 	right_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right_col.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -317,16 +317,10 @@ func _build_market_tab() -> Control:
 	right_col.add_theme_constant_override("separation", 10)
 	top_strip.add_child(right_col)
 
-	var loc_card := PanelContainer.new()
-	loc_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	loc_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	loc_card.custom_minimum_size = Vector2(0, 84)
-	loc_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.GOLD_ACCENT, 14, 3, 16, 8))
-	right_col.add_child(loc_card)
-
-	_loc_lbl = UiPalette.add_hero_label(loc_card, "📍 North Omaha", UiPalette.FONT_DRUG_NAME, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_loc_lbl = UiPalette.add_hero_label(right_col, "📍 North Omaha", UiPalette.FONT_DRUG_NAME, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_loc_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_loc_lbl.custom_minimum_size = Vector2(0, 84)
 
 	var act_row := HBoxContainer.new()
 	act_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
