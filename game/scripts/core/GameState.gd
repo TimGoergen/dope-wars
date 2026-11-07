@@ -129,8 +129,8 @@ func has_perk(perk_id: String) -> bool:
 
 func log_scanner(msg: String) -> void:
 	scanner_log.push_front(msg)
-	if scanner_log.size() > 30:
-		scanner_log.resize(30)
+	if scanner_log.size() > 80:
+		scanner_log.resize(80)
 
 
 # --- Telemetry & Capacity Getters ---------------------------------------------------------------

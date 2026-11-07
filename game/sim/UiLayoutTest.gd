@@ -32,11 +32,25 @@ func _initialize() -> void:
 		return
 	var loc_lbl: Label = main._loc_lbl
 	var day_lbl: Label = main._day_lbl
+	var travel_btn: Button = main._travel_btn
+	var scanner_card: PanelContainer = main._scanner_card
+	var log_line_1: Label = main._log_line_1
 	var expected_loc := "📍 %s" % String(OmahaCatalog.get_district(main.state.current_district_id)["name"])
-	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or not day_lbl.text.begins_with("📅 ") or day_lbl.text.contains("Day"):
-		push_error("FAIL [Hero Location/Day]: loc='%s' (expected '%s') day='%s'" % [loc_lbl.text, expected_loc, day_lbl.text])
+	if loc_lbl.text != expected_loc or loc_lbl.get_global_rect().position.y < hero_rect.end.y or travel_btn.text != "🚗 TRAVEL" or not log_line_1.text.begins_with("📰 ") or not day_lbl.text.begins_with("📅 ") or day_lbl.text.contains("Day"):
+		push_error("FAIL [Split Strip & Header]: loc='%s' travel='%s' news='%s' day='%s'" % [loc_lbl.text, travel_btn.text, log_line_1.text, day_lbl.text])
 		quit(1)
 		return
+	if scanner_card.get_global_rect().size.x > 400.0 or loc_lbl.get_global_rect().position.x <= scanner_card.get_global_rect().end.x:
+		push_error("FAIL [1/3 vs 2/3 Split]: scanner_rect=%s loc_rect=%s" % [str(scanner_card.get_global_rect()), str(loc_lbl.get_global_rect())])
+		quit(1)
+		return
+	main._set_news_expanded(true)
+	var exp_panel: PanelContainer = main._news_expand_panel
+	if not exp_panel.visible or exp_panel.size.y > 1200.0:
+		push_error("FAIL [News Hold Expand]: visible=%s size=%s" % [str(exp_panel.visible), str(exp_panel.size)])
+		quit(1)
+		return
+	main._set_news_expanded(false)
 	var tab0_btn: Button = main._tab_buttons[0]
 	var tab2_btn: Button = main._tab_buttons[2]
 	var tab0_rect: Rect2 = tab0_btn.get_global_rect()

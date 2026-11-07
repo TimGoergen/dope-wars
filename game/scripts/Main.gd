@@ -32,6 +32,8 @@ var _finish_run_btn: Button
 var _scanner_card: PanelContainer
 var _log_line_1: Label
 var _log_line_2: Label
+var _news_expand_panel: PanelContainer
+var _news_expand_vbox: VBoxContainer
 var _product_rows: Dictionary = {} # product_id -> Dictionary of nodes
 
 # Spot & Bank Tab Dynamic VBox
@@ -175,11 +177,31 @@ func _build_dashboard_ui() -> void:
 	)
 	add_child(_dev_tuning_overlay)
 
+	# Press-and-Hold Expanded News Panel (grows up to 1200px / half screen height while held)
+	_news_expand_panel = PanelContainer.new()
+	_news_expand_panel.visible = false
+	_news_expand_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_news_expand_panel.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 4, 16, 14))
+	add_child(_news_expand_panel)
+
+	var news_scroll := ScrollContainer.new()
+	news_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	news_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	news_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	news_scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_news_expand_panel.add_child(news_scroll)
+
+	_news_expand_vbox = VBoxContainer.new()
+	_news_expand_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_news_expand_vbox.add_theme_constant_override("separation", 8)
+	_news_expand_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	news_scroll.add_child(_news_expand_vbox)
+
 
 func _build_hero_header(parent: VBoxContainer) -> void:
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(0, 304)
+	card.custom_minimum_size = Vector2(0, 268)
 	card.add_theme_stylebox_override("panel", UiPalette.make_hero_header_box())
 	parent.add_child(card)
 	_hero_card = card
@@ -188,7 +210,7 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 10)
+	vbox.add_theme_constant_override("separation", 12)
 	card.add_child(vbox)
 
 	# Row 1: Edge-Pinned Left (Cash) and Right (Debt) with a wide empty center gap
@@ -207,11 +229,7 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 
 	_debt_lbl = UiPalette.add_hero_label(r1, "🦈 $5,500", UiPalette.FONT_HERO_DEBT, UiPalette.DEBT_CRIMSON, HORIZONTAL_ALIGNMENT_RIGHT)
 
-	# Centered Location Row (Below camera cutout): Red pin icon + Full District Name (no numbers)
-	_loc_lbl = UiPalette.add_hero_label(vbox, "📍 North Omaha", UiPalette.FONT_HERO, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
-	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	# Row 2: Left (Bank) | Right (Calendar Icon + x/y)
+	# Row 2 (Below camera cutout): Left (Bank) | Right (Calendar Icon + x/y)
 	var r2 := HBoxContainer.new()
 	r2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	r2.add_theme_constant_override("separation", 16)
@@ -250,17 +268,78 @@ func _build_market_tab() -> Control:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 10)
 
-	# Action Row: Prominent Travel Bar (+ Finish Run on Final Day)
+	# Split Top Strip: Left 1/3 = News Display (press & hold to expand up to 1/2 screen height)
+	#                  Right 2/3 = Top half Location (📍 Full Name), Bottom half 🚗 TRAVEL button
+	var top_strip := HBoxContainer.new()
+	top_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_strip.custom_minimum_size = Vector2(0, 178)
+	top_strip.add_theme_constant_override("separation", 12)
+	vbox.add_child(top_strip)
+
+	# Left 1/3: Newspaper News / Recent Transactions Display
+	_scanner_card = PanelContainer.new()
+	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scanner_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scanner_card.size_flags_stretch_ratio = 1.0
+	_scanner_card.clip_contents = true
+	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 14, 10))
+	top_strip.add_child(_scanner_card)
+
+	var scan_vbox := VBoxContainer.new()
+	scan_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scan_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scan_vbox.add_theme_constant_override("separation", 4)
+	scan_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_scanner_card.add_child(scan_vbox)
+
+	_log_line_1 = UiPalette.add_label(scan_vbox, "📰 Welcome to Omaha.", UiPalette.FONT_SMALL, UiPalette.GOLD_ACCENT, true, true)
+	_log_line_1.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_log_line_2 = UiPalette.add_label(scan_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, true, false)
+	_log_line_2.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var news_hold_btn := Button.new()
+	UiPalette.style_flat_inert_button(news_hold_btn)
+	news_hold_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	news_hold_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	news_hold_btn.button_down.connect(func() -> void:
+		_set_news_expanded(true)
+	)
+	news_hold_btn.button_up.connect(func() -> void:
+		_set_news_expanded(false)
+	)
+	_scanner_card.add_child(news_hold_btn)
+
+	# Right 2/3: Top half = Red Pin + Full Location Name; Bottom half = 🚗 TRAVEL button
+	var right_col := VBoxContainer.new()
+	right_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right_col.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_col.size_flags_stretch_ratio = 2.0
+	right_col.add_theme_constant_override("separation", 10)
+	top_strip.add_child(right_col)
+
+	var loc_card := PanelContainer.new()
+	loc_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	loc_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	loc_card.custom_minimum_size = Vector2(0, 84)
+	loc_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.GOLD_ACCENT, 14, 3, 16, 8))
+	right_col.add_child(loc_card)
+
+	_loc_lbl = UiPalette.add_hero_label(loc_card, "📍 North Omaha", UiPalette.FONT_DRUG_NAME, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_loc_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
 	var act_row := HBoxContainer.new()
 	act_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	act_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	act_row.add_theme_constant_override("separation", 12)
-	vbox.add_child(act_row)
+	right_col.add_child(act_row)
 
 	_travel_btn = Button.new()
-	_travel_btn.text = "🚗 TRAVEL — North Omaha 🏦"
+	_travel_btn.text = "🚗 TRAVEL"
 	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_travel_btn.custom_minimum_size = Vector2(0, 88)
-	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SUBHEAD, 14)
+	_travel_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_travel_btn.custom_minimum_size = Vector2(0, 84)
+	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_DRUG_BTN, 14)
 	_travel_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		_open_travel_modal()
@@ -270,27 +349,14 @@ func _build_market_tab() -> Control:
 	_finish_run_btn = Button.new()
 	_finish_run_btn.text = "🏁 FINISH RUN"
 	_finish_run_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_finish_run_btn.custom_minimum_size = Vector2(0, 88)
+	_finish_run_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_finish_run_btn.custom_minimum_size = Vector2(0, 84)
 	_finish_run_btn.visible = false
 	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SUBHEAD, 14)
 	_finish_run_btn.pressed.connect(func() -> void:
 		_on_finish_run_pressed()
 	)
 	act_row.add_child(_finish_run_btn)
-
-	# High-Visibility 2-Line Police Scanner & Spike/Flood Alert Banner
-	_scanner_card = PanelContainer.new()
-	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 18, 10))
-	vbox.add_child(_scanner_card)
-
-	var scan_vbox := VBoxContainer.new()
-	scan_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scan_vbox.add_theme_constant_override("separation", 4)
-	_scanner_card.add_child(scan_vbox)
-
-	_log_line_1 = UiPalette.add_label(scan_vbox, "📻 Welcome to Omaha.", UiPalette.FONT_ROW_SUB, UiPalette.GOLD_ACCENT, true, true)
-	_log_line_2 = UiPalette.add_label(scan_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, true, false)
 
 	# Filtered Active Product Board (Only shows available or held products so rows expand ~35% taller)
 	var board := PanelContainer.new()
@@ -732,6 +798,37 @@ func _on_finish_run_pressed() -> void:
 	_summary_overlay.open_summary(state, meta, true)
 
 
+func _set_news_expanded(expanded: bool) -> void:
+	if _news_expand_panel == null:
+		return
+	if not expanded:
+		_news_expand_panel.visible = false
+		return
+
+	for c in _news_expand_vbox.get_children():
+		c.queue_free()
+
+	var card_rect := _scanner_card.get_global_rect()
+	var card_w := maxf(320.0, card_rect.size.x)
+	_news_expand_vbox.custom_minimum_size = Vector2(card_w - 36.0, 0.0)
+
+	UiPalette.add_label(_news_expand_vbox, "📰 RECENT TRANSACTIONS", UiPalette.FONT_SMALL, UiPalette.GOLD_ACCENT, true, true)
+	for i in range(state.scanner_log.size()):
+		var col := UiPalette.TEXT_PRIMARY if i == 0 else UiPalette.TEXT_SECONDARY
+		var lbl := UiPalette.add_label(_news_expand_vbox, "• " + String(state.scanner_log[i]), UiPalette.FONT_TINY, col, true, i == 0)
+		lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# Compute required height to fit full history, capped at half the screen height (1200px)
+	var est_lines := 2
+	for msg in state.scanner_log:
+		est_lines += maxi(1, int(ceil(float(String(msg).length()) / 20.0)))
+	var target_h := clampf(float(est_lines) * 34.0 + 36.0, card_rect.size.y, 1200.0)
+
+	_news_expand_panel.position = card_rect.position
+	_news_expand_panel.size = Vector2(card_w, target_h)
+	_news_expand_panel.visible = true
+
+
 func _refresh_all() -> void:
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
 
@@ -740,8 +837,6 @@ func _refresh_all() -> void:
 	_bank_lbl.text = "🏦 %s" % Money.format_short(state.bank)
 	_debt_lbl.text = "🦈 %s" % Money.format_short(state.debt)
 	_debt_lbl.add_theme_color_override("font_color", UiPalette.DEBT_CRIMSON if state.debt > 0 else UiPalette.CASH_EMERALD)
-
-	_loc_lbl.text = "📍 %s" % cur_d["name"]
 
 	var day_str := ("📅 %d" % state.day) if state.is_endless else ("📅 %d/%d" % [state.day, state.max_days])
 	_day_lbl.text = day_str
@@ -753,24 +848,25 @@ func _refresh_all() -> void:
 	_heat_lbl.text = "🚨 %.0f%%" % state.heat
 	_heat_lbl.add_theme_color_override("font_color", UiPalette.POLICE_RED if state.heat >= 35.0 else UiPalette.SPIKE_AMBER)
 
-	# 2. Market Tab Travel & High-Contrast Scanner Alert Banner
-	_travel_btn.text = "🚗 TRAVEL — %s %s" % [cur_d["name"], cur_d["icon"]]
+	# 2. Split Top Strip: Right 2/3 (Location + Travel) & Left 1/3 (Newspaper News Display)
+	_loc_lbl.text = "📍 %s" % cur_d["name"]
+	_travel_btn.text = "🚗 TRAVEL"
 	_travel_btn.disabled = state.is_final_day()
 	_finish_run_btn.visible = state.is_final_day() and not state.run_completed and not state.game_over
 
 	var has_spike := state.active_market_events.values().has("spike")
 	var has_flood := state.active_market_events.values().has("flood")
 	if has_spike:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.SPIKE_BG, UiPalette.SPIKE_AMBER, 14, 4, 18, 10))
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.SPIKE_BG, UiPalette.SPIKE_AMBER, 14, 4, 14, 10))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER)
 	elif has_flood:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.FLOOD_BG, UiPalette.FLOOD_CYAN, 14, 4, 18, 10))
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.FLOOD_BG, UiPalette.FLOOD_CYAN, 14, 4, 14, 10))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.FLOOD_CYAN)
 	else:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 18, 10))
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 14, 10))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
 
-	_log_line_1.text = "📻 " + (state.scanner_log[0] if state.scanner_log.size() > 0 else "Ready.")
+	_log_line_1.text = "📰 " + (state.scanner_log[0] if state.scanner_log.size() > 0 else "Ready.")
 	if state.scanner_log.size() > 1 and not String(state.scanner_log[1]).is_empty():
 		_log_line_2.visible = true
 		_log_line_2.text = "↳ " + String(state.scanner_log[1])
