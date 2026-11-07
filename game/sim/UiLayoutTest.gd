@@ -30,6 +30,15 @@ func _initialize() -> void:
 		push_error("FAIL [Camera Cutout Clearance]: cash_rect=%s debt_rect=%s overlap center cutout (470..610)" % [str(cash_rect), str(debt_rect)])
 		quit(1)
 		return
+	var tab0_btn: Button = main._tab_buttons[0]
+	var tab2_btn: Button = main._tab_buttons[2]
+	var tab0_rect: Rect2 = tab0_btn.get_global_rect()
+	var tab0_sb: StyleBoxFlat = tab0_btn.get_theme_stylebox("normal") as StyleBoxFlat
+	var tab2_sb: StyleBoxFlat = tab2_btn.get_theme_stylebox("normal") as StyleBoxFlat
+	if tab0_rect.size.y < 196.0 or tab0_rect.end.y > 2353.0 or tab0_sb.corner_radius_bottom_left != 64 or tab2_sb.corner_radius_bottom_right != 64:
+		push_error("FAIL [Bottom Tab Bar]: rect=%s bl=%d br=%d" % [str(tab0_rect), tab0_sb.corner_radius_bottom_left, tab2_sb.corner_radius_bottom_right])
+		quit(1)
+		return
 
 	# 2. Check Travel Modal
 	main._open_travel_modal()

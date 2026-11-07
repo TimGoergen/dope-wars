@@ -415,16 +415,16 @@ func _build_bottom_tab_bar(parent: VBoxContainer) -> void:
 	parent.add_child(bar)
 
 	var tab_defs := [
-		["💊 MARKET", 0],
-		["🏦 SPOT & BANK", 1],
-		["👑 KINGPIN", 2]
+		["💊\nMARKET", 0],
+		["🏦 SPOT\n& BANK", 1],
+		["👑\nKINGPIN", 2]
 	]
 
 	for t_def in tab_defs:
 		var btn := Button.new()
 		btn.text = String(t_def[0])
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		btn.custom_minimum_size = Vector2(0, 98)
+		btn.custom_minimum_size = Vector2(0, 196)
 		var idx := int(t_def[1])
 		btn.pressed.connect(func() -> void:
 			Audio.play(&"tap")
@@ -439,10 +439,7 @@ func _show_tab(tab_idx: int) -> void:
 	for i in range(_tab_containers.size()):
 		_tab_containers[i].visible = (i == _current_tab)
 		var btn := _tab_buttons[i]
-		if i == _current_tab:
-			UiPalette.style_button(btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_BUTTON, 14)
-		else:
-			UiPalette.style_button(btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_SECONDARY, UiPalette.FONT_BUTTON, 14)
+		UiPalette.style_bottom_tab_button(btn, i == _current_tab, i)
 
 	if _current_tab == 1:
 		_rebuild_spot_tab()
@@ -887,7 +884,7 @@ func _refresh_all() -> void:
 
 	# 5. Update Tab 1 button label with current neighborhood spot icon
 	if _tab_buttons.size() >= 2:
-		_tab_buttons[1].text = "%s SPOT & BANK" % cur_d["icon"]
+		_tab_buttons[1].text = "%s SPOT\n& BANK" % cur_d["icon"]
 
 	# 6. Refresh Active Modals (Combat or Street Encounter)
 	_combat_overlay.refresh(state)

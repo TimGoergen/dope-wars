@@ -139,6 +139,36 @@ static func style_button(
 	btn.clip_text = true
 
 
+static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) -> void:
+	var bg := BTN_PRIMARY if is_active else CARD_BG
+	var border := GOLD_ACCENT if is_active else BORDER_BRIGHT
+	var text_col := GOLD_ACCENT if is_active else TEXT_PRIMARY
+	var normal := make_box(bg, border, 20, 4, 14, 10)
+	var hover := make_box(bg.lightened(0.08), border.lightened(0.12), 20, 4, 14, 10)
+	var pressed := make_box(bg.darkened(0.16), border, 20, 4, 14, 10)
+
+	for sb in [normal, hover, pressed]:
+		if tab_idx == 0:
+			sb.corner_radius_bottom_left = 64
+		elif tab_idx == 2:
+			sb.corner_radius_bottom_right = 64
+
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", pressed)
+	btn.add_theme_stylebox_override("focus", normal)
+	btn.add_theme_color_override("font_color", text_col)
+	btn.add_theme_color_override("font_hover_color", text_col)
+	btn.add_theme_color_override("font_pressed_color", text_col)
+	btn.add_theme_color_override("font_focus_color", text_col)
+	btn.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	btn.add_theme_constant_override("outline_size", 5)
+	btn.add_theme_font_size_override("font_size", FONT_DRUG_BTN)
+	btn.add_theme_font_override("font", make_bold_font())
+	btn.clip_text = false
+
+
 static func add_label(
 	parent: Node,
 	text: String,
