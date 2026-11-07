@@ -30,6 +30,13 @@ func _initialize() -> void:
 		push_error("FAIL [Camera Cutout Clearance]: cash_rect=%s debt_rect=%s overlap center cutout (470..610)" % [str(cash_rect), str(debt_rect)])
 		quit(1)
 		return
+	var loc_lbl: Label = main._loc_lbl
+	var day_lbl: Label = main._day_lbl
+	var expected_loc := "📍 %s" % String(OmahaCatalog.get_district(main.state.current_district_id)["name"])
+	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or not day_lbl.text.begins_with("📅 ") or day_lbl.text.contains("Day"):
+		push_error("FAIL [Hero Location/Day]: loc='%s' (expected '%s') day='%s'" % [loc_lbl.text, expected_loc, day_lbl.text])
+		quit(1)
+		return
 	var tab0_btn: Button = main._tab_buttons[0]
 	var tab2_btn: Button = main._tab_buttons[2]
 	var tab0_rect: Rect2 = tab0_btn.get_global_rect()

@@ -20,7 +20,8 @@ var _hero_card: PanelContainer
 var _cash_lbl: Label
 var _bank_lbl: Label
 var _debt_lbl: Label
-var _loc_day_lbl: Label
+var _loc_lbl: Label
+var _day_lbl: Label
 var _space_lbl: Label
 var _hp_lbl: Label
 var _heat_lbl: Label
@@ -178,7 +179,7 @@ func _build_dashboard_ui() -> void:
 func _build_hero_header(parent: VBoxContainer) -> void:
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(0, 284)
+	card.custom_minimum_size = Vector2(0, 304)
 	card.add_theme_stylebox_override("panel", UiPalette.make_hero_header_box())
 	parent.add_child(card)
 	_hero_card = card
@@ -187,7 +188,7 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 14)
+	vbox.add_theme_constant_override("separation", 10)
 	card.add_child(vbox)
 
 	# Row 1: Edge-Pinned Left (Cash) and Right (Debt) with a wide empty center gap
@@ -206,7 +207,11 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 
 	_debt_lbl = UiPalette.add_hero_label(r1, "🦈 $5,500", UiPalette.FONT_HERO_DEBT, UiPalette.DEBT_CRIMSON, HORIZONTAL_ALIGNMENT_RIGHT)
 
-	# Row 2 (Below camera cutout): Left (Bank) | Right (Location & Day)
+	# Centered Location Row (Below camera cutout): Red pin icon + Full District Name (no numbers)
+	_loc_lbl = UiPalette.add_hero_label(vbox, "📍 North Omaha", UiPalette.FONT_HERO, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	# Row 2: Left (Bank) | Right (Calendar Icon + x/y)
 	var r2 := HBoxContainer.new()
 	r2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	r2.add_theme_constant_override("separation", 16)
@@ -215,7 +220,7 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	_bank_lbl = UiPalette.add_hero_label(r2, "🏦 $0", UiPalette.FONT_HERO, UiPalette.BANK_CYAN, HORIZONTAL_ALIGNMENT_LEFT)
 	_bank_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	_loc_day_lbl = UiPalette.add_hero_label(r2, "📍 North O • Day 1/31", UiPalette.FONT_HERO_ROW2, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_RIGHT)
+	_day_lbl = UiPalette.add_hero_label(r2, "📅 1/31", UiPalette.FONT_HERO_ROW2, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_RIGHT)
 
 	var divider := ColorRect.new()
 	divider.color = UiPalette.BORDER_SLATE
@@ -736,9 +741,11 @@ func _refresh_all() -> void:
 	_debt_lbl.text = "🦈 %s" % Money.format_short(state.debt)
 	_debt_lbl.add_theme_color_override("font_color", UiPalette.DEBT_CRIMSON if state.debt > 0 else UiPalette.CASH_EMERALD)
 
-	var day_str := ("Day %d" % state.day) if state.is_endless else ("Day %d/%d" % [state.day, state.max_days])
-	_loc_day_lbl.text = "📍 %s • %s" % [cur_d["short_name"], day_str]
-	_loc_day_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if state.is_final_day() else UiPalette.GOLD_ACCENT)
+	_loc_lbl.text = "📍 %s" % cur_d["name"]
+
+	var day_str := ("📅 %d" % state.day) if state.is_endless else ("📅 %d/%d" % [state.day, state.max_days])
+	_day_lbl.text = day_str
+	_day_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if state.is_final_day() else UiPalette.GOLD_ACCENT)
 
 	_space_lbl.text = "🧥 %d/%d" % [state.get_used_capacity(), state.get_max_capacity()]
 	_hp_lbl.text = "❤️ %d" % state.health
