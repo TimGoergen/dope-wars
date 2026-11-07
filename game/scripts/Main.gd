@@ -309,48 +309,43 @@ func _build_market_tab() -> Control:
 	)
 	_scanner_card.add_child(news_hold_btn)
 
-	# Right 2/3: Top half = Red Pin + Full Location Name (no background or outline); Bottom half = 🚗 TRAVEL button
-	var right_col := VBoxContainer.new()
-	right_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right_col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	right_col.size_flags_stretch_ratio = 2.0
-	right_col.add_theme_constant_override("separation", 10)
-	top_strip.add_child(right_col)
+	# Right 2/3: Combined Location (left 2/3, vertically centered & left-aligned) + 🚗 Travel Button (right-most 1/3, large car icon only)
+	var right_row := HBoxContainer.new()
+	right_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_row.size_flags_stretch_ratio = 2.0
+	right_row.add_theme_constant_override("separation", 12)
+	top_strip.add_child(right_row)
 
-	_loc_lbl = UiPalette.add_hero_label(right_col, "📍 North Omaha", UiPalette.FONT_DRUG_NAME, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_loc_lbl = UiPalette.add_hero_label(right_row, "📍 North Omaha", UiPalette.FONT_DRUG_NAME, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_LEFT)
 	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_loc_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_loc_lbl.custom_minimum_size = Vector2(0, 84)
-
-	var act_row := HBoxContainer.new()
-	act_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	act_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	act_row.add_theme_constant_override("separation", 12)
-	right_col.add_child(act_row)
+	_loc_lbl.size_flags_stretch_ratio = 2.0
+	_loc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	_travel_btn = Button.new()
-	_travel_btn.text = "🚗 TRAVEL"
+	_travel_btn.text = "🚗"
 	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_travel_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_travel_btn.custom_minimum_size = Vector2(0, 84)
-	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_DRUG_BTN, 14)
+	_travel_btn.size_flags_stretch_ratio = 1.0
+	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 84, 16)
 	_travel_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		_open_travel_modal()
 	)
-	act_row.add_child(_travel_btn)
+	right_row.add_child(_travel_btn)
 
 	_finish_run_btn = Button.new()
-	_finish_run_btn.text = "🏁 FINISH RUN"
+	_finish_run_btn.text = "🏁"
 	_finish_run_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_finish_run_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_finish_run_btn.custom_minimum_size = Vector2(0, 84)
+	_finish_run_btn.size_flags_stretch_ratio = 1.0
 	_finish_run_btn.visible = false
-	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SUBHEAD, 14)
+	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, 72, 16)
 	_finish_run_btn.pressed.connect(func() -> void:
 		_on_finish_run_pressed()
 	)
-	act_row.add_child(_finish_run_btn)
+	right_row.add_child(_finish_run_btn)
 
 	# Filtered Active Product Board (Only shows available or held products so rows expand ~35% taller)
 	var board := PanelContainer.new()
@@ -844,7 +839,7 @@ func _refresh_all() -> void:
 
 	# 2. Split Top Strip: Right 2/3 (Location + Travel) & Left 1/3 (Newspaper News Display)
 	_loc_lbl.text = "📍 %s" % cur_d["name"]
-	_travel_btn.text = "🚗 TRAVEL"
+	_travel_btn.text = "🚗"
 	_travel_btn.disabled = state.is_final_day()
 	_finish_run_btn.visible = state.is_final_day() and not state.run_completed and not state.game_over
 

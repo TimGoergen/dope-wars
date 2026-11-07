@@ -36,7 +36,7 @@ func _initialize() -> void:
 	var scanner_card: PanelContainer = main._scanner_card
 	var log_line_1: Label = main._log_line_1
 	var expected_loc := "📍 %s" % String(OmahaCatalog.get_district(main.state.current_district_id)["name"])
-	if loc_lbl.text != expected_loc or loc_lbl.get_global_rect().position.y < hero_rect.end.y or travel_btn.text != "🚗 TRAVEL" or not log_line_1.text.begins_with("📰 ") or not day_lbl.text.begins_with("📅 ") or day_lbl.text.contains("Day"):
+	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_LEFT or loc_lbl.get_global_rect().position.y < hero_rect.end.y or travel_btn.text != "🚗" or not log_line_1.text.begins_with("📰 ") or not day_lbl.text.begins_with("📅 ") or day_lbl.text.contains("Day"):
 		push_error("FAIL [Split Strip & Header]: loc='%s' travel='%s' news='%s' day='%s'" % [loc_lbl.text, travel_btn.text, log_line_1.text, day_lbl.text])
 		quit(1)
 		return
