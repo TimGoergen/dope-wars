@@ -268,25 +268,25 @@ func _build_market_tab() -> Control:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 10)
 
-	# Top Strip: Left = 📰 News Icon (press & hold to expand) | Middle = Location Name (no pin) | Right = 🚗 Travel Button
+	# Top Strip: Left = 📰 News Icon (frameless, press & hold to expand) | Middle = Centered Location Name | Right = 🚗 Travel Icon (frameless)
 	var top_strip := HBoxContainer.new()
 	top_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_strip.custom_minimum_size = Vector2(0, 152)
-	top_strip.add_theme_constant_override("separation", 16)
+	top_strip.add_theme_constant_override("separation", 12)
 	vbox.add_child(top_strip)
 
-	# Left: Newspaper Icon Display (same 84px icon size and 1.0 width ratio as the 🚗 button on the right)
+	# Left: Frameless Newspaper Icon (108px, vertically & horizontally centered)
 	_scanner_card = PanelContainer.new()
 	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scanner_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scanner_card.size_flags_stretch_ratio = 1.0
-	_scanner_card.clip_contents = true
-	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 16, 3, 12, 8))
+	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_empty_box())
 	top_strip.add_child(_scanner_card)
 
-	_log_line_1 = UiPalette.add_hero_label(_scanner_card, "📰", 84, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_log_line_1 = UiPalette.add_hero_label(_scanner_card, "📰", 108, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	_log_line_1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_log_line_1.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_log_line_1.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_log_line_1.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var news_hold_btn := Button.new()
@@ -301,20 +301,26 @@ func _build_market_tab() -> Control:
 	)
 	_scanner_card.add_child(news_hold_btn)
 
-	# Middle: Wide Location Name (no pin icon, vertically centered & left-aligned)
-	_loc_lbl = UiPalette.add_hero_label(top_strip, "North Omaha", UiPalette.FONT_HERO, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_LEFT)
+	# Middle: Wide Location Name (no pin icon, horizontally & vertically centered)
+	_loc_lbl = UiPalette.add_hero_label(top_strip, "North Omaha", 54, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_loc_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_loc_lbl.size_flags_stretch_ratio = 2.8
+	_loc_lbl.size_flags_stretch_ratio = 3.0
+	_loc_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_loc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	# Right: 🚗 Travel Button (large 84px car icon only)
+	# Right: Frameless 🚗 Travel Button (108px car icon, vertically & horizontally centered)
 	_travel_btn = Button.new()
 	_travel_btn.text = "🚗"
 	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_travel_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_travel_btn.size_flags_stretch_ratio = 1.0
-	UiPalette.style_button(_travel_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 84, 16)
+	UiPalette.style_flat_inert_button(_travel_btn)
+	_travel_btn.add_theme_font_size_override("font_size", 108)
+	_travel_btn.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
+	_travel_btn.add_theme_color_override("font_hover_color", UiPalette.GOLD_ACCENT)
+	_travel_btn.add_theme_color_override("font_pressed_color", UiPalette.GOLD_ACCENT)
+	_travel_btn.add_theme_color_override("font_disabled_color", UiPalette.TEXT_MUTED)
 	_travel_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		_open_travel_modal()
@@ -327,7 +333,8 @@ func _build_market_tab() -> Control:
 	_finish_run_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_finish_run_btn.size_flags_stretch_ratio = 1.0
 	_finish_run_btn.visible = false
-	UiPalette.style_button(_finish_run_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, 72, 16)
+	UiPalette.style_flat_inert_button(_finish_run_btn)
+	_finish_run_btn.add_theme_font_size_override("font_size", 108)
 	_finish_run_btn.pressed.connect(func() -> void:
 		_on_finish_run_pressed()
 	)
@@ -831,14 +838,12 @@ func _refresh_all() -> void:
 
 	var has_spike := state.active_market_events.values().has("spike")
 	var has_flood := state.active_market_events.values().has("flood")
+	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_empty_box())
 	if has_spike:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.SPIKE_BG, UiPalette.SPIKE_AMBER, 16, 4, 12, 8))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER)
 	elif has_flood:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.FLOOD_BG, UiPalette.FLOOD_CYAN, 16, 4, 12, 8))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.FLOOD_CYAN)
 	else:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 16, 3, 12, 8))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
 
 	_log_line_1.text = "📰"
