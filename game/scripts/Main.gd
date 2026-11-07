@@ -268,34 +268,26 @@ func _build_market_tab() -> Control:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 10)
 
-	# Split Top Strip: Left 1/3 = News Display (press & hold to expand up to 1/2 screen height)
-	#                  Right 2/3 = Top half Location (📍 Full Name), Bottom half 🚗 TRAVEL button
+	# Top Strip: Left = 📰 News Icon (press & hold to expand) | Middle = Location Name (no pin) | Right = 🚗 Travel Button
 	var top_strip := HBoxContainer.new()
 	top_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_strip.custom_minimum_size = Vector2(0, 178)
-	top_strip.add_theme_constant_override("separation", 12)
+	top_strip.custom_minimum_size = Vector2(0, 152)
+	top_strip.add_theme_constant_override("separation", 16)
 	vbox.add_child(top_strip)
 
-	# Left 1/3: Newspaper News / Recent Transactions Display
+	# Left: Newspaper Icon Display (same 84px icon size and 1.0 width ratio as the 🚗 button on the right)
 	_scanner_card = PanelContainer.new()
 	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scanner_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scanner_card.size_flags_stretch_ratio = 1.0
 	_scanner_card.clip_contents = true
-	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 14, 10))
+	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 16, 3, 12, 8))
 	top_strip.add_child(_scanner_card)
 
-	var scan_vbox := VBoxContainer.new()
-	scan_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scan_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scan_vbox.add_theme_constant_override("separation", 4)
-	scan_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_scanner_card.add_child(scan_vbox)
-
-	_log_line_1 = UiPalette.add_label(scan_vbox, "📰 Welcome to Omaha.", UiPalette.FONT_SMALL, UiPalette.GOLD_ACCENT, true, true)
+	_log_line_1 = UiPalette.add_hero_label(_scanner_card, "📰", 84, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_log_line_1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_log_line_1.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_log_line_1.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_log_line_2 = UiPalette.add_label(scan_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, true, false)
-	_log_line_2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var news_hold_btn := Button.new()
 	UiPalette.style_flat_inert_button(news_hold_btn)
@@ -309,20 +301,14 @@ func _build_market_tab() -> Control:
 	)
 	_scanner_card.add_child(news_hold_btn)
 
-	# Right 2/3: Combined Location (left 2/3, vertically centered & left-aligned) + 🚗 Travel Button (right-most 1/3, large car icon only)
-	var right_row := HBoxContainer.new()
-	right_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	right_row.size_flags_stretch_ratio = 2.0
-	right_row.add_theme_constant_override("separation", 12)
-	top_strip.add_child(right_row)
-
-	_loc_lbl = UiPalette.add_hero_label(right_row, "📍 North Omaha", UiPalette.FONT_DRUG_NAME, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_LEFT)
+	# Middle: Wide Location Name (no pin icon, vertically centered & left-aligned)
+	_loc_lbl = UiPalette.add_hero_label(top_strip, "North Omaha", UiPalette.FONT_HERO, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_LEFT)
 	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_loc_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_loc_lbl.size_flags_stretch_ratio = 2.0
+	_loc_lbl.size_flags_stretch_ratio = 2.8
 	_loc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
+	# Right: 🚗 Travel Button (large 84px car icon only)
 	_travel_btn = Button.new()
 	_travel_btn.text = "🚗"
 	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -333,7 +319,7 @@ func _build_market_tab() -> Control:
 		Audio.play(&"tap")
 		_open_travel_modal()
 	)
-	right_row.add_child(_travel_btn)
+	top_strip.add_child(_travel_btn)
 
 	_finish_run_btn = Button.new()
 	_finish_run_btn.text = "🏁"
@@ -345,7 +331,7 @@ func _build_market_tab() -> Control:
 	_finish_run_btn.pressed.connect(func() -> void:
 		_on_finish_run_pressed()
 	)
-	right_row.add_child(_finish_run_btn)
+	top_strip.add_child(_finish_run_btn)
 
 	# Filtered Active Product Board (Only shows available or held products so rows expand ~35% taller)
 	var board := PanelContainer.new()
@@ -798,7 +784,7 @@ func _set_news_expanded(expanded: bool) -> void:
 		c.queue_free()
 
 	var card_rect := _scanner_card.get_global_rect()
-	var card_w := maxf(320.0, card_rect.size.x)
+	var card_w := clampf(1080.0 - card_rect.position.x - 20.0, 320.0, 1040.0)
 	_news_expand_vbox.custom_minimum_size = Vector2(card_w - 36.0, 0.0)
 
 	UiPalette.add_label(_news_expand_vbox, "📰 RECENT TRANSACTIONS", UiPalette.FONT_SMALL, UiPalette.GOLD_ACCENT, true, true)
@@ -810,7 +796,7 @@ func _set_news_expanded(expanded: bool) -> void:
 	# Compute required height to fit full history, capped at half the screen height (1200px)
 	var est_lines := 2
 	for msg in state.scanner_log:
-		est_lines += maxi(1, int(ceil(float(String(msg).length()) / 20.0)))
+		est_lines += maxi(1, int(ceil(float(String(msg).length()) / 42.0)))
 	var target_h := clampf(float(est_lines) * 34.0 + 36.0, card_rect.size.y, 1200.0)
 
 	_news_expand_panel.position = card_rect.position
@@ -837,8 +823,8 @@ func _refresh_all() -> void:
 	_heat_lbl.text = "🚨 %.0f%%" % state.heat
 	_heat_lbl.add_theme_color_override("font_color", UiPalette.POLICE_RED if state.heat >= 35.0 else UiPalette.SPIKE_AMBER)
 
-	# 2. Split Top Strip: Right 2/3 (Location + Travel) & Left 1/3 (Newspaper News Display)
-	_loc_lbl.text = "📍 %s" % cur_d["name"]
+	# 2. Top Strip: 📰 Icon | Location Name (no pin) | 🚗 Travel Icon
+	_loc_lbl.text = String(cur_d["name"])
 	_travel_btn.text = "🚗"
 	_travel_btn.disabled = state.is_final_day()
 	_finish_run_btn.visible = state.is_final_day() and not state.run_completed and not state.game_over
@@ -846,21 +832,16 @@ func _refresh_all() -> void:
 	var has_spike := state.active_market_events.values().has("spike")
 	var has_flood := state.active_market_events.values().has("flood")
 	if has_spike:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.SPIKE_BG, UiPalette.SPIKE_AMBER, 14, 4, 14, 10))
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.SPIKE_BG, UiPalette.SPIKE_AMBER, 16, 4, 12, 8))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER)
 	elif has_flood:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.FLOOD_BG, UiPalette.FLOOD_CYAN, 14, 4, 14, 10))
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.FLOOD_BG, UiPalette.FLOOD_CYAN, 16, 4, 12, 8))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.FLOOD_CYAN)
 	else:
-		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 14, 3, 14, 10))
+		_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, 16, 3, 12, 8))
 		_log_line_1.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
 
-	_log_line_1.text = "📰 " + (state.scanner_log[0] if state.scanner_log.size() > 0 else "Ready.")
-	if state.scanner_log.size() > 1 and not String(state.scanner_log[1]).is_empty():
-		_log_line_2.visible = true
-		_log_line_2.text = "↳ " + String(state.scanner_log[1])
-	else:
-		_log_line_2.visible = false
+	_log_line_1.text = "📰"
 
 	# 3. Filtered Active Product Board (Only show available or held products so rows expand ~35% taller)
 	for p_def in OmahaCatalog.PRODUCTS:
