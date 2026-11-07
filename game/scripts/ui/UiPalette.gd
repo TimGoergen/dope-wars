@@ -31,10 +31,10 @@ const FLOOD_BG := Color("#0A4358")
 
 const POLICE_RED := Color("#EF4444")
 const POLICE_BLUE := Color("#3B82F6")
-const BTN_PRIMARY := Color("#1D4ED8")
-const BTN_SUCCESS := Color("#16A34A")
-const BTN_DANGER := Color("#DC2626")
-const BTN_AMBER := Color("#D97706")
+const BTN_PRIMARY := Color("#1E40AF")
+const BTN_SUCCESS := Color("#0D5C2E")
+const BTN_DANGER := Color("#991B1B")
+const BTN_AMBER := Color("#92400E")
 const BTN_DISABLED := Color("#17202E")
 
 # Chunky, high-visibility font scale for 1080x2400 portrait viewport (Pixel 10 Pro XL)
@@ -42,6 +42,10 @@ const FONT_HERO_CASH := 64
 const FONT_HERO_DEBT := 56
 const FONT_HERO_ROW2 := 46
 const FONT_HERO_ROW3 := 44
+const FONT_SELL_BTN := 60
+const FONT_DRUG_BTN := 45
+const FONT_DRUG_PRICE := 46
+const FONT_DRUG_NAME := 44
 const FONT_HERO := 48
 const FONT_TITLE := 46
 const FONT_HEADER := 38
@@ -54,6 +58,7 @@ const FONT_TINY := 23
 
 
 static var _bold_font: FontVariation
+static var _empty_stylebox: StyleBoxEmpty
 
 
 static func make_bold_font() -> FontVariation:
@@ -62,6 +67,23 @@ static func make_bold_font() -> FontVariation:
 		_bold_font.base_font = ThemeDB.fallback_font
 		_bold_font.variation_embolden = 0.45
 	return _bold_font
+
+
+static func make_empty_box() -> StyleBoxEmpty:
+	if _empty_stylebox == null:
+		_empty_stylebox = StyleBoxEmpty.new()
+	return _empty_stylebox
+
+
+static func style_flat_inert_button(btn: Button) -> void:
+	var eb := make_empty_box()
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.add_theme_stylebox_override("normal", eb)
+	btn.add_theme_stylebox_override("hover", eb)
+	btn.add_theme_stylebox_override("pressed", eb)
+	btn.add_theme_stylebox_override("focus", eb)
+	btn.add_theme_stylebox_override("disabled", eb)
 
 
 static func make_box(
@@ -94,21 +116,24 @@ static func style_button(
 	radius: int = 12
 ) -> void:
 	var bw := 3 if border.a > 0.01 else 0
-	var normal := make_box(bg, border, radius, bw, 14, 10)
-	var hover := make_box(bg.lightened(0.12), border.lightened(0.18), radius, bw, 14, 10)
-	var pressed := make_box(bg.darkened(0.18), border, radius, bw, 14, 10)
-	var disabled := make_box(BTN_DISABLED, Color("#2A394F"), radius, 2, 14, 10)
+	var normal := make_box(bg, border, radius, bw, 12, 8)
+	var hover := make_box(bg.lightened(0.08), border.lightened(0.12), radius, bw, 12, 8)
+	var pressed := make_box(bg.darkened(0.16), border, radius, bw, 12, 8)
+	var disabled := make_box(BTN_DISABLED, Color("#2A394F"), radius, 2, 12, 8)
 
+	btn.focus_mode = Control.FOCUS_NONE
 	btn.add_theme_stylebox_override("normal", normal)
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
-	btn.add_theme_stylebox_override("focus", hover)
+	btn.add_theme_stylebox_override("focus", normal)
 	btn.add_theme_stylebox_override("disabled", disabled)
 	btn.add_theme_color_override("font_color", text_col)
 	btn.add_theme_color_override("font_hover_color", text_col)
 	btn.add_theme_color_override("font_pressed_color", text_col)
 	btn.add_theme_color_override("font_focus_color", text_col)
 	btn.add_theme_color_override("font_disabled_color", TEXT_MUTED)
+	btn.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	btn.add_theme_constant_override("outline_size", 0 if btn.disabled else 5)
 	btn.add_theme_font_size_override("font_size", font_sz)
 	btn.add_theme_font_override("font", make_bold_font())
 	btn.clip_text = true

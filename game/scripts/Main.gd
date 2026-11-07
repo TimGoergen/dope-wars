@@ -82,7 +82,7 @@ func _build_dashboard_ui() -> void:
 	margin.add_theme_constant_override("margin_left", 20)
 	margin.add_theme_constant_override("margin_right", 20)
 	margin.add_theme_constant_override("margin_top", 48)
-	margin.add_theme_constant_override("margin_bottom", 28)
+	margin.add_theme_constant_override("margin_bottom", 48)
 	add_child(margin)
 
 	var root_vbox := VBoxContainer.new()
@@ -319,10 +319,13 @@ func _build_market_tab() -> Control:
 
 		# Left/Middle clickable area to open the Trade Slider Modal
 		var row_tap_btn := Button.new()
-		row_tap_btn.flat = true
+		UiPalette.style_flat_inert_button(row_tap_btn)
 		row_tap_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_tap_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		row_tap_btn.pressed.connect(func() -> void:
+			var cur_entry: Dictionary = state.inventory.get(pid, {"qty": 0, "avg_paid": 0})
+			if int(cur_entry["qty"]) <= 0 and state.get_max_buyable(pid) <= 0:
+				return
 			Audio.play(&"tap")
 			_trade_overlay.open_for_product(state, pid)
 		)
@@ -342,23 +345,23 @@ func _build_market_tab() -> Control:
 		left_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		info_hbox.add_child(left_vbox)
 
-		var name_lbl := UiPalette.add_label(left_vbox, String(p_def["name"]), UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_PRIMARY, false, true)
+		var name_lbl := UiPalette.add_label(left_vbox, String(p_def["name"]), UiPalette.FONT_DRUG_NAME, UiPalette.TEXT_PRIMARY, false, true)
 		name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 		var sub_lbl := UiPalette.add_label(left_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, false, false)
 		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 		# Big Price Display
-		var price_lbl := UiPalette.add_label(info_hbox, "$0", UiPalette.FONT_HEADER, UiPalette.TEXT_PRIMARY, false, true)
+		var price_lbl := UiPalette.add_label(info_hbox, "$0", UiPalette.FONT_DRUG_PRICE, UiPalette.TEXT_PRIMARY, false, true)
 		price_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		price_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		price_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		# Right-edge 1-Tap Quick Action Button ([BUY N] / [SELL N] / [DUMP N])
+		# Right-edge 1-Tap Quick Action Button ([BUY N] / [SELL] / [DUMP N])
 		var quick_btn := Button.new()
-		quick_btn.custom_minimum_size = Vector2(248, 0)
+		quick_btn.custom_minimum_size = Vector2(296, 0)
 		quick_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON, 12)
+		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_DRUG_BTN, 12)
 		quick_btn.pressed.connect(func() -> void:
 			_on_quick_action_pressed(pid)
 		)
@@ -367,6 +370,7 @@ func _build_market_tab() -> Control:
 		_product_rows[pid] = {
 			"panel": row_panel,
 			"base_bg": row_bg_col,
+			"row_tap_btn": row_tap_btn,
 			"name_lbl": name_lbl,
 			"sub_lbl": sub_lbl,
 			"price_lbl": price_lbl,
@@ -781,6 +785,7 @@ func _refresh_all() -> void:
 		var max_buy := state.get_max_buyable(pid)
 
 		var panel: PanelContainer = ui["panel"]
+		var row_tap_btn: Button = ui["row_tap_btn"]
 		var name_lbl: Label = ui["name_lbl"]
 		var sub_lbl: Label = ui["sub_lbl"]
 		var price_lbl: Label = ui["price_lbl"]
@@ -791,6 +796,11 @@ func _refresh_all() -> void:
 		panel.visible = show_row
 		if not show_row:
 			continue
+
+		var can_interact := (held > 0) or (price > 0 and max_buy > 0)
+		row_tap_btn.disabled = not can_interact
+		row_tap_btn.mouse_filter = Control.MOUSE_FILTER_STOP if can_interact else Control.MOUSE_FILTER_IGNORE
+		quick_btn.mouse_filter = Control.MOUSE_FILTER_STOP if can_interact else Control.MOUSE_FILTER_IGNORE
 
 		var row_bg: Color = ui["base_bg"]
 		var row_border := UiPalette.BORDER_SLATE
@@ -846,28 +856,28 @@ func _refresh_all() -> void:
 		# Smart Quick Action Button
 		if held > 0 and price > 0:
 			var pl := held * (price - avg_paid)
-			quick_btn.text = "SELL %d" % held
+			quick_btn.text = "SELL"
 			quick_btn.disabled = false
 			UiPalette.style_button(
 				quick_btn,
 				UiPalette.BTN_SUCCESS if pl >= 0 else UiPalette.BTN_AMBER,
 				UiPalette.CASH_EMERALD if pl >= 0 else UiPalette.SPIKE_AMBER,
 				UiPalette.TEXT_PRIMARY,
-				UiPalette.FONT_BUTTON,
+				UiPalette.FONT_SELL_BTN,
 				12
 			)
 		elif held > 0 and price <= 0:
 			quick_btn.text = "DUMP %d" % held
 			quick_btn.disabled = false
-			UiPalette.style_button(quick_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON, 12)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, UiPalette.FONT_DRUG_BTN, 12)
 		elif price > 0 and max_buy > 0:
 			quick_btn.text = "BUY %d" % max_buy
 			quick_btn.disabled = false
-			UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON, 12)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_DRUG_BTN, 12)
 		else:
 			quick_btn.text = "Coat Full" if state.get_free_capacity() <= 0 else "Too Pricy"
 			quick_btn.disabled = true
-			UiPalette.style_button(quick_btn, UiPalette.BTN_DISABLED, UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, UiPalette.FONT_SMALL, 12)
+			UiPalette.style_button(quick_btn, UiPalette.BTN_DISABLED, UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, 36, 12)
 
 	# 4. Update Spot & Kingpin Tabs if visible
 	if _current_tab == 1:
