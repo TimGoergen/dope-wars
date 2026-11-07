@@ -30,6 +30,7 @@ var _heat_lbl: Label
 var _travel_btn: Button
 var _finish_run_btn: Button
 var _scanner_card: PanelContainer
+var _news_icon_rect: TextureRect
 var _log_line_1: Label
 var _log_line_2: Label
 var _news_expand_panel: PanelContainer
@@ -220,14 +221,14 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	r1.add_theme_constant_override("separation", 16)
 	vbox.add_child(r1)
 
-	_cash_lbl = UiPalette.add_hero_label(r1, "💵 $2,000", UiPalette.FONT_HERO_CASH, UiPalette.CASH_EMERALD, HORIZONTAL_ALIGNMENT_LEFT)
+	_cash_lbl = UiPalette.add_hero_stat(r1, "cash", 56, "$2,000", UiPalette.FONT_HERO_CASH, UiPalette.CASH_EMERALD, HORIZONTAL_ALIGNMENT_LEFT, false)
 
 	var camera_gap := Control.new()
 	camera_gap.custom_minimum_size = Vector2(150, 0)
 	camera_gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	r1.add_child(camera_gap)
 
-	_debt_lbl = UiPalette.add_hero_label(r1, "🦈 $5,500", UiPalette.FONT_HERO_DEBT, UiPalette.DEBT_CRIMSON, HORIZONTAL_ALIGNMENT_RIGHT)
+	_debt_lbl = UiPalette.add_hero_stat(r1, "shark", 52, "$5,500", UiPalette.FONT_HERO_DEBT, UiPalette.DEBT_CRIMSON, HORIZONTAL_ALIGNMENT_RIGHT, false)
 
 	# Row 2 (Below camera cutout): Left (Bank) | Right (Calendar Icon + x/y)
 	var r2 := HBoxContainer.new()
@@ -235,10 +236,9 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	r2.add_theme_constant_override("separation", 16)
 	vbox.add_child(r2)
 
-	_bank_lbl = UiPalette.add_hero_label(r2, "🏦 $0", UiPalette.FONT_HERO, UiPalette.BANK_CYAN, HORIZONTAL_ALIGNMENT_LEFT)
-	_bank_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_bank_lbl = UiPalette.add_hero_stat(r2, "bank", 46, "$0", UiPalette.FONT_HERO, UiPalette.BANK_CYAN, HORIZONTAL_ALIGNMENT_LEFT, true)
 
-	_day_lbl = UiPalette.add_hero_label(r2, "📅 1/31", UiPalette.FONT_HERO_ROW2, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_RIGHT)
+	_day_lbl = UiPalette.add_hero_stat(r2, "calendar", 46, "1/31", UiPalette.FONT_HERO_ROW2, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_RIGHT, false)
 
 	var divider := ColorRect.new()
 	divider.color = UiPalette.BORDER_SLATE
@@ -252,14 +252,11 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	r3.add_theme_constant_override("separation", 16)
 	vbox.add_child(r3)
 
-	_space_lbl = UiPalette.add_hero_label(r3, "🧥 0/100", UiPalette.FONT_HERO_ROW3, UiPalette.TEXT_PRIMARY, HORIZONTAL_ALIGNMENT_LEFT)
-	_space_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_space_lbl = UiPalette.add_hero_stat(r3, "coat", 44, "0/100", UiPalette.FONT_HERO_ROW3, UiPalette.TEXT_PRIMARY, HORIZONTAL_ALIGNMENT_LEFT, true)
 
-	_hp_lbl = UiPalette.add_hero_label(r3, "❤️ 100", UiPalette.FONT_HERO_ROW3, UiPalette.CASH_EMERALD, HORIZONTAL_ALIGNMENT_CENTER)
-	_hp_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hp_lbl = UiPalette.add_hero_stat(r3, "heart", 44, "100", UiPalette.FONT_HERO_ROW3, UiPalette.CASH_EMERALD, HORIZONTAL_ALIGNMENT_CENTER, true)
 
-	_heat_lbl = UiPalette.add_hero_label(r3, "🚨 0%", UiPalette.FONT_HERO_ROW3, UiPalette.SPIKE_AMBER, HORIZONTAL_ALIGNMENT_RIGHT)
-	_heat_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_heat_lbl = UiPalette.add_hero_stat(r3, "siren", 44, "0%", UiPalette.FONT_HERO_ROW3, UiPalette.SPIKE_AMBER, HORIZONTAL_ALIGNMENT_RIGHT, true)
 
 
 func _build_market_tab() -> Control:
@@ -268,14 +265,14 @@ func _build_market_tab() -> Control:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 10)
 
-	# Top Strip: Left = 📰 News Icon (frameless, press & hold to expand) | Middle = Centered Location Name | Right = 🚗 Travel Icon (frameless)
+	# Top Strip: Left = Newspaper SVG Icon (frameless, press & hold to expand) | Middle = Centered Location Name | Right = Car SVG Icon (frameless)
 	var top_strip := HBoxContainer.new()
 	top_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_strip.custom_minimum_size = Vector2(0, 152)
 	top_strip.add_theme_constant_override("separation", 12)
 	vbox.add_child(top_strip)
 
-	# Left: Frameless Newspaper Icon (108px, vertically & horizontally centered)
+	# Left: Frameless Newspaper SVG Icon (112x112, vertically & horizontally centered)
 	_scanner_card = PanelContainer.new()
 	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scanner_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -283,11 +280,14 @@ func _build_market_tab() -> Control:
 	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_empty_box())
 	top_strip.add_child(_scanner_card)
 
-	_log_line_1 = UiPalette.add_hero_label(_scanner_card, "📰", 108, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
-	_log_line_1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_log_line_1.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_log_line_1.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_log_line_1.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_news_icon_rect = UiIcons.create_icon_rect("newspaper", 112)
+	_news_icon_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_news_icon_rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scanner_card.add_child(_news_icon_rect)
+
+	_log_line_1 = Label.new()
+	_log_line_1.visible = false
+	_scanner_card.add_child(_log_line_1)
 
 	var news_hold_btn := Button.new()
 	UiPalette.style_flat_inert_button(news_hold_btn)
@@ -309,18 +309,15 @@ func _build_market_tab() -> Control:
 	_loc_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_loc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	# Right: Frameless 🚗 Travel Button (108px car icon, vertically & horizontally centered)
+	# Right: Frameless Car SVG Travel Button (112x112 car icon, vertically & horizontally centered)
 	_travel_btn = Button.new()
-	_travel_btn.text = "🚗"
+	_travel_btn.text = ""
+	_travel_btn.icon = UiIcons.get_icon("car", 112)
+	_travel_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_travel_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_travel_btn.size_flags_stretch_ratio = 1.0
 	UiPalette.style_flat_inert_button(_travel_btn)
-	_travel_btn.add_theme_font_size_override("font_size", 108)
-	_travel_btn.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
-	_travel_btn.add_theme_color_override("font_hover_color", UiPalette.GOLD_ACCENT)
-	_travel_btn.add_theme_color_override("font_pressed_color", UiPalette.GOLD_ACCENT)
-	_travel_btn.add_theme_color_override("font_disabled_color", UiPalette.TEXT_MUTED)
 	_travel_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		_open_travel_modal()
@@ -328,13 +325,14 @@ func _build_market_tab() -> Control:
 	top_strip.add_child(_travel_btn)
 
 	_finish_run_btn = Button.new()
-	_finish_run_btn.text = "🏁"
+	_finish_run_btn.text = ""
+	_finish_run_btn.icon = UiIcons.get_icon("flag", 112)
+	_finish_run_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_finish_run_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_finish_run_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_finish_run_btn.size_flags_stretch_ratio = 1.0
 	_finish_run_btn.visible = false
 	UiPalette.style_flat_inert_button(_finish_run_btn)
-	_finish_run_btn.add_theme_font_size_override("font_size", 108)
 	_finish_run_btn.pressed.connect(func() -> void:
 		_on_finish_run_pressed()
 	)
@@ -390,7 +388,7 @@ func _build_market_tab() -> Control:
 		info_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row_tap_btn.add_child(info_hbox)
 
-		# 2-Line Left Column: Line 1 = Drug Name + Spike/Flood Badge; Line 2 = Held/Avg/P&L or Normal Range
+		# 2-Line Left Column: Line 1 = Drug Name + Spike/Flood SVG Badge; Line 2 = Held/Avg/P&L or Normal Range
 		var left_vbox := VBoxContainer.new()
 		left_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		left_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -398,7 +396,17 @@ func _build_market_tab() -> Control:
 		left_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		info_hbox.add_child(left_vbox)
 
-		var name_lbl := UiPalette.add_label(left_vbox, String(p_def["name"]), UiPalette.FONT_DRUG_NAME, UiPalette.TEXT_PRIMARY, false, true)
+		var name_row := HBoxContainer.new()
+		name_row.add_theme_constant_override("separation", 8)
+		name_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		left_vbox.add_child(name_row)
+
+		var badge_icon := UiIcons.create_icon_rect("fire", 38)
+		badge_icon.visible = false
+		badge_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		name_row.add_child(badge_icon)
+
+		var name_lbl := UiPalette.add_label(name_row, String(p_def["name"]), UiPalette.FONT_DRUG_NAME, UiPalette.TEXT_PRIMARY, false, true)
 		name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 		var sub_lbl := UiPalette.add_label(left_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, false, false)
@@ -424,6 +432,7 @@ func _build_market_tab() -> Control:
 			"panel": row_panel,
 			"base_bg": row_bg_col,
 			"row_tap_btn": row_tap_btn,
+			"badge_icon": badge_icon,
 			"name_lbl": name_lbl,
 			"sub_lbl": sub_lbl,
 			"price_lbl": price_lbl,
@@ -468,17 +477,20 @@ func _build_bottom_tab_bar(parent: VBoxContainer) -> void:
 	parent.add_child(bar)
 
 	var tab_defs := [
-		["💊\nMARKET", 0],
-		["🏦 SPOT\n& BANK", 1],
-		["👑\nKINGPIN", 2]
+		["MARKET", "pill", 0],
+		["SPOT\n& BANK", "bank", 1],
+		["KINGPIN", "crown", 2]
 	]
 
 	for t_def in tab_defs:
 		var btn := Button.new()
 		btn.text = String(t_def[0])
+		btn.icon = UiIcons.get_icon(String(t_def[1]), 60)
+		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.custom_minimum_size = Vector2(0, 196)
-		var idx := int(t_def[1])
+		var idx := int(t_def[2])
 		btn.pressed.connect(func() -> void:
 			Audio.play(&"tap")
 			_show_tab(idx)
@@ -814,25 +826,26 @@ func _set_news_expanded(expanded: bool) -> void:
 func _refresh_all() -> void:
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
 
-	# 1. Hero Header
-	_cash_lbl.text = "💵 %s" % Money.format_short(state.cash)
-	_bank_lbl.text = "🏦 %s" % Money.format_short(state.bank)
-	_debt_lbl.text = "🦈 %s" % Money.format_short(state.debt)
+	# 1. Hero Header (icons are dedicated SVG TextureRects beside each label)
+	_cash_lbl.text = Money.format_short(state.cash)
+	_bank_lbl.text = Money.format_short(state.bank)
+	_debt_lbl.text = Money.format_short(state.debt)
 	_debt_lbl.add_theme_color_override("font_color", UiPalette.DEBT_CRIMSON if state.debt > 0 else UiPalette.CASH_EMERALD)
 
-	var day_str := ("📅 %d" % state.day) if state.is_endless else ("📅 %d/%d" % [state.day, state.max_days])
+	var day_str := ("%d" % state.day) if state.is_endless else ("%d/%d" % [state.day, state.max_days])
 	_day_lbl.text = day_str
 	_day_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if state.is_final_day() else UiPalette.GOLD_ACCENT)
 
-	_space_lbl.text = "🧥 %d/%d" % [state.get_used_capacity(), state.get_max_capacity()]
-	_hp_lbl.text = "❤️ %d" % state.health
+	_space_lbl.text = "%d/%d" % [state.get_used_capacity(), state.get_max_capacity()]
+	_hp_lbl.text = "%d" % state.health
 	_hp_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD if state.health > 40 else UiPalette.DEBT_CRIMSON)
-	_heat_lbl.text = "🚨 %.0f%%" % state.heat
+	_heat_lbl.text = "%.0f%%" % state.heat
 	_heat_lbl.add_theme_color_override("font_color", UiPalette.POLICE_RED if state.heat >= 35.0 else UiPalette.SPIKE_AMBER)
 
-	# 2. Top Strip: 📰 Icon | Location Name (no pin) | 🚗 Travel Icon
+	# 2. Top Strip: Newspaper SVG Icon | Location Name (no pin) | Car SVG Travel Icon
 	_loc_lbl.text = String(cur_d["name"])
-	_travel_btn.text = "🚗"
+	_travel_btn.text = ""
+	_travel_btn.icon = UiIcons.get_icon("car", 112)
 	_travel_btn.disabled = state.is_final_day()
 	_finish_run_btn.visible = state.is_final_day() and not state.run_completed and not state.game_over
 
@@ -840,13 +853,11 @@ func _refresh_all() -> void:
 	var has_flood := state.active_market_events.values().has("flood")
 	_scanner_card.add_theme_stylebox_override("panel", UiPalette.make_empty_box())
 	if has_spike:
-		_log_line_1.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER)
+		_news_icon_rect.texture = UiIcons.get_icon("newspaper_spike", 112)
 	elif has_flood:
-		_log_line_1.add_theme_color_override("font_color", UiPalette.FLOOD_CYAN)
+		_news_icon_rect.texture = UiIcons.get_icon("newspaper_flood", 112)
 	else:
-		_log_line_1.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
-
-	_log_line_1.text = "📰"
+		_news_icon_rect.texture = UiIcons.get_icon("newspaper", 112)
 
 	# 3. Filtered Active Product Board (Only show available or held products so rows expand ~35% taller)
 	for p_def in OmahaCatalog.PRODUCTS:
@@ -861,6 +872,7 @@ func _refresh_all() -> void:
 
 		var panel: PanelContainer = ui["panel"]
 		var row_tap_btn: Button = ui["row_tap_btn"]
+		var badge_icon: TextureRect = ui["badge_icon"]
 		var name_lbl: Label = ui["name_lbl"]
 		var sub_lbl: Label = ui["sub_lbl"]
 		var price_lbl: Label = ui["price_lbl"]
@@ -893,17 +905,27 @@ func _refresh_all() -> void:
 			bw = 3
 		panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg, row_border, 12, bw, 16, 8))
 
-		# Line 1: Product Name + Event Badge
+		# Line 1: Product Name + Event SVG Badge
 		var badge := ""
 		match sig:
 			"spike":
-				badge = "  🔥 4× SPIKE!"
+				badge = "  4× SPIKE!"
+				badge_icon.texture = UiIcons.get_icon("fire", 38)
+				badge_icon.visible = true
 			"flood":
-				badge = "  ❄️ 1/4 FLOOD!"
+				badge = "  1/4 FLOOD!"
+				badge_icon.texture = UiIcons.get_icon("snowflake", 38)
+				badge_icon.visible = true
 			"high":
-				badge = "  📈 PRICY"
+				badge = "  PRICY"
+				badge_icon.texture = UiIcons.get_icon("fire", 34)
+				badge_icon.visible = true
 			"low":
-				badge = "  🏷️ CHEAP"
+				badge = "  CHEAP"
+				badge_icon.texture = UiIcons.get_icon("snowflake", 34)
+				badge_icon.visible = true
+			_:
+				badge_icon.visible = false
 		name_lbl.text = "%s%s" % [p_def["name"], badge]
 
 		# Line 2: Held Qty + Avg Paid + P/L (if owned) OR Normal Price Range (if unowned)
@@ -960,9 +982,10 @@ func _refresh_all() -> void:
 	elif _current_tab == 2:
 		_rebuild_kingpin_tab()
 
-	# 5. Update Tab 1 button label with current neighborhood spot icon
+	# 5. Update Tab 1 button icon with current neighborhood spot SVG icon
 	if _tab_buttons.size() >= 2:
-		_tab_buttons[1].text = "%s SPOT\n& BANK" % cur_d["icon"]
+		_tab_buttons[1].text = "SPOT\n& BANK"
+		_tab_buttons[1].icon = UiIcons.get_icon(UiIcons.icon_for_district(state.current_district_id), 60)
 
 	# 6. Refresh Active Modals (Combat or Street Encounter)
 	_combat_overlay.refresh(state)

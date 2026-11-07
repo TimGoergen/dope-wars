@@ -84,6 +84,11 @@ static func style_flat_inert_button(btn: Button) -> void:
 	btn.add_theme_stylebox_override("pressed", eb)
 	btn.add_theme_stylebox_override("focus", eb)
 	btn.add_theme_stylebox_override("disabled", eb)
+	btn.add_theme_color_override("icon_normal_color", Color.WHITE)
+	btn.add_theme_color_override("icon_hover_color", Color.WHITE)
+	btn.add_theme_color_override("icon_pressed_color", Color.WHITE)
+	btn.add_theme_color_override("icon_focus_color", Color.WHITE)
+	btn.add_theme_color_override("icon_disabled_color", Color(1.0, 1.0, 1.0, 0.35))
 
 
 static func make_box(
@@ -115,6 +120,14 @@ static func style_button(
 	font_sz: int = FONT_BUTTON,
 	radius: int = 12
 ) -> void:
+	var extracted := UiIcons.extract_leading_icon(btn.text)
+	var icon_name := String(extracted["icon"])
+	if icon_name != "":
+		btn.icon = UiIcons.get_icon(icon_name, clampi(font_sz + 8, 30, 52))
+		btn.text = String(extracted["text"])
+	else:
+		btn.text = UiIcons.strip_emojis(btn.text)
+
 	var bw := 3 if border.a > 0.01 else 0
 	var normal := make_box(bg, border, radius, bw, 12, 8)
 	var hover := make_box(bg.lightened(0.08), border.lightened(0.12), radius, bw, 12, 8)
@@ -132,6 +145,11 @@ static func style_button(
 	btn.add_theme_color_override("font_pressed_color", text_col)
 	btn.add_theme_color_override("font_focus_color", text_col)
 	btn.add_theme_color_override("font_disabled_color", TEXT_MUTED)
+	btn.add_theme_color_override("icon_normal_color", Color.WHITE)
+	btn.add_theme_color_override("icon_hover_color", Color.WHITE)
+	btn.add_theme_color_override("icon_pressed_color", Color.WHITE)
+	btn.add_theme_color_override("icon_focus_color", Color.WHITE)
+	btn.add_theme_color_override("icon_disabled_color", Color(1.0, 1.0, 1.0, 0.45))
 	btn.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	btn.add_theme_constant_override("outline_size", 0 if btn.disabled else 5)
 	btn.add_theme_font_size_override("font_size", font_sz)
@@ -154,6 +172,8 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 			sb.corner_radius_bottom_right = 64
 
 	btn.focus_mode = Control.FOCUS_NONE
+	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 	btn.add_theme_stylebox_override("normal", normal)
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
@@ -162,6 +182,10 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 	btn.add_theme_color_override("font_hover_color", text_col)
 	btn.add_theme_color_override("font_pressed_color", text_col)
 	btn.add_theme_color_override("font_focus_color", text_col)
+	btn.add_theme_color_override("icon_normal_color", Color.WHITE)
+	btn.add_theme_color_override("icon_hover_color", Color.WHITE)
+	btn.add_theme_color_override("icon_pressed_color", Color.WHITE)
+	btn.add_theme_color_override("icon_focus_color", Color.WHITE)
 	btn.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	btn.add_theme_constant_override("outline_size", 5)
 	btn.add_theme_font_size_override("font_size", FONT_DRUG_BTN)
@@ -177,15 +201,33 @@ static func add_label(
 	wrap: bool = true,
 	bold: bool = false
 ) -> Label:
+	var extracted := UiIcons.extract_leading_icon(text)
+	var icon_name := String(extracted["icon"])
+	var clean_text := String(extracted["text"]) if icon_name != "" else UiIcons.strip_emojis(text)
+
+	var target_parent: Node = parent
+	if icon_name != "" and parent is VBoxContainer:
+		var hb := HBoxContainer.new()
+		hb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hb.add_theme_constant_override("separation", 10)
+		hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		parent.add_child(hb)
+		var ic := UiIcons.create_icon_rect(icon_name, clampi(font_sz + 8, 28, 48))
+		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hb.add_child(ic)
+		target_parent = hb
+
 	var lbl := Label.new()
-	lbl.text = text
+	lbl.text = clean_text
 	lbl.add_theme_font_size_override("font_size", font_sz)
 	lbl.add_theme_color_override("font_color", col)
 	if bold or font_sz >= FONT_ROW_MAIN:
 		lbl.add_theme_font_override("font", make_bold_font())
 	if wrap:
 		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	parent.add_child(lbl)
+	if target_parent != parent:
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	target_parent.add_child(lbl)
 	return lbl
 
 
@@ -197,7 +239,7 @@ static func add_hero_label(
 	align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT
 ) -> Label:
 	var lbl := Label.new()
-	lbl.text = text
+	lbl.text = UiIcons.strip_emojis(text)
 	lbl.horizontal_alignment = align
 	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size", font_sz)
@@ -208,6 +250,36 @@ static func add_hero_label(
 	lbl.add_theme_constant_override("shadow_offset_y", 3)
 	lbl.add_theme_constant_override("shadow_outline_size", 4)
 	parent.add_child(lbl)
+	return lbl
+
+
+static func add_hero_stat(
+	parent: Node,
+	icon_name: String,
+	icon_px: int,
+	text: String,
+	font_sz: int,
+	col: Color,
+	align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT,
+	expand_h: bool = false
+) -> Label:
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 10)
+	if expand_h:
+		hb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if align == HORIZONTAL_ALIGNMENT_CENTER:
+		hb.alignment = BoxContainer.ALIGNMENT_CENTER
+	elif align == HORIZONTAL_ALIGNMENT_RIGHT:
+		hb.alignment = BoxContainer.ALIGNMENT_END
+	else:
+		hb.alignment = BoxContainer.ALIGNMENT_BEGIN
+	parent.add_child(hb)
+
+	var icon_rect := UiIcons.create_icon_rect(icon_name, icon_px)
+	icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hb.add_child(icon_rect)
+
+	var lbl := add_hero_label(hb, text, font_sz, col, align)
 	return lbl
 
 
@@ -277,17 +349,25 @@ static func build_modal_shell(
 	card_vbox.add_theme_constant_override("separation", 16)
 	card.add_child(card_vbox)
 
-	# Header Row with wrapped title and unmissable Close button
+	# Header Row with optional SVG icon, wrapped title, and unmissable Close button
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 12)
 	card_vbox.add_child(header)
 
-	var title_lbl := add_label(header, title_text, FONT_HEADER, GOLD_ACCENT, true, true)
+	var extracted := UiIcons.extract_leading_icon(title_text)
+	var icon_name := String(extracted["icon"])
+	var clean_title := String(extracted["text"]) if icon_name != "" else UiIcons.strip_emojis(title_text)
+	if icon_name != "":
+		var hdr_icon := UiIcons.create_icon_rect(icon_name, 48)
+		hdr_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		header.add_child(hdr_icon)
+
+	var title_lbl := add_label(header, clean_title, FONT_HEADER, GOLD_ACCENT, true, true)
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	if allow_close:
 		var close_btn := Button.new()
-		close_btn.text = "✕ CLOSE"
+		close_btn.text = "X CLOSE"
 		close_btn.custom_minimum_size = Vector2(170, 72)
 		style_button(close_btn, BTN_DANGER, DEBT_CRIMSON, TEXT_PRIMARY, FONT_SMALL)
 		close_btn.pressed.connect(func() -> void:
@@ -314,7 +394,7 @@ static func build_modal_shell(
 
 	if allow_close:
 		var bottom_close := Button.new()
-		bottom_close.text = "⬅ BACK TO STREETS"
+		bottom_close.text = "BACK TO STREETS"
 		bottom_close.custom_minimum_size = Vector2(0, 84)
 		bottom_close.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		style_button(bottom_close, CARD_BG, BORDER_BRIGHT, TEXT_PRIMARY, FONT_BUTTON)

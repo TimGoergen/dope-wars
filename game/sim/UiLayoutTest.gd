@@ -24,8 +24,8 @@ func _initialize() -> void:
 		push_error("FAIL [Hero Header]: rect=%s (expected y >= 44 and height >= 260)" % str(hero_rect))
 		quit(1)
 		return
-	var cash_rect: Rect2 = (main._cash_lbl as Control).get_global_rect()
-	var debt_rect: Rect2 = (main._debt_lbl as Control).get_global_rect()
+	var cash_rect: Rect2 = (main._cash_lbl.get_parent() as Control).get_global_rect()
+	var debt_rect: Rect2 = (main._debt_lbl.get_parent() as Control).get_global_rect()
 	if cash_rect.end.x > 470.0 or debt_rect.position.x < 610.0:
 		push_error("FAIL [Camera Cutout Clearance]: cash_rect=%s debt_rect=%s overlap center cutout (470..610)" % [str(cash_rect), str(debt_rect)])
 		quit(1)
@@ -34,12 +34,18 @@ func _initialize() -> void:
 	var day_lbl: Label = main._day_lbl
 	var travel_btn: Button = main._travel_btn
 	var scanner_card: PanelContainer = main._scanner_card
-	var log_line_1: Label = main._log_line_1
+	var news_icon_rect: TextureRect = main._news_icon_rect
 	var expected_loc := String(OmahaCatalog.get_district(main.state.current_district_id)["name"])
-	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or loc_lbl.get_global_rect().position.y < hero_rect.end.y or travel_btn.text != "🚗" or log_line_1.text != "📰" or not day_lbl.text.begins_with("📅 ") or day_lbl.text.contains("Day"):
-		push_error("FAIL [Split Strip & Header]: loc='%s' travel='%s' news='%s' day='%s'" % [loc_lbl.text, travel_btn.text, log_line_1.text, day_lbl.text])
+	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or loc_lbl.get_global_rect().position.y < hero_rect.end.y or travel_btn.icon == null or travel_btn.icon.get_width() < 100 or news_icon_rect == null or news_icon_rect.texture == null or news_icon_rect.texture.get_width() < 100 or day_lbl.text.contains("Day"):
+		push_error("FAIL [Split Strip & SVG Icons]: loc='%s' travel_icon=%s news_tex=%s day='%s'" % [loc_lbl.text, str(travel_btn.icon), str(news_icon_rect.texture if news_icon_rect else null), day_lbl.text])
 		quit(1)
 		return
+	for icon_key in ["cash", "shark", "bank", "calendar", "coat", "heart", "siren", "newspaper", "newspaper_spike", "newspaper_flood", "car", "flag", "pill", "crown", "trash", "gun", "shield", "hospital", "martini", "dice", "scales", "gem", "trophy", "gear", "speaker_on", "speaker_off", "pin", "fire", "snowflake", "check", "lock"]:
+		var tex := UiIcons.get_icon(icon_key, 64)
+		if tex == null or tex.get_width() != 64 or tex.get_height() != 64:
+			push_error("FAIL [UiIcons SVG Rasterizer]: icon '%s' failed to rasterize (tex=%s)" % [icon_key, str(tex)])
+			quit(1)
+			return
 	if scanner_card.get_global_rect().size.x > 400.0 or loc_lbl.get_global_rect().position.x <= scanner_card.get_global_rect().end.x:
 		push_error("FAIL [1/3 vs 2/3 Split]: scanner_rect=%s loc_rect=%s" % [str(scanner_card.get_global_rect()), str(loc_lbl.get_global_rect())])
 		quit(1)
