@@ -36,7 +36,7 @@ func _initialize() -> void:
 	var scanner_card: PanelContainer = main._scanner_card
 	var news_icon_rect: TextureRect = main._news_icon_rect
 	var expected_loc := String(OmahaCatalog.get_district(main.state.current_district_id)["name"])
-	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or loc_lbl.get_global_rect().position.y > hero_rect.end.y or travel_btn.icon != UiIcons.get_icon("pin", 112) or news_icon_rect == null or news_icon_rect.size != Vector2(112, 112) or day_lbl.text.contains("Day"):
+	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or loc_lbl.get_global_rect().position.y > hero_rect.end.y or travel_btn.icon != UiIcons.get_icon("pin", 112) or news_icon_rect == null or news_icon_rect.size != Vector2(112, 112) or not day_lbl.text.begins_with("Day "):
 		push_error("FAIL [Split Strip & SVG Icons]: loc='%s' travel_icon=%s news_size=%s day='%s'" % [loc_lbl.text, str(travel_btn.icon), str(news_icon_rect.size if news_icon_rect else Vector2.ZERO), day_lbl.text])
 		quit(1)
 		return

@@ -288,7 +288,7 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 
 	_bank_lbl = UiPalette.add_hero_stat(r2, "bank", 46, "$0", UiPalette.FONT_HERO, UiPalette.BANK_CYAN, HORIZONTAL_ALIGNMENT_LEFT, true)
 
-	_day_lbl = UiPalette.add_hero_stat(r2, "calendar", 46, "1/31", UiPalette.FONT_HERO_ROW2, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_RIGHT, false)
+	_day_lbl = UiPalette.add_hero_stat(r2, "calendar", 46, "Day 1 of 31", UiPalette.FONT_HERO_ROW2, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_RIGHT, false)
 
 	var divider := ColorRect.new()
 	divider.color = UiPalette.BORDER_SLATE
@@ -922,7 +922,7 @@ func _refresh_all() -> void:
 	_debt_lbl.text = Money.format_short(state.debt)
 	_debt_lbl.add_theme_color_override("font_color", UiPalette.DEBT_CRIMSON if state.debt > 0 else UiPalette.CASH_EMERALD)
 
-	var day_str := ("%d" % state.day) if state.is_endless else ("%d/%d" % [state.day, state.max_days])
+	var day_str := ("Day %d" % state.day) if state.is_endless else ("Day %d of %d" % [state.day, state.max_days])
 	_day_lbl.text = day_str
 	_day_lbl.add_theme_color_override("font_color", UiPalette.SPIKE_AMBER if state.is_final_day() else UiPalette.GOLD_ACCENT)
 
