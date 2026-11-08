@@ -215,7 +215,7 @@ func _build_dashboard_ui() -> void:
 	news_header.add_theme_constant_override("separation", 10)
 	news_panel_vbox.add_child(news_header)
 
-	_news_title_lbl = UiPalette.add_label(news_header, "RECENT\nTRANSACTIONS", UiPalette.FONT_SMALL * 2, UiPalette.GOLD_ACCENT, false, true)
+	_news_title_lbl = UiPalette.add_label(news_header, "RECENT NEWS", UiPalette.FONT_SMALL * 2, UiPalette.GOLD_ACCENT, false, true)
 	_news_title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	_news_close_btn = Button.new()
