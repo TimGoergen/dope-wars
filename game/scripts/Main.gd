@@ -509,7 +509,7 @@ func _build_spot_tab() -> Control:
 
 	_spot_vbox = VBoxContainer.new()
 	_spot_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_spot_vbox.add_theme_constant_override("separation", 16)
+	_spot_vbox.add_theme_constant_override("separation", 24)
 	scroll.add_child(_spot_vbox)
 	return scroll
 
