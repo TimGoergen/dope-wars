@@ -44,6 +44,7 @@ var active_market_events: Dictionary = {}
 
 # Tomorrow's guaranteed event (from Blackstone VIP Booth, Barfly Tip-off, or Police Scanner perk)
 var pending_forecast_event: Dictionary = {}
+var next_day_markets: Dictionary = {} # district_id -> cached MarketEngine roll for tomorrow
 var vip_intel_bought_today: bool = false
 var casino_bet_used_today: bool = false
 var casino_launder_used_today: bool = false
@@ -105,6 +106,7 @@ func new_run(mode_days: int = 31, perks: Array = [], seed_val: int = 0) -> void:
 		inventory[p_def["id"]] = {"qty": 0, "avg_paid": 0}
 
 	pending_forecast_event = {}
+	next_day_markets.clear()
 	vip_intel_bought_today = false
 	casino_bet_used_today = false
 	casino_launder_used_today = false
@@ -530,6 +532,7 @@ func buy_vip_intel(mode: String) -> Dictionary:
 	cash -= cost
 	vip_intel_bought_today = true
 	pending_forecast_event = MarketEngine.roll_forecast_event(avail_today, mode, tuning, rng)
+	next_day_markets.clear()
 	var p_name := String(pending_forecast_event.get("product_name", ""))
 	var ev_type := String(pending_forecast_event.get("event_type", "spike"))
 	if ev_type == "spike":
@@ -637,14 +640,40 @@ func _trigger_big_sal_enforcers() -> void:
 		end_fate = "Beaten to death by Big Sal's enforcers on Day %d" % day
 
 
+func get_next_day_market_preview(district_id: String) -> Dictionary:
+	if district_id == current_district_id:
+		return {
+			"prices": market_prices,
+			"signals": market_signals,
+			"events": active_market_events,
+			"messages": []
+		}
+	if not next_day_markets.has(district_id):
+		var next_is_final := (not is_endless) and ((day + 1) >= max_days)
+		next_day_markets[district_id] = MarketEngine.roll_daily_market(
+			district_id,
+			next_is_final,
+			pending_forecast_event,
+			tuning,
+			rng
+		)
+	return next_day_markets[district_id]
+
+
 func _roll_market_for_current_district(forced_event: Dictionary = {}) -> void:
-	var result := MarketEngine.roll_daily_market(
-		current_district_id,
-		is_final_day(),
-		forced_event,
-		tuning,
-		rng
-	)
+	var result: Dictionary
+	if next_day_markets.has(current_district_id):
+		result = next_day_markets[current_district_id]
+		next_day_markets.clear()
+	else:
+		next_day_markets.clear()
+		result = MarketEngine.roll_daily_market(
+			current_district_id,
+			is_final_day(),
+			forced_event,
+			tuning,
+			rng
+		)
 	market_prices = result["prices"]
 	market_signals = result["signals"]
 	active_market_events = result["events"]
@@ -657,6 +686,7 @@ func _roll_scanner_perk_forecast_if_needed() -> void:
 	if has_perk("police_scanner") and pending_forecast_event.is_empty() and not is_final_day():
 		if rng.randf() < 0.65:
 			pending_forecast_event = MarketEngine.roll_forecast_event([], "random", tuning, rng)
+			next_day_markets.clear()
 			var p_name := String(pending_forecast_event.get("product_name", ""))
 			var et := String(pending_forecast_event.get("event_type", "spike"))
 			log_scanner("📡 Scanner 24h Forecast: %s %s brewing for tomorrow." % [
@@ -760,6 +790,7 @@ func _roll_street_encounter() -> void:
 			# Benson Barfly Tip-Off
 			if pending_forecast_event.is_empty() and not is_final_day():
 				pending_forecast_event = MarketEngine.roll_forecast_event([], "random", tuning, rng)
+				next_day_markets.clear()
 				var p_name := String(pending_forecast_event.get("product_name", ""))
 				var et := String(pending_forecast_event.get("event_type", "spike"))
 				log_scanner("🍺 Dive Bar Tip-Off: '%s is about to %s tomorrow!'" % [
@@ -1103,6 +1134,7 @@ func to_dict() -> Dictionary:
 		"market_signals": market_signals.duplicate(),
 		"active_market_events": active_market_events.duplicate(),
 		"pending_forecast_event": pending_forecast_event.duplicate(),
+		"next_day_markets": next_day_markets.duplicate(true),
 		"vip_intel_bought_today": vip_intel_bought_today,
 		"casino_bet_used_today": casino_bet_used_today,
 		"casino_launder_used_today": casino_launder_used_today,
@@ -1172,6 +1204,7 @@ func from_dict(data: Dictionary) -> void:
 
 	active_market_events = data.get("active_market_events", {}).duplicate()
 	pending_forecast_event = data.get("pending_forecast_event", {}).duplicate()
+	next_day_markets = data.get("next_day_markets", {}).duplicate(true)
 	vip_intel_bought_today = bool(data.get("vip_intel_bought_today", false))
 	casino_bet_used_today = bool(data.get("casino_bet_used_today", false))
 	casino_launder_used_today = bool(data.get("casino_launder_used_today", false))

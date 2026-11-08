@@ -53,8 +53,16 @@ static func roll_daily_market(
 		available_count += 1
 		var min_p := int(tuning.get(p_def["min_prop"]))
 		var max_p := int(tuning.get(p_def["max_prop"]))
-		var base_price := float(rng.randi_range(min_p, max_p))
 		var affinity_mult := get_district_affinity_multiplier(district, pid, tuning)
+		var roll_min := min_p
+		var roll_max := max_p
+		if not active_events.has(pid):
+			var span := float(max_p - min_p)
+			if affinity_mult < 0.99:
+				roll_max = maxi(min_p, int(floor(float(min_p) + span * 0.25)))
+			elif affinity_mult > 1.01:
+				roll_min = mini(max_p, int(ceil(float(min_p) + span * 0.75)))
+		var base_price := float(rng.randi_range(roll_min, roll_max))
 
 		var ev_mult := 1.0
 		var event_tag := ""
@@ -79,7 +87,10 @@ static func roll_daily_market(
 				var min_p := int(tuning.get(p_def["min_prop"]))
 				var max_p := int(tuning.get(p_def["max_prop"]))
 				var affinity_mult := get_district_affinity_multiplier(district, pid, tuning)
-				var fallback_price := maxi(1, int(round(float(rng.randi_range(min_p, max_p)) * affinity_mult)))
+				var span := float(max_p - min_p)
+				var roll_min := mini(max_p, int(ceil(float(min_p) + span * 0.75))) if affinity_mult > 1.01 else min_p
+				var roll_max := maxi(min_p, int(floor(float(min_p) + span * 0.25))) if affinity_mult < 0.99 else max_p
+				var fallback_price := maxi(1, int(round(float(rng.randi_range(roll_min, roll_max)) * affinity_mult)))
 				prices[pid] = fallback_price
 				signals[pid] = _classify_price_signal(fallback_price, min_p, max_p)
 				available_count += 1

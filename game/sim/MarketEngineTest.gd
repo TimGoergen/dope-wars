@@ -64,6 +64,19 @@ func _init() -> void:
 				elif sg == "high":
 					_assert_true(float(pr) >= float(min_p) + span * 0.75, "High signal price check (%s: %d)" % [pid, pr])
 
+	# 5. Verify Travel screen preview matches post-travel market prices & signals 100%
+	var gs := GameState.new(tuning, 12345)
+	gs.new_run(31, [], 12345)
+	for target_id in ["council_bluffs", "benson", "west_omaha", "south_omaha"]:
+		var preview := gs.get_next_day_market_preview(target_id)
+		var prev_sigs: Dictionary = preview["signals"].duplicate()
+		var prev_prices: Dictionary = preview["prices"].duplicate()
+		gs.drive_to_district(target_id)
+		for p_def in OmahaCatalog.PRODUCTS:
+			var pid: String = p_def["id"]
+			_assert_eq(gs.market_signals[pid], prev_sigs[pid], "Travel preview signal match (%s in %s)" % [pid, target_id])
+			_assert_eq(gs.market_prices[pid], prev_prices[pid], "Travel preview price match (%s in %s)" % [pid, target_id])
+
 	if _failures == 0:
 		print("ALL CHECKS PASSED")
 		quit(0)

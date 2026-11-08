@@ -572,17 +572,42 @@ func _open_travel_modal() -> void:
 		c.queue_free()
 
 	var vbox := UiPalette.build_modal_shell(_travel_overlay, "🚗 OMAHA METRO TRANSIT", UiPalette.GOLD_ACCENT, true)
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 14)
+
+	# Tighten outer modal margins and enlarge header/footer controls so the travel screen uses the full 1080x2400 viewport
+	var margin_node := _travel_overlay.get_child(1) as MarginContainer
+	if margin_node != null:
+		margin_node.add_theme_constant_override("margin_top", 52)
+		margin_node.add_theme_constant_override("margin_bottom", 48)
+		margin_node.add_theme_constant_override("margin_left", 18)
+		margin_node.add_theme_constant_override("margin_right", 18)
+		var card_vbox := vbox.get_parent().get_parent() as VBoxContainer
+		if card_vbox != null and card_vbox.get_child_count() >= 3:
+			var hdr := card_vbox.get_child(0) as HBoxContainer
+			if hdr != null:
+				for hc in hdr.get_children():
+					if hc is Label:
+						(hc as Label).add_theme_font_size_override("font_size", UiPalette.FONT_TITLE)
+					elif hc is Button:
+						(hc as Button).custom_minimum_size = Vector2(186, 80)
+						(hc as Button).add_theme_font_size_override("font_size", UiPalette.FONT_BUTTON)
+			var btm_btn := card_vbox.get_child(card_vbox.get_child_count() - 1) as Button
+			if btm_btn != null:
+				btm_btn.custom_minimum_size = Vector2(0, 96)
+				btm_btn.add_theme_font_size_override("font_size", UiPalette.FONT_SUBHEAD)
 
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
 	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Tap any destination to drive (advances 1 Day)." % [
 		cur_d["icon"], cur_d["name"]
-	], UiPalette.FONT_SMALL, UiPalette.TEXT_SECONDARY)
+	], UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_SECONDARY)
 
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 14)
-	grid.add_theme_constant_override("v_separation", 14)
+	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 16)
+	grid.add_theme_constant_override("v_separation", 16)
 	vbox.add_child(grid)
 
 	for d_def in OmahaCatalog.DISTRICTS:
@@ -590,41 +615,60 @@ func _open_travel_modal() -> void:
 		var is_here := (did == state.current_district_id)
 		var card := PanelContainer.new()
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		var card_bg := UiPalette.BTN_PRIMARY if is_here else UiPalette.CARD_BG
 		var card_border := UiPalette.GOLD_ACCENT if is_here else UiPalette.BORDER_BRIGHT
-		card.add_theme_stylebox_override("panel", UiPalette.make_box(card_bg, card_border, 16, 3, 16, 14))
+		card.add_theme_stylebox_override("panel", UiPalette.make_box(card_bg, card_border, 18, 4, 18, 16))
 		grid.add_child(card)
 
 		var cv := VBoxContainer.new()
 		cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		cv.add_theme_constant_override("separation", 6)
+		cv.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		cv.add_theme_constant_override("separation", 8)
 		cv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(cv)
 
 		var title_str := ("📍 %s (HERE)" % d_def["name"]) if is_here else ("%s %s" % [d_def["icon"], d_def["name"]])
-		UiPalette.add_label(cv, title_str, UiPalette.FONT_BUTTON, UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY, true, true)
+		UiPalette.add_label(cv, title_str, UiPalette.FONT_HEADER, UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY, true, true)
 
 		var spot_str := String(d_def["facility_btn"])
-		UiPalette.add_label(cv, spot_str, UiPalette.FONT_TINY, UiPalette.BANK_CYAN, true, false)
+		UiPalette.add_label(cv, spot_str, UiPalette.FONT_BUTTON, UiPalette.BANK_CYAN, true, true)
 
-		var cheap_ids: Array = d_def.get("cheap_products", [])
-		var high_ids: Array = d_def.get("pricy_products", [])
-		var cheap_str := _format_product_list_short(cheap_ids) if not cheap_ids.is_empty() else "Standard"
-		var high_str := "All +20%" if bool(d_def.get("west_o_pricy", false)) else (_format_product_list_short(high_ids) if not high_ids.is_empty() else "Standard")
-		UiPalette.add_label(cv, "🏷️ Cheap: %s" % cheap_str, UiPalette.FONT_TINY, UiPalette.CASH_EMERALD, true, false)
-		UiPalette.add_label(cv, "📈 Pricy: %s" % high_str, UiPalette.FONT_TINY, UiPalette.SPIKE_AMBER, true, false)
+		var affinities_vbox := VBoxContainer.new()
+		affinities_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		affinities_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		affinities_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		affinities_vbox.add_theme_constant_override("separation", 6)
+		affinities_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cv.add_child(affinities_vbox)
+
+		var preview: Dictionary = state.get_next_day_market_preview(did)
+		var sigs: Dictionary = preview.get("signals", {})
+		var cheap_ids: Array = []
+		var high_ids: Array = []
+		for p_def in OmahaCatalog.PRODUCTS:
+			var pid := String(p_def["id"])
+			var sig := String(sigs.get(pid, "normal"))
+			if sig == "low" or sig == "flood":
+				cheap_ids.append(pid)
+			elif sig == "high" or sig == "spike":
+				high_ids.append(pid)
+		var cheap_str := _format_product_list_short(cheap_ids) if not cheap_ids.is_empty() else "None"
+		var high_str := _format_product_list_short(high_ids) if not high_ids.is_empty() else "None"
+		UiPalette.add_label(affinities_vbox, "🏷️ Cheap: %s" % cheap_str, 28, UiPalette.CASH_EMERALD, true, true)
+		UiPalette.add_label(affinities_vbox, "📈 Pricy: %s" % high_str, 28, UiPalette.SPIKE_AMBER, true, true)
 
 		var go_btn := Button.new()
 		go_btn.text = "📍 CURRENT SPOT" if is_here else "🚗 DRIVE HERE"
-		go_btn.custom_minimum_size = Vector2(0, 68)
+		go_btn.custom_minimum_size = Vector2(0, 96)
 		go_btn.disabled = is_here or state.is_final_day()
 		UiPalette.style_button(
 			go_btn,
 			UiPalette.BTN_DISABLED if is_here else UiPalette.BTN_SUCCESS,
 			UiPalette.GOLD_ACCENT if is_here else UiPalette.CASH_EMERALD,
 			UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY,
-			UiPalette.FONT_SMALL,
-			10
+			UiPalette.FONT_SUBHEAD,
+			14
 		)
 		go_btn.pressed.connect(func() -> void:
 			_travel_overlay.visible = false
