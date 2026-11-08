@@ -18,6 +18,8 @@ const EMOJI_TO_ICON := {
 	"🏧": "bank",
 	"📅": "calendar",
 	"🧥": "coat",
+	"📦": "coat",
+	"💼": "coat",
 	"❤️": "heart",
 	"❤": "heart",
 	"💉": "heart",
@@ -67,7 +69,16 @@ const EMOJI_TO_ICON := {
 	"✅": "check",
 	"🟢": "check",
 	"🔒": "lock",
-	"⚪": "lock"
+	"⚪": "lock",
+	"🛒": "cash",
+	"🎒": "coat",
+	"🤝": "cash",
+	"🐕": "siren",
+	"🕳️": "trash",
+	"🕳": "trash",
+	"🍺": "martini",
+	"📻": "newspaper",
+	"📡": "newspaper"
 }
 
 
@@ -197,13 +208,19 @@ static func _get_svg_markup(name: String) -> String:
 				<rect x="28" y="45" width="8" height="7" rx="1.5" fill="#334155"/>
 				<rect x="40" y="45" width="8" height="7" rx="1.5" fill="#334155"/>
 			</svg>"""
-		"coat":
+		"coat", "inventory":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<path d="M22 8 L10 16 L4 34 L13 38 L17 24 L15 56 L49 56 L47 24 L51 38 L60 34 L54 16 L42 8 L32 18 Z" fill="#D97706" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>
-				<polygon points="22,8 32,24 26,30 18,16" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
-				<polygon points="42,8 32,24 38,30 46,16" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
-				<rect x="16" y="36" width="32" height="6" rx="2" fill="#78350F" stroke="#FACC15" stroke-width="1.5"/>
-				<line x1="32" y1="24" x2="32" y2="56" stroke="#0F172A" stroke-width="2.5"/>
+				<rect x="4" y="9" width="56" height="24" rx="7" fill="#0F172A"/>
+				<path d="M 6 29 H 58 V 47 A 8 8 0 0 1 50 55 H 14 A 8 8 0 0 1 6 47 Z" fill="#0F172A"/>
+				<path d="M 9 35 H 55 V 47 A 5 5 0 0 1 50 52 H 14 A 5 5 0 0 1 9 47 Z" fill="#D97706"/>
+				<path d="M 12 12 H 15 V 30 H 12 A 5 5 0 0 1 7 25 V 17 A 5 5 0 0 1 12 12 Z" fill="#F59E0B"/>
+				<rect x="19" y="12" width="26" height="18" fill="#F59E0B"/>
+				<path d="M 49 12 H 52 A 5 5 0 0 1 57 17 V 25 A 5 5 0 0 1 52 30 H 49 Z" fill="#F59E0B"/>
+				<rect x="15" y="12" width="4" height="23" fill="#F8FAFC"/>
+				<rect x="45" y="12" width="4" height="23" fill="#F8FAFC"/>
+				<rect x="9" y="30" width="46" height="5" fill="#F8FAFC"/>
+				<rect x="24" y="24" width="16" height="16" rx="5" fill="#F8FAFC"/>
+				<rect x="29.5" y="37" width="5" height="8" rx="2.5" fill="#F8FAFC"/>
 			</svg>"""
 		"heart":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">

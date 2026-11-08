@@ -865,9 +865,15 @@ func _set_news_expanded(expanded: bool) -> void:
 
 	_news_expand_vbox.custom_minimum_size = Vector2(card_w - 48.0, 0.0)
 
+	var log_font_sz := int(round(float(UiPalette.FONT_TINY) * 1.40))
 	for i in range(state.scanner_log.size()):
-		var col := UiPalette.TEXT_PRIMARY if i == 0 else UiPalette.TEXT_SECONDARY
-		var lbl := UiPalette.add_label(_news_expand_vbox, "• " + String(state.scanner_log[i]), UiPalette.FONT_TINY, col, true, i == 0)
+		var msg_str := String(state.scanner_log[i])
+		var is_travel := msg_str.contains("Pulled into") or msg_str.contains("Parked in")
+		var col := UiPalette.TEXT_PRIMARY if is_travel else UiPalette.TEXT_SECONDARY
+		var lbl := UiPalette.add_label(_news_expand_vbox, "• " + msg_str, log_font_sz, col, true, is_travel)
+		if is_travel:
+			lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.90))
+			lbl.add_theme_constant_override("outline_size", 3)
 		lbl.mouse_filter = Control.MOUSE_FILTER_PASS
 
 	_news_expand_panel.custom_minimum_size = Vector2(card_w, float(target_h))

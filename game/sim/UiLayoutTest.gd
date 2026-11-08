@@ -50,13 +50,17 @@ func _initialize() -> void:
 		push_error("FAIL [1/3 vs 2/3 Split]: scanner_rect=%s loc_rect=%s" % [str(scanner_card.get_global_rect()), str(loc_lbl.get_global_rect())])
 		quit(1)
 		return
+	main.state.log_scanner("🚗 Day 2: Pulled into Council Bluffs.")
+	main.state.log_scanner("🛒 Bought 5 Weed @ $150 ($750).")
 	main._set_news_expanded(true)
 	var exp_panel: PanelContainer = main._news_expand_panel
 	var news_title: Label = main._news_title_lbl
 	var news_close: Button = main._news_close_btn
 	var expected_h := roundf((1440.0 - scanner_card.get_global_rect().position.y) * 1.25)
-	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 810.0) or not is_equal_approx(exp_panel.size.y, expected_h) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44):
-		push_error("FAIL [News Popup Layout]: visible=%s pos=%s size=%s expected_h=%.1f title_sz=%d close_icon=%s" % [str(exp_panel.visible), str(exp_panel.position), str(exp_panel.size), expected_h, news_title.get_theme_font_size("font_size"), str(news_close.icon)])
+	var first_log_lbl: Label = main._news_expand_vbox.get_child(0) as Label
+	var second_log_lbl: Label = main._news_expand_vbox.get_child(1) as Label
+	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 810.0) or not is_equal_approx(exp_panel.size.y, expected_h) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44) or first_log_lbl.get_theme_font_size("font_size") != 32 or first_log_lbl.has_theme_font_override("font") or not second_log_lbl.has_theme_font_override("font"):
+		push_error("FAIL [News Popup Layout]: visible=%s pos=%s size=%s expected_h=%.1f title_sz=%d log_sz=%d" % [str(exp_panel.visible), str(exp_panel.position), str(exp_panel.size), expected_h, news_title.get_theme_font_size("font_size"), first_log_lbl.get_theme_font_size("font_size")])
 		quit(1)
 		return
 	main._set_news_expanded(false)
