@@ -35,8 +35,8 @@ Audio="*res://scripts/audio/Audio.gd"
 
 window/size/viewport_width=1080
 window/size/viewport_height=2400
-window/size/window_width_override=432
-window/size/window_height_override=960
+window/size/window_width_override=378
+window/size/window_height_override=840
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
