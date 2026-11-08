@@ -532,7 +532,7 @@ func _build_bottom_tab_bar(parent: VBoxContainer) -> void:
 	for t_def in tab_defs:
 		var btn := Button.new()
 		btn.text = String(t_def[0])
-		btn.icon = UiIcons.get_icon(String(t_def[1]), 84)
+		btn.icon = UiIcons.get_icon(String(t_def[1]), 104)
 		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1090,7 +1090,7 @@ func _refresh_all() -> void:
 	# 5. Update Tab 1 button icon with current neighborhood spot SVG icon
 	if _tab_buttons.size() >= 2:
 		_tab_buttons[1].text = "COMMERCE"
-		_tab_buttons[1].icon = UiIcons.get_icon(UiIcons.icon_for_district(state.current_district_id), 84)
+		_tab_buttons[1].icon = UiIcons.get_icon(UiIcons.icon_for_district(state.current_district_id), 104)
 
 	# 6. Refresh Active Modals (Combat or Street Encounter)
 	_combat_overlay.refresh(state)

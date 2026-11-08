@@ -69,7 +69,7 @@ func _initialize() -> void:
 	var tab0_rect: Rect2 = tab0_btn.get_global_rect()
 	var tab0_sb: StyleBoxFlat = tab0_btn.get_theme_stylebox("normal") as StyleBoxFlat
 	var tab2_sb: StyleBoxFlat = tab2_btn.get_theme_stylebox("normal") as StyleBoxFlat
-	if tab0_rect.size.y < 196.0 or tab0_rect.end.y > 2353.0 or tab0_sb.corner_radius_bottom_left != 64 or tab2_sb.corner_radius_bottom_right != 64 or tab0_btn.icon != UiIcons.get_icon("market", 84) or main._tab_buttons[1].text != "COMMERCE":
+	if tab0_rect.size.y < 196.0 or tab0_rect.end.y > 2353.0 or tab0_sb.corner_radius_bottom_left != 64 or tab2_sb.corner_radius_bottom_right != 64 or tab0_btn.icon != UiIcons.get_icon("market", 104) or main._tab_buttons[1].text != "COMMERCE":
 		push_error("FAIL [Bottom Tab Bar]: rect=%s bl=%d br=%d" % [str(tab0_rect), tab0_sb.corner_radius_bottom_left, tab2_sb.corner_radius_bottom_right])
 		quit(1)
 		return

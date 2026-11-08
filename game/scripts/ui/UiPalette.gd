@@ -161,11 +161,13 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 	var bg := BTN_PRIMARY if is_active else CARD_BG
 	var border := GOLD_ACCENT if is_active else BORDER_BRIGHT
 	var text_col := GOLD_ACCENT if is_active else TEXT_PRIMARY
-	var normal := make_box(bg, border, 20, 4, 14, 10)
-	var hover := make_box(bg.lightened(0.08), border.lightened(0.12), 20, 4, 14, 10)
-	var pressed := make_box(bg.darkened(0.16), border, 20, 4, 14, 10)
+	var normal := make_box(bg, border, 20, 4, 14, 14)
+	var hover := make_box(bg.lightened(0.08), border.lightened(0.12), 20, 4, 14, 14)
+	var pressed := make_box(bg.darkened(0.16), border, 20, 4, 14, 14)
 
 	for sb in [normal, hover, pressed]:
+		sb.content_margin_top = 18
+		sb.content_margin_bottom = 14
 		if tab_idx == 0:
 			sb.corner_radius_bottom_left = 64
 		elif tab_idx == 2:
@@ -174,7 +176,7 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-	btn.add_theme_constant_override("icon_max_width", 96)
+	btn.add_theme_constant_override("icon_max_width", 112)
 	btn.add_theme_stylebox_override("normal", normal)
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
