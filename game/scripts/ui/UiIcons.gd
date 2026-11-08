@@ -12,6 +12,7 @@ const EMOJI_TO_ICON := {
 	"💵": "cash",
 	"💰": "cash",
 	"💳": "cash",
+	"💲": "dollar",
 	"🦈": "shark",
 	"🏦": "bank",
 	"🏧": "bank",
@@ -157,6 +158,14 @@ static func _get_svg_markup(name: String) -> String:
 				<circle cx="15" cy="32" r="3" fill="#BBF7D0"/>
 				<circle cx="49" cy="32" r="3" fill="#BBF7D0"/>
 			</svg>"""
+		"dollar":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<rect width="64" height="64" rx="12" fill="#0A0D12"/>
+				<rect x="4.75" y="4.75" width="54.5" height="54.5" rx="10" fill="#121721" stroke="#22C55E" stroke-width="4"/>
+				<rect x="28.5" y="8" width="7" height="48" rx="3.5" fill="#F59E0B"/>
+				<path d="M 41.5 22.25 C 41.5 15.5, 22 15.5, 22 24 C 22 31.75, 42.25 31.75, 42.25 40.25 C 42.25 48.5, 22.25 48.5, 22.25 41.75"
+					fill="none" stroke="#22C55E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>"""
 		"shark":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
 				<circle cx="32" cy="32" r="27" fill="#4C0519" stroke="#FB7185" stroke-width="3"/>
@@ -214,35 +223,35 @@ static func _get_svg_markup(name: String) -> String:
 			</svg>"""
 		"newspaper":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<rect x="12" y="12" width="46" height="44" rx="5" fill="#94A3B8" stroke="#0F172A" stroke-width="3"/>
-				<rect x="6" y="8" width="46" height="46" rx="5" fill="#F8FAFC" stroke="#0F172A" stroke-width="3"/>
-				<rect x="11" y="13" width="36" height="9" rx="2" fill="#FACC15" stroke="#0F172A" stroke-width="2"/>
-				<rect x="11" y="26" width="16" height="14" rx="2" fill="#38BDF8" stroke="#0F172A" stroke-width="2"/>
-				<line x1="31" y1="28" x2="46" y2="28" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
-				<line x1="31" y1="34" x2="46" y2="34" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
-				<line x1="31" y1="40" x2="43" y2="40" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+				<rect x="12" y="10" width="46" height="48" rx="5" fill="#94A3B8" stroke="#0F172A" stroke-width="3.5"/>
+				<rect x="6" y="6" width="46" height="48" rx="5" fill="#F8FAFC" stroke="#0F172A" stroke-width="3.5"/>
+				<rect x="11" y="11" width="36" height="10" rx="2" fill="#FACC15" stroke="#0F172A" stroke-width="2"/>
+				<rect x="11" y="25" width="16" height="15" rx="2" fill="#38BDF8" stroke="#0F172A" stroke-width="2"/>
+				<line x1="31" y1="27" x2="46" y2="27" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round"/>
+				<line x1="31" y1="33" x2="46" y2="33" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+				<line x1="31" y1="39" x2="43" y2="39" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
 				<line x1="12" y1="46" x2="46" y2="46" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
 			</svg>"""
 		"newspaper_spike":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<rect x="12" y="12" width="46" height="44" rx="5" fill="#92400E" stroke="#0F172A" stroke-width="3"/>
-				<rect x="6" y="8" width="46" height="46" rx="5" fill="#FEF3C7" stroke="#F59E0B" stroke-width="3"/>
-				<rect x="11" y="13" width="36" height="9" rx="2" fill="#EF4444" stroke="#0F172A" stroke-width="2"/>
-				<rect x="11" y="26" width="16" height="14" rx="2" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
-				<line x1="31" y1="28" x2="46" y2="28" stroke="#78350F" stroke-width="3.5" stroke-linecap="round"/>
-				<line x1="31" y1="34" x2="46" y2="34" stroke="#92400E" stroke-width="3" stroke-linecap="round"/>
-				<line x1="31" y1="40" x2="43" y2="40" stroke="#92400E" stroke-width="3" stroke-linecap="round"/>
+				<rect x="12" y="10" width="46" height="48" rx="5" fill="#92400E" stroke="#0F172A" stroke-width="3.5"/>
+				<rect x="6" y="6" width="46" height="48" rx="5" fill="#FEF3C7" stroke="#F59E0B" stroke-width="3.5"/>
+				<rect x="11" y="11" width="36" height="10" rx="2" fill="#EF4444" stroke="#0F172A" stroke-width="2"/>
+				<rect x="11" y="25" width="16" height="15" rx="2" fill="#F59E0B" stroke="#0F172A" stroke-width="2"/>
+				<line x1="31" y1="27" x2="46" y2="27" stroke="#78350F" stroke-width="3.5" stroke-linecap="round"/>
+				<line x1="31" y1="33" x2="46" y2="33" stroke="#92400E" stroke-width="3" stroke-linecap="round"/>
+				<line x1="31" y1="39" x2="43" y2="39" stroke="#92400E" stroke-width="3" stroke-linecap="round"/>
 				<line x1="12" y1="46" x2="46" y2="46" stroke="#92400E" stroke-width="3" stroke-linecap="round"/>
 			</svg>"""
 		"newspaper_flood":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<rect x="12" y="12" width="46" height="44" rx="5" fill="#155E75" stroke="#0F172A" stroke-width="3"/>
-				<rect x="6" y="8" width="46" height="46" rx="5" fill="#E0F2FE" stroke="#22D3EE" stroke-width="3"/>
-				<rect x="11" y="13" width="36" height="9" rx="2" fill="#0284C7" stroke="#0F172A" stroke-width="2"/>
-				<rect x="11" y="26" width="16" height="14" rx="2" fill="#22D3EE" stroke="#0F172A" stroke-width="2"/>
-				<line x1="31" y1="28" x2="46" y2="28" stroke="#082F49" stroke-width="3.5" stroke-linecap="round"/>
-				<line x1="31" y1="34" x2="46" y2="34" stroke="#0C4A6E" stroke-width="3" stroke-linecap="round"/>
-				<line x1="31" y1="40" x2="43" y2="40" stroke="#0C4A6E" stroke-width="3" stroke-linecap="round"/>
+				<rect x="12" y="10" width="46" height="48" rx="5" fill="#155E75" stroke="#0F172A" stroke-width="3.5"/>
+				<rect x="6" y="6" width="46" height="48" rx="5" fill="#E0F2FE" stroke="#22D3EE" stroke-width="3.5"/>
+				<rect x="11" y="11" width="36" height="10" rx="2" fill="#0284C7" stroke="#0F172A" stroke-width="2"/>
+				<rect x="11" y="25" width="16" height="15" rx="2" fill="#22D3EE" stroke="#0F172A" stroke-width="2"/>
+				<line x1="31" y1="27" x2="46" y2="27" stroke="#082F49" stroke-width="3.5" stroke-linecap="round"/>
+				<line x1="31" y1="33" x2="46" y2="33" stroke="#0C4A6E" stroke-width="3" stroke-linecap="round"/>
+				<line x1="31" y1="39" x2="43" y2="39" stroke="#0C4A6E" stroke-width="3" stroke-linecap="round"/>
 				<line x1="12" y1="46" x2="46" y2="46" stroke="#0C4A6E" stroke-width="3" stroke-linecap="round"/>
 			</svg>"""
 		"car":
@@ -362,8 +371,14 @@ static func _get_svg_markup(name: String) -> String:
 			</svg>"""
 		"pin":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<path d="M32 58 C32 58 14 38 14 24 A18 18 0 1 1 50 24 C50 38 32 58 32 58 Z" fill="#EF4444" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>
-				<circle cx="32" cy="24" r="7" fill="#F8FAFC"/>
+				<path d="M32 58 C24 52 7 39 7 26 C7 13.5 18 6 32 6 C46 6 57 13.5 57 26 C57 39 40 52 32 58 Z" fill="#EF4444" stroke="#0F172A" stroke-width="3.5" stroke-linejoin="round"/>
+				<path d="M15 21 C18 14 24 11 31 11" stroke="#FCA5A5" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+				<circle cx="32" cy="26" r="10.5" fill="#F8FAFC" stroke="#0F172A" stroke-width="3"/>
+			</svg>"""
+		"close_x":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<line x1="14" y1="14" x2="50" y2="50" stroke="#F8FAFC" stroke-width="7" stroke-linecap="round"/>
+				<line x1="50" y1="14" x2="14" y2="50" stroke="#F8FAFC" stroke-width="7" stroke-linecap="round"/>
 			</svg>"""
 		"fire":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">

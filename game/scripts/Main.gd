@@ -33,7 +33,10 @@ var _scanner_card: PanelContainer
 var _news_icon_rect: TextureRect
 var _log_line_1: Label
 var _log_line_2: Label
+var _news_overlay: Control
 var _news_expand_panel: PanelContainer
+var _news_title_lbl: Label
+var _news_close_btn: Button
 var _news_expand_vbox: VBoxContainer
 var _product_rows: Dictionary = {} # product_id -> Dictionary of nodes
 
@@ -178,24 +181,70 @@ func _build_dashboard_ui() -> void:
 	)
 	add_child(_dev_tuning_overlay)
 
-	# Press-and-Hold Expanded News Panel (grows up to 1200px / half screen height while held)
+	# Click-to-Open Recent Transactions Popup (stays open until X button or outside click)
+	_news_overlay = Control.new()
+	_news_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_news_overlay.visible = false
+	add_child(_news_overlay)
+
+	var news_outside_btn := Button.new()
+	news_outside_btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	UiPalette.style_flat_inert_button(news_outside_btn)
+	news_outside_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		_set_news_expanded(false)
+	)
+	_news_overlay.add_child(news_outside_btn)
+
 	_news_expand_panel = PanelContainer.new()
 	_news_expand_panel.visible = false
-	_news_expand_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_news_expand_panel.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 4, 16, 14))
-	add_child(_news_expand_panel)
+	_news_expand_panel.size = Vector2(648, 1080)
+	_news_expand_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_news_expand_panel.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 4, 20, 18))
+	_news_overlay.add_child(_news_expand_panel)
+
+	var news_panel_vbox := VBoxContainer.new()
+	news_panel_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	news_panel_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	news_panel_vbox.add_theme_constant_override("separation", 12)
+	_news_expand_panel.add_child(news_panel_vbox)
+
+	var news_header := HBoxContainer.new()
+	news_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	news_header.add_theme_constant_override("separation", 10)
+	news_panel_vbox.add_child(news_header)
+
+	_news_title_lbl = UiPalette.add_label(news_header, "RECENT\nTRANSACTIONS", UiPalette.FONT_SMALL * 2, UiPalette.GOLD_ACCENT, false, true)
+	_news_title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	_news_close_btn = Button.new()
+	_news_close_btn.text = ""
+	_news_close_btn.icon = UiIcons.get_icon("close_x", 44)
+	_news_close_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_news_close_btn.custom_minimum_size = Vector2(64, 64)
+	_news_close_btn.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	UiPalette.style_flat_inert_button(_news_close_btn)
+	_news_close_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		_set_news_expanded(false)
+	)
+	news_header.add_child(_news_close_btn)
+
+	var news_div := ColorRect.new()
+	news_div.color = UiPalette.BORDER_SLATE
+	news_div.custom_minimum_size = Vector2(0, 2)
+	news_div.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	news_panel_vbox.add_child(news_div)
 
 	var news_scroll := ScrollContainer.new()
 	news_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	news_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	news_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	news_scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_news_expand_panel.add_child(news_scroll)
+	news_panel_vbox.add_child(news_scroll)
 
 	_news_expand_vbox = VBoxContainer.new()
 	_news_expand_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_news_expand_vbox.add_theme_constant_override("separation", 8)
-	_news_expand_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_news_expand_vbox.add_theme_constant_override("separation", 10)
 	news_scroll.add_child(_news_expand_vbox)
 
 
@@ -272,7 +321,7 @@ func _build_market_tab() -> Control:
 	top_strip.add_theme_constant_override("separation", 12)
 	vbox.add_child(top_strip)
 
-	# Left: Frameless Newspaper SVG Icon (112x112, vertically & horizontally centered)
+	# Left: Frameless Newspaper SVG Icon (112x112, vertically & horizontally centered, same height as travel pin)
 	_scanner_card = PanelContainer.new()
 	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scanner_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -281,8 +330,8 @@ func _build_market_tab() -> Control:
 	top_strip.add_child(_scanner_card)
 
 	_news_icon_rect = UiIcons.create_icon_rect("newspaper", 112)
-	_news_icon_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_news_icon_rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_news_icon_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_news_icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_scanner_card.add_child(_news_icon_rect)
 
 	_log_line_1 = Label.new()
@@ -293,11 +342,9 @@ func _build_market_tab() -> Control:
 	UiPalette.style_flat_inert_button(news_hold_btn)
 	news_hold_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	news_hold_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	news_hold_btn.button_down.connect(func() -> void:
-		_set_news_expanded(true)
-	)
-	news_hold_btn.button_up.connect(func() -> void:
-		_set_news_expanded(false)
+	news_hold_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		_set_news_expanded(not _news_expand_panel.visible)
 	)
 	_scanner_card.add_child(news_hold_btn)
 
@@ -309,10 +356,10 @@ func _build_market_tab() -> Control:
 	_loc_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_loc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	# Right: Frameless Car SVG Travel Button (112x112 car icon, vertically & horizontally centered)
+	# Right: Frameless Location Pin SVG Travel Button (112x112 rounder/fatter pin icon, vertically & horizontally centered)
 	_travel_btn = Button.new()
 	_travel_btn.text = ""
-	_travel_btn.icon = UiIcons.get_icon("car", 112)
+	_travel_btn.icon = UiIcons.get_icon("pin", 112)
 	_travel_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_travel_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_travel_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -793,34 +840,41 @@ func _on_finish_run_pressed() -> void:
 
 
 func _set_news_expanded(expanded: bool) -> void:
-	if _news_expand_panel == null:
+	if _news_expand_panel == null or _news_overlay == null:
 		return
 	if not expanded:
 		_news_expand_panel.visible = false
+		_news_overlay.visible = false
 		return
 
 	for c in _news_expand_vbox.get_children():
 		c.queue_free()
 
-	var card_rect := _scanner_card.get_global_rect()
-	var card_w := clampf(1080.0 - card_rect.position.x - 20.0, 320.0, 1040.0)
-	_news_expand_vbox.custom_minimum_size = Vector2(card_w - 36.0, 0.0)
+	var vp_size := size
+	if vp_size.x <= 0.0 or vp_size.y <= 0.0:
+		vp_size = Vector2(1080.0, 2400.0)
 
-	UiPalette.add_label(_news_expand_vbox, "📰 RECENT TRANSACTIONS", UiPalette.FONT_SMALL, UiPalette.GOLD_ACCENT, true, true)
+	# Fixed size & margins: 10% left margin (108px), 30% right margin (324px -> width 648px),
+	# same top height as the news strip, bottom reaches down to 40% from the bottom (y = 1440px).
+	var left_x := roundf(vp_size.x * 0.10)
+	var right_margin := roundf(vp_size.x * 0.30)
+	var card_w := vp_size.x - left_x - right_margin
+	var top_y := _scanner_card.get_global_rect().position.y
+	var bottom_y := roundf(vp_size.y * 0.60)
+	var target_h := maxi(300, int(roundf(bottom_y - top_y)))
+
+	_news_expand_vbox.custom_minimum_size = Vector2(card_w - 48.0, 0.0)
+
 	for i in range(state.scanner_log.size()):
 		var col := UiPalette.TEXT_PRIMARY if i == 0 else UiPalette.TEXT_SECONDARY
 		var lbl := UiPalette.add_label(_news_expand_vbox, "• " + String(state.scanner_log[i]), UiPalette.FONT_TINY, col, true, i == 0)
-		lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lbl.mouse_filter = Control.MOUSE_FILTER_PASS
 
-	# Compute required height to fit full history, capped at half the screen height (1200px)
-	var est_lines := 2
-	for msg in state.scanner_log:
-		est_lines += maxi(1, int(ceil(float(String(msg).length()) / 42.0)))
-	var target_h := clampf(float(est_lines) * 34.0 + 36.0, card_rect.size.y, 1200.0)
-
-	_news_expand_panel.position = card_rect.position
-	_news_expand_panel.size = Vector2(card_w, target_h)
+	_news_expand_panel.custom_minimum_size = Vector2(card_w, float(target_h))
+	_news_expand_panel.position = Vector2(left_x, top_y)
+	_news_expand_panel.size = Vector2(card_w, float(target_h))
 	_news_expand_panel.visible = true
+	_news_overlay.visible = true
 
 
 func _refresh_all() -> void:
@@ -842,10 +896,10 @@ func _refresh_all() -> void:
 	_heat_lbl.text = "%.0f%%" % state.heat
 	_heat_lbl.add_theme_color_override("font_color", UiPalette.POLICE_RED if state.heat >= 35.0 else UiPalette.SPIKE_AMBER)
 
-	# 2. Top Strip: Newspaper SVG Icon | Location Name (no pin) | Car SVG Travel Icon
+	# 2. Top Strip: Newspaper SVG Icon | Location Name (no pin) | Location Pin SVG Travel Icon
 	_loc_lbl.text = String(cur_d["name"])
 	_travel_btn.text = ""
-	_travel_btn.icon = UiIcons.get_icon("car", 112)
+	_travel_btn.icon = UiIcons.get_icon("pin", 112)
 	_travel_btn.disabled = state.is_final_day()
 	_finish_run_btn.visible = state.is_final_day() and not state.run_completed and not state.game_over
 

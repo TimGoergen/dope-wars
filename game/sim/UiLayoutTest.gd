@@ -36,11 +36,11 @@ func _initialize() -> void:
 	var scanner_card: PanelContainer = main._scanner_card
 	var news_icon_rect: TextureRect = main._news_icon_rect
 	var expected_loc := String(OmahaCatalog.get_district(main.state.current_district_id)["name"])
-	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or loc_lbl.get_global_rect().position.y < hero_rect.end.y or travel_btn.icon == null or travel_btn.icon.get_width() < 100 or news_icon_rect == null or news_icon_rect.texture == null or news_icon_rect.texture.get_width() < 100 or day_lbl.text.contains("Day"):
-		push_error("FAIL [Split Strip & SVG Icons]: loc='%s' travel_icon=%s news_tex=%s day='%s'" % [loc_lbl.text, str(travel_btn.icon), str(news_icon_rect.texture if news_icon_rect else null), day_lbl.text])
+	if loc_lbl.text != expected_loc or loc_lbl.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER or loc_lbl.get_global_rect().position.y < hero_rect.end.y or travel_btn.icon != UiIcons.get_icon("pin", 112) or news_icon_rect == null or news_icon_rect.size != Vector2(112, 112) or day_lbl.text.contains("Day"):
+		push_error("FAIL [Split Strip & SVG Icons]: loc='%s' travel_icon=%s news_size=%s day='%s'" % [loc_lbl.text, str(travel_btn.icon), str(news_icon_rect.size if news_icon_rect else Vector2.ZERO), day_lbl.text])
 		quit(1)
 		return
-	for icon_key in ["cash", "shark", "bank", "calendar", "coat", "heart", "siren", "newspaper", "newspaper_spike", "newspaper_flood", "car", "flag", "pill", "crown", "trash", "gun", "shield", "hospital", "martini", "dice", "scales", "gem", "trophy", "gear", "speaker_on", "speaker_off", "pin", "fire", "snowflake", "check", "lock"]:
+	for icon_key in ["cash", "shark", "bank", "calendar", "coat", "heart", "siren", "newspaper", "newspaper_spike", "newspaper_flood", "car", "flag", "pill", "crown", "trash", "gun", "shield", "hospital", "martini", "dice", "scales", "gem", "trophy", "gear", "speaker_on", "speaker_off", "pin", "close_x", "fire", "snowflake", "check", "lock"]:
 		var tex := UiIcons.get_icon(icon_key, 64)
 		if tex == null or tex.get_width() != 64 or tex.get_height() != 64:
 			push_error("FAIL [UiIcons SVG Rasterizer]: icon '%s' failed to rasterize (tex=%s)" % [icon_key, str(tex)])
@@ -52,8 +52,10 @@ func _initialize() -> void:
 		return
 	main._set_news_expanded(true)
 	var exp_panel: PanelContainer = main._news_expand_panel
-	if not exp_panel.visible or exp_panel.size.y > 1200.0:
-		push_error("FAIL [News Hold Expand]: visible=%s size=%s" % [str(exp_panel.visible), str(exp_panel.size)])
+	var news_title: Label = main._news_title_lbl
+	var news_close: Button = main._news_close_btn
+	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 648.0) or not is_equal_approx(exp_panel.position.y + exp_panel.size.y, 1440.0) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44):
+		push_error("FAIL [News Popup Layout]: visible=%s pos=%s size=%s title_sz=%d close_icon=%s" % [str(exp_panel.visible), str(exp_panel.position), str(exp_panel.size), news_title.get_theme_font_size("font_size"), str(news_close.icon)])
 		quit(1)
 		return
 	main._set_news_expanded(false)
