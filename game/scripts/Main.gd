@@ -201,7 +201,7 @@ func _build_dashboard_ui() -> void:
 	_news_expand_panel.visible = false
 	_news_expand_panel.size = Vector2(810, 1349)
 	_news_expand_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_news_expand_panel.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 4, 20, 18))
+	_news_expand_panel.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.TEXT_SECONDARY, 16, 3, 20, 18))
 	_news_overlay.add_child(_news_expand_panel)
 
 	var news_panel_vbox := VBoxContainer.new()
