@@ -131,6 +131,16 @@ static func icon_for_district(district_id: String) -> String:
 			return "bank"
 
 
+static func cop_portrait_for_tier(tier: int) -> String:
+	match tier:
+		3:
+			return "cop_dea"
+		2:
+			return "cop_sheriff"
+		_:
+			return "cop_hardass"
+
+
 static func extract_leading_icon(raw_text: String) -> Dictionary:
 	var trimmed := raw_text.strip_edges()
 	for emoji_key in EMOJI_TO_ICON.keys():
@@ -447,6 +457,84 @@ static func _get_svg_markup(name: String) -> String:
 				<path d="M20 28 V18 A12 12 0 0 1 44 18 V28" stroke="#CBD5E1" stroke-width="4.5" fill="none"/>
 				<rect x="14" y="28" width="36" height="28" rx="6" fill="#FACC15" stroke="#0F172A" stroke-width="3"/>
 				<circle cx="32" cy="42" r="4" fill="#0F172A"/>
+			</svg>"""
+		"slider_grabber":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="32" r="28" fill="#0F172A" stroke="#FACC15" stroke-width="4"/>
+				<circle cx="32" cy="32" r="23" fill="#FACC15"/>
+				<circle cx="32" cy="32" r="19" fill="#FEF08A"/>
+				<line x1="26" y1="20" x2="26" y2="44" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
+				<line x1="32" y1="18" x2="32" y2="46" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
+				<line x1="38" y1="20" x2="38" y2="44" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
+			</svg>"""
+		"cop_hardass", "cop_profile":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="32" r="30" fill="#0A1128" stroke="#3B82F6" stroke-width="2.5"/>
+				<path d="M10 62 C10 49 19 45 32 45 C45 45 54 49 54 62 Z" fill="#1E3A8A" stroke="#0F172A" stroke-width="2"/>
+				<polygon points="32,48 26,45 38,45" fill="#F8FAFC"/>
+				<polygon points="32,48 30,62 34,62" fill="#0F172A"/>
+				<polygon points="20,51 25,51 26,56 22.5,59 19,56" fill="#FACC15" stroke="#78350F" stroke-width="0.8"/>
+				<rect x="28" y="38" width="8" height="9" fill="#FDBA74"/>
+				<path d="M22 28 C22 22 42 22 42 28 C42 38 38 44 32 44 C26 44 22 38 22 28 Z" fill="#FDBA74" stroke="#9A3412" stroke-width="1.2"/>
+				<ellipse cx="21" cy="31" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<ellipse cx="43" cy="31" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<path d="M25 37 C27 35.5 37 35.5 39 37 C37 39 27 39 25 37 Z" fill="#3B1C0B"/>
+				<line x1="28" y1="41" x2="36" y2="41" stroke="#9A3412" stroke-width="1.2" stroke-linecap="round"/>
+				<path d="M22 27 C22 22 31 22 31 27 C31 33 24 34 22 27 Z" fill="#0F172A" stroke="#FACC15" stroke-width="1.2"/>
+				<path d="M33 27 C33 22 42 22 42 27 C42 33 35 34 33 27 Z" fill="#0F172A" stroke="#FACC15" stroke-width="1.2"/>
+				<line x1="30" y1="25.5" x2="34" y2="25.5" stroke="#FACC15" stroke-width="1.5"/>
+				<line x1="24" y1="26" x2="29" y2="31" stroke="#38BDF8" stroke-width="1.2" opacity="0.85"/>
+				<line x1="35" y1="26" x2="40" y2="31" stroke="#38BDF8" stroke-width="1.2" opacity="0.85"/>
+				<path d="M18 22 Q32 26 46 22 Q47 25 43 27 Q32 29 21 27 Z" fill="#020617" stroke="#334155" stroke-width="0.8"/>
+				<path d="M20 22 L16 13 Q32 8 48 13 L44 22 Z" fill="#1E3A8A" stroke="#0F172A" stroke-width="1.5"/>
+				<path d="M20 21.5 Q32 24.5 44 21.5" stroke="#FACC15" stroke-width="2.5" fill="none"/>
+				<polygon points="32,12 35,16 32,20 29,16" fill="#FACC15" stroke="#78350F" stroke-width="0.8"/>
+			</svg>"""
+		"cop_sheriff":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="32" r="30" fill="#1C140E" stroke="#D97706" stroke-width="2.5"/>
+				<path d="M10 62 C10 49 19 45 32 45 C45 45 54 49 54 62 Z" fill="#B45309" stroke="#0F172A" stroke-width="2"/>
+				<polygon points="32,48 26,45 38,45" fill="#FEF3C7"/>
+				<polygon points="32,48 30,62 34,62" fill="#451A03"/>
+				<polygon points="20,51 25,51 26,56 22.5,59 19,56" fill="#FACC15" stroke="#78350F" stroke-width="0.8"/>
+				<circle cx="22.5" cy="54" r="1.5" fill="#78350F"/>
+				<rect x="28" y="38" width="8" height="9" fill="#FDBA74"/>
+				<path d="M22 28 C22 22 42 22 42 28 C42 38 38 44 32 44 C26 44 22 38 22 28 Z" fill="#FDBA74" stroke="#9A3412" stroke-width="1.2"/>
+				<ellipse cx="21" cy="31" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<ellipse cx="43" cy="31" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<path d="M24 37 C27 35 37 35 40 37 C39 40 36 39 32 38 C28 39 25 40 24 37 Z" fill="#451A03"/>
+				<path d="M22 27 C22 22 31 22 31 27 C31 33 24 34 22 27 Z" fill="#0F172A" stroke="#FACC15" stroke-width="1.2"/>
+				<path d="M33 27 C33 22 42 22 42 27 C42 33 35 34 33 27 Z" fill="#0F172A" stroke="#FACC15" stroke-width="1.2"/>
+				<line x1="30" y1="25.5" x2="34" y2="25.5" stroke="#FACC15" stroke-width="1.5"/>
+				<line x1="24" y1="26" x2="29" y2="31" stroke="#FDE68A" stroke-width="1.2" opacity="0.85"/>
+				<line x1="35" y1="26" x2="40" y2="31" stroke="#FDE68A" stroke-width="1.2" opacity="0.85"/>
+				<ellipse cx="32" cy="22" rx="24" ry="5.5" fill="#92400E" stroke="#451A03" stroke-width="1.5"/>
+				<path d="M21 21 L23 10 Q32 13 41 10 L43 21 Z" fill="#B45309" stroke="#451A03" stroke-width="1.5"/>
+				<path d="M21 20 Q32 23 43 20" stroke="#451A03" stroke-width="2.5" fill="none"/>
+				<polygon points="32,15 34,18 32,20 30,18" fill="#FACC15"/>
+			</svg>"""
+		"cop_dea":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="32" r="30" fill="#0B0F19" stroke="#EF4444" stroke-width="2.5"/>
+				<path d="M10 62 C10 49 19 45 32 45 C45 45 54 49 54 62 Z" fill="#1E293B" stroke="#0F172A" stroke-width="2"/>
+				<rect x="18" y="50" width="28" height="12" rx="2" fill="#0F172A"/>
+				<path d="M22 53 H25 C26.5 53 27 54 27 56 C27 58 26.5 59 25 59 H22 Z M23.5 54.5 V57.5 H25 C25.8 57.5 26 57 26 56 C26 55 25.8 54.5 25 54.5 Z" fill="#FACC15"/>
+				<path d="M28.5 53 H33 V54.5 H30 V55.2 H32.5 V56.5 H30 V57.5 H33 V59 H28.5 Z" fill="#FACC15"/>
+				<path d="M36 53 H38 L40.5 59 H38.8 L38.3 57.6 H35.7 L35.2 59 H33.5 Z M36.2 56.3 H37.8 L37 54.2 Z" fill="#FACC15"/>
+				<rect x="42" y="44" width="6" height="8" rx="2" fill="#334155" stroke="#0F172A" stroke-width="1"/>
+				<rect x="28" y="38" width="8" height="9" fill="#FDBA74"/>
+				<path d="M22 28 C22 22 42 22 42 28 C42 38 38 44 32 44 C26 44 22 38 22 28 Z" fill="#FDBA74" stroke="#9A3412" stroke-width="1.2"/>
+				<ellipse cx="21" cy="31" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<ellipse cx="43" cy="31" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<line x1="28" y1="39" x2="36" y2="39" stroke="#9A3412" stroke-width="1.8" stroke-linecap="round"/>
+				<path d="M21 26 C21 22 31 22 31 26 C31 31 23 32 21 26 Z" fill="#020617" stroke="#EF4444" stroke-width="1.2"/>
+				<path d="M33 26 C33 22 43 22 43 26 C43 31 35 32 33 26 Z" fill="#020617" stroke="#EF4444" stroke-width="1.2"/>
+				<line x1="29" y1="24.5" x2="35" y2="24.5" stroke="#EF4444" stroke-width="1.5"/>
+				<line x1="23" y1="25" x2="29" y2="30" stroke="#F87171" stroke-width="1.2" opacity="0.9"/>
+				<line x1="35" y1="25" x2="41" y2="30" stroke="#F87171" stroke-width="1.2" opacity="0.9"/>
+				<path d="M19 22 Q32 25 45 22 Q44 26 41 27 Q32 28 23 27 Z" fill="#020617" stroke="#334155" stroke-width="1"/>
+				<path d="M21 22 C21 14 43 14 43 22 Z" fill="#0F172A" stroke="#334155" stroke-width="1.5"/>
+				<polygon points="32,15 34,18 32,20 30,18" fill="#FACC15"/>
 			</svg>"""
 		_:
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">

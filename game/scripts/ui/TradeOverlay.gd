@@ -190,46 +190,25 @@ func _rebuild() -> void:
 		)
 		mode_row.add_child(drop_tab)
 
-	# 4. Quantity Readout & Chunky Slider (48px quantity title, 84px slider)
+	# 4. Quantity Readout & Chunky Slider (48px quantity title, 48px slider with tactile grabber)
 	_qty_label = UiPalette.add_label(main_vbox, "Quantity: 0", 48, UiPalette.GOLD_ACCENT)
 	_qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	_qty_slider = HSlider.new()
-	_qty_slider.custom_minimum_size = Vector2(0, 84)
+	_qty_slider.custom_minimum_size = Vector2(0, 48)
 	_qty_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_qty_slider.step = 1
+	UiPalette.style_slider(_qty_slider)
 	_qty_slider.value_changed.connect(func(_v: float) -> void:
 		_update_preview()
 	)
 	main_vbox.add_child(_qty_slider)
 
-	# 5. Preset Percentage Buttons (1, 25%, 50%, 75%, MAX) (Enlarged to 88px height, 32px font)
-	var pct_row := HBoxContainer.new()
-	pct_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pct_row.add_theme_constant_override("separation", 12)
-	main_vbox.add_child(pct_row)
-	for pair in [["1", 0.0], ["25%", 0.25], ["50%", 0.50], ["75%", 0.75], ["MAX", 1.0]]:
-		var b := Button.new()
-		b.text = String(pair[0])
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size = Vector2(0, 88)
-		UiPalette.style_button(b, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, 32)
-		var frac := float(pair[1])
-		b.pressed.connect(func() -> void:
-			Audio.play(&"tap")
-			if frac <= 0.01:
-				_qty_slider.value = mini(1, _max_qty)
-			else:
-				_qty_slider.value = maxi(1, int(round(float(_max_qty) * frac)))
-			_update_preview()
-		)
-		pct_row.add_child(b)
-
-	# 6. Large Preview Label (42px)
+	# 5. Large Preview Label (42px)
 	_preview_label = UiPalette.add_label(main_vbox, "", 42, UiPalette.CASH_EMERALD)
 	_preview_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-	# 7. Big Confirm Action Button (112px tall, 48px font)
+	# 6. Big Confirm Action Button (112px tall, 48px font)
 	_confirm_btn = Button.new()
 	_confirm_btn.custom_minimum_size = Vector2(0, 112)
 	_confirm_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL

@@ -157,6 +157,25 @@ static func style_button(
 	btn.clip_text = true
 
 
+static func style_slider(slider: HSlider) -> void:
+	var grabber_tex := UiIcons.get_icon("slider_grabber", 48)
+	slider.add_theme_icon_override("grabber", grabber_tex)
+	slider.add_theme_icon_override("grabber_highlight", grabber_tex)
+	slider.add_theme_icon_override("grabber_disabled", grabber_tex)
+
+	var track_bg := make_box(CARD_BG, BORDER_SLATE, 8, 2, 0, 0)
+	track_bg.content_margin_top = 16
+	track_bg.content_margin_bottom = 16
+
+	var track_fill := make_box(GOLD_ACCENT, GOLD_ACCENT, 8, 0, 0, 0)
+	track_fill.content_margin_top = 16
+	track_fill.content_margin_bottom = 16
+
+	slider.add_theme_stylebox_override("slider", track_bg)
+	slider.add_theme_stylebox_override("grabber_area", track_fill)
+	slider.add_theme_stylebox_override("grabber_area_highlight", track_fill)
+
+
 static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) -> void:
 	var bg := BTN_PRIMARY if is_active else CARD_BG
 	var border := GOLD_ACCENT if is_active else BORDER_BRIGHT

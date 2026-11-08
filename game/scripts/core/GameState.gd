@@ -881,6 +881,14 @@ func combat_fight() -> Dictionary:
 	var cop_dmg_Result := _resolve_cop_return_fire(cops.size())
 	if not game_over and not active_combat.is_empty():
 		active_combat["round"] = int(active_combat.get("round", 1)) + 1
+		active_combat["last_action"] = "fight"
+		active_combat["last_player_dmg"] = player_dmg_dealt
+		active_combat["last_cops_downed"] = cops_downed_this_round
+		active_combat["last_cop_fire"] = cop_dmg_Result
+		var player_part := "💥 You dealt %d DMG!" % player_dmg_dealt if player_dmg_dealt > 0 else "❌ Your shots missed!"
+		if cops_downed_this_round > 0:
+			player_part += " (☠️ Officer Down!)"
+		active_combat["last_log"] = "%s Cop Return Fire: %s" % [player_part, cop_dmg_Result.get("summary", "No damage")]
 	return {
 		"ok": true,
 		"victory": false,
@@ -907,7 +915,9 @@ func combat_run() -> Dictionary:
 	var cop_fire := _resolve_cop_return_fire(cops.size())
 	if not game_over and not active_combat.is_empty():
 		active_combat["round"] = int(active_combat.get("round", 1)) + 1
-		active_combat["last_log"] = "🚂 Blocked by a train! Took return fire (%s)!" % cop_fire["summary"]
+		active_combat["last_action"] = "run"
+		active_combat["last_cop_fire"] = cop_fire
+		active_combat["last_log"] = "🚫 Escape Failed (Blocked in Traffic)! Cop Return Fire: %s" % cop_fire.get("summary", "No damage")
 	return {"ok": true, "escaped": false, "cop_fire": cop_fire, "game_over": game_over}
 
 
@@ -932,6 +942,8 @@ func _resolve_cop_return_fire(num_cops: int) -> Dictionary:
 	var max_d := int(active_combat["max_dmg"])
 
 	var dmg_to_player := 0
+	var dmg_to_armor := 0
+	var dmg_to_health := 0
 	var dmg_to_crew := 0
 	var crew_killed := 0
 
@@ -955,6 +967,8 @@ func _resolve_cop_return_fire(num_cops: int) -> Dictionary:
 				var hp_loss := raw_dmg - absorbed
 				health -= hp_loss
 				dmg_to_player += raw_dmg
+				dmg_to_armor += absorbed
+				dmg_to_health += hp_loss
 
 	if health <= 0:
 		health = 0
@@ -971,10 +985,10 @@ func _resolve_cop_return_fire(num_cops: int) -> Dictionary:
 		summary += ", %d Runner killed!" % crew_killed
 	elif dmg_to_crew > 0:
 		summary += ", Runner took %d dmg" % dmg_to_crew
-	if not active_combat.is_empty():
-		active_combat["last_log"] = "💥 Firefight Round %d: %s" % [int(active_combat.get("round", 1)), summary]
 	return {
 		"dmg_to_player": dmg_to_player,
+		"dmg_to_armor": dmg_to_armor,
+		"dmg_to_health": dmg_to_health,
 		"dmg_to_crew": dmg_to_crew,
 		"crew_killed": crew_killed,
 		"summary": summary
