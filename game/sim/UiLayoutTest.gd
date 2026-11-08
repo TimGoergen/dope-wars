@@ -40,7 +40,7 @@ func _initialize() -> void:
 		push_error("FAIL [Split Strip & SVG Icons]: loc='%s' travel_icon=%s news_size=%s day='%s'" % [loc_lbl.text, str(travel_btn.icon), str(news_icon_rect.size if news_icon_rect else Vector2.ZERO), day_lbl.text])
 		quit(1)
 		return
-	for icon_key in ["cash", "shark", "bank", "calendar", "coat", "heart", "siren", "newspaper", "newspaper_spike", "newspaper_flood", "car", "flag", "pill", "crown", "trash", "gun", "shield", "hospital", "martini", "dice", "scales", "gem", "trophy", "gear", "speaker_on", "speaker_off", "pin", "close_x", "fire", "snowflake", "check", "lock"]:
+	for icon_key in ["cash", "dollar", "shark", "bank", "calendar", "coat", "inventory", "heart", "siren", "newspaper", "newspaper_spike", "newspaper_flood", "car", "flag", "pill", "crown", "trash", "gun", "shield", "hospital", "martini", "dice", "scales", "gem", "trophy", "gear", "speaker_on", "speaker_off", "pin", "close_x", "fire", "snowflake", "check", "lock"]:
 		var tex := UiIcons.get_icon(icon_key, 64)
 		if tex == null or tex.get_width() != 64 or tex.get_height() != 64:
 			push_error("FAIL [UiIcons SVG Rasterizer]: icon '%s' failed to rasterize (tex=%s)" % [icon_key, str(tex)])
@@ -54,8 +54,9 @@ func _initialize() -> void:
 	var exp_panel: PanelContainer = main._news_expand_panel
 	var news_title: Label = main._news_title_lbl
 	var news_close: Button = main._news_close_btn
-	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 648.0) or not is_equal_approx(exp_panel.position.y + exp_panel.size.y, 1440.0) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44):
-		push_error("FAIL [News Popup Layout]: visible=%s pos=%s size=%s title_sz=%d close_icon=%s" % [str(exp_panel.visible), str(exp_panel.position), str(exp_panel.size), news_title.get_theme_font_size("font_size"), str(news_close.icon)])
+	var expected_h := roundf((1440.0 - scanner_card.get_global_rect().position.y) * 1.25)
+	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 810.0) or not is_equal_approx(exp_panel.size.y, expected_h) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44):
+		push_error("FAIL [News Popup Layout]: visible=%s pos=%s size=%s expected_h=%.1f title_sz=%d close_icon=%s" % [str(exp_panel.visible), str(exp_panel.position), str(exp_panel.size), expected_h, news_title.get_theme_font_size("font_size"), str(news_close.icon)])
 		quit(1)
 		return
 	main._set_news_expanded(false)

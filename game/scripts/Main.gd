@@ -198,7 +198,7 @@ func _build_dashboard_ui() -> void:
 
 	_news_expand_panel = PanelContainer.new()
 	_news_expand_panel.visible = false
-	_news_expand_panel.size = Vector2(648, 1080)
+	_news_expand_panel.size = Vector2(810, 1349)
 	_news_expand_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_news_expand_panel.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.GOLD_ACCENT, 16, 4, 20, 18))
 	_news_overlay.add_child(_news_expand_panel)
@@ -854,14 +854,14 @@ func _set_news_expanded(expanded: bool) -> void:
 	if vp_size.x <= 0.0 or vp_size.y <= 0.0:
 		vp_size = Vector2(1080.0, 2400.0)
 
-	# Fixed size & margins: 10% left margin (108px), 30% right margin (324px -> width 648px),
-	# same top height as the news strip, bottom reaches down to 40% from the bottom (y = 1440px).
+	# Fixed size & margins: 10% left margin (108px), 15% right margin (162px -> width 810px),
+	# same top height as the news strip, height increased by 25% over the previous 60%-bottom span.
 	var left_x := roundf(vp_size.x * 0.10)
-	var right_margin := roundf(vp_size.x * 0.30)
+	var right_margin := roundf(vp_size.x * 0.15)
 	var card_w := vp_size.x - left_x - right_margin
 	var top_y := _scanner_card.get_global_rect().position.y
 	var bottom_y := roundf(vp_size.y * 0.60)
-	var target_h := maxi(300, int(roundf(bottom_y - top_y)))
+	var target_h := maxi(300, int(roundf((bottom_y - top_y) * 1.25)))
 
 	_news_expand_vbox.custom_minimum_size = Vector2(card_w - 48.0, 0.0)
 
