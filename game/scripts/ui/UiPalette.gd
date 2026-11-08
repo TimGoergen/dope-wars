@@ -174,6 +174,7 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	btn.add_theme_constant_override("icon_max_width", 96)
 	btn.add_theme_stylebox_override("normal", normal)
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
