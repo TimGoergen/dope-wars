@@ -524,7 +524,7 @@ func _build_bottom_tab_bar(parent: VBoxContainer) -> void:
 	parent.add_child(bar)
 
 	var tab_defs := [
-		["MARKET", "pill", 0],
+		["MARKET", "market", 0],
 		["SPOT\n& BANK", "bank", 1],
 		["KINGPIN", "crown", 2]
 	]
@@ -870,7 +870,8 @@ func _set_news_expanded(expanded: bool) -> void:
 		var msg_str := String(state.scanner_log[i])
 		var is_travel := msg_str.contains("Pulled into") or msg_str.contains("Parked in")
 		var col := UiPalette.TEXT_PRIMARY if is_travel else UiPalette.TEXT_SECONDARY
-		var lbl := UiPalette.add_label(_news_expand_vbox, "• " + msg_str, log_font_sz, col, true, is_travel)
+		var line_text := UiIcons.strip_emojis(msg_str) if is_travel else ("• " + msg_str)
+		var lbl := UiPalette.add_label(_news_expand_vbox, line_text, log_font_sz, col, true, is_travel)
 		if is_travel:
 			lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.90))
 			lbl.add_theme_constant_override("outline_size", 3)

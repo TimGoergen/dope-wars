@@ -210,17 +210,22 @@ static func _get_svg_markup(name: String) -> String:
 			</svg>"""
 		"coat", "inventory":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<rect x="4" y="9" width="56" height="24" rx="7" fill="#0F172A"/>
-				<path d="M 6 29 H 58 V 47 A 8 8 0 0 1 50 55 H 14 A 8 8 0 0 1 6 47 Z" fill="#0F172A"/>
-				<path d="M 9 35 H 55 V 47 A 5 5 0 0 1 50 52 H 14 A 5 5 0 0 1 9 47 Z" fill="#D97706"/>
-				<path d="M 12 12 H 15 V 30 H 12 A 5 5 0 0 1 7 25 V 17 A 5 5 0 0 1 12 12 Z" fill="#F59E0B"/>
-				<rect x="19" y="12" width="26" height="18" fill="#F59E0B"/>
-				<path d="M 49 12 H 52 A 5 5 0 0 1 57 17 V 25 A 5 5 0 0 1 52 30 H 49 Z" fill="#F59E0B"/>
-				<rect x="15" y="12" width="4" height="23" fill="#F8FAFC"/>
-				<rect x="45" y="12" width="4" height="23" fill="#F8FAFC"/>
-				<rect x="9" y="30" width="46" height="5" fill="#F8FAFC"/>
-				<rect x="24" y="24" width="16" height="16" rx="5" fill="#F8FAFC"/>
-				<rect x="29.5" y="37" width="5" height="8" rx="2.5" fill="#F8FAFC"/>
+				<rect x="4" y="9" width="56" height="24" rx="7" fill="#090D16"/>
+				<path d="M 6 29 H 58 V 47 A 8 8 0 0 1 50 55 H 14 A 8 8 0 0 1 6 47 Z" fill="#090D16"/>
+				<path d="M 9 35 H 55 V 47 A 5 5 0 0 1 50 52 H 14 A 5 5 0 0 1 9 47 Z" fill="#5C2406"/>
+				<path d="M 12 12 H 14.5 V 29.5 H 12 A 5 5 0 0 1 7 24.5 V 17 A 5 5 0 0 1 12 12 Z" fill="#78350F"/>
+				<rect x="19.5" y="12" width="25" height="17.5" fill="#78350F"/>
+				<path d="M 49.5 12 H 52 A 5 5 0 0 1 57 17 V 24.5 A 5 5 0 0 1 52 29.5 H 49.5 Z" fill="#78350F"/>
+				<rect x="13.5" y="12" width="7" height="23" fill="#2A1003"/>
+				<rect x="43.5" y="12" width="7" height="23" fill="#2A1003"/>
+				<rect x="9" y="28.5" width="46" height="8" fill="#2A1003"/>
+				<rect x="22" y="22" width="20" height="20" rx="6.5" fill="#2A1003"/>
+				<rect x="27.5" y="36" width="9" height="11" rx="4" fill="#2A1003"/>
+				<rect x="15" y="12" width="4" height="22.5" fill="#FDE047"/>
+				<rect x="45" y="12" width="4" height="22.5" fill="#FDE047"/>
+				<rect x="9" y="30" width="46" height="5" fill="#FDE047"/>
+				<rect x="24" y="24" width="16" height="16" rx="5" fill="#FDE047"/>
+				<rect x="29.5" y="37" width="5" height="8" rx="2.5" fill="#FDE047"/>
 			</svg>"""
 		"heart":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
@@ -292,12 +297,29 @@ static func _get_svg_markup(name: String) -> String:
 				<rect x="25.5" y="23" width="9.5" height="13" fill="#0F172A"/>
 				<rect x="44.5" y="23" width="9.5" height="13" fill="#0F172A"/>
 			</svg>"""
-		"pill":
-			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<g transform="rotate(-45 32 32)">
-					<rect x="10" y="20" width="44" height="24" rx="12" fill="#F8FAFC" stroke="#0F172A" stroke-width="3"/>
-					<path d="M32 20 H22 A12 12 0 0 0 22 44 H32 Z" fill="#EF4444" stroke="#0F172A" stroke-width="3"/>
-					<line x1="18" y1="26" x2="28" y2="26" stroke="#FCA5A5" stroke-width="3" stroke-linecap="round"/>
+		"market", "pill":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+				<g transform="scale(2)">
+					<g transform="rotate(-10 10 9)">
+						<rect x="2.5" y="5" width="14.5" height="9" rx="1.8" fill="#15803D" stroke="#0B0F19" stroke-width="1.4"/>
+					</g>
+					<rect x="3.5" y="3.5" width="14.5" height="9" rx="1.8" fill="#4ADE80" stroke="#0B0F19" stroke-width="1.5"/>
+					<circle cx="10.7" cy="8" r="2.2" fill="#166534"/>
+					<circle cx="6" cy="6" r="0.8" fill="#166534"/>
+					<circle cx="15.5" cy="10" r="0.8" fill="#166534"/>
+					<rect x="15.5" y="13.5" width="13.5" height="14.5" rx="2.2" fill="#0F172A" stroke="#CBD5E1" stroke-width="1.5"/>
+					<path d="M16.5 21L19.5 18.8l2.8 2 2.7-2.3 3 2.5v5a1.2 1.2 0 0 1-1.2 1.2h-9.1a1.2 1.2 0 0 1-1.2-1.2V21z" fill="#38BDF8"/>
+					<polygon points="20 26.5 22.5 21.8 25 26.5" fill="#E0F2FE" opacity="0.85"/>
+					<line x1="16.3" y1="16.8" x2="28.2" y2="16.8" stroke="#EF4444" stroke-width="2"/>
+					<g transform="translate(16, 23.5) rotate(-40) scale(1.08)">
+						<path d="M-2.3 0 V-3.2 A2.3 2.3 0 0 1 2.3 -3.2 V0 Z" fill="#EF4444" stroke="#0B0F19" stroke-width="1.4" stroke-linejoin="round"/>
+						<path d="M-2.3 0 H2.3 V3.2 A2.3 2.3 0 0 1 -2.3 3.2 V0 Z" fill="#F8FAFC" stroke="#0B0F19" stroke-width="1.4" stroke-linejoin="round"/>
+						<line x1="-1.1" y1="-3" x2="-1.1" y2="-1" stroke="#FCA5A5" stroke-width="0.9" stroke-linecap="round"/>
+					</g>
+					<path d="M21 5h5.5v5.5" stroke="#FACC15" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+					<path d="M26.5 5 21.5 10" stroke="#FACC15" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+					<path d="M10.5 27H5v-5.5" stroke="#FACC15" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+					<path d="M5 27l5-5" stroke="#FACC15" stroke-width="2.2" stroke-linecap="round" fill="none"/>
 				</g>
 			</svg>"""
 		"crown":

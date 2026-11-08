@@ -40,7 +40,7 @@ func _initialize() -> void:
 		push_error("FAIL [Split Strip & SVG Icons]: loc='%s' travel_icon=%s news_size=%s day='%s'" % [loc_lbl.text, str(travel_btn.icon), str(news_icon_rect.size if news_icon_rect else Vector2.ZERO), day_lbl.text])
 		quit(1)
 		return
-	for icon_key in ["cash", "dollar", "shark", "bank", "calendar", "coat", "inventory", "heart", "siren", "newspaper", "newspaper_spike", "newspaper_flood", "car", "flag", "pill", "crown", "trash", "gun", "shield", "hospital", "martini", "dice", "scales", "gem", "trophy", "gear", "speaker_on", "speaker_off", "pin", "close_x", "fire", "snowflake", "check", "lock"]:
+	for icon_key in ["cash", "dollar", "shark", "bank", "calendar", "coat", "inventory", "heart", "siren", "newspaper", "newspaper_spike", "newspaper_flood", "car", "flag", "market", "pill", "crown", "trash", "gun", "shield", "hospital", "martini", "dice", "scales", "gem", "trophy", "gear", "speaker_on", "speaker_off", "pin", "close_x", "fire", "snowflake", "check", "lock"]:
 		var tex := UiIcons.get_icon(icon_key, 64)
 		if tex == null or tex.get_width() != 64 or tex.get_height() != 64:
 			push_error("FAIL [UiIcons SVG Rasterizer]: icon '%s' failed to rasterize (tex=%s)" % [icon_key, str(tex)])
@@ -59,7 +59,7 @@ func _initialize() -> void:
 	var expected_h := roundf((1440.0 - scanner_card.get_global_rect().position.y) * 1.25)
 	var first_log_lbl: Label = main._news_expand_vbox.get_child(0) as Label
 	var second_log_lbl: Label = main._news_expand_vbox.get_child(1) as Label
-	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 810.0) or not is_equal_approx(exp_panel.size.y, expected_h) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44) or first_log_lbl.get_theme_font_size("font_size") != 32 or first_log_lbl.has_theme_font_override("font") or not second_log_lbl.has_theme_font_override("font"):
+	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 810.0) or not is_equal_approx(exp_panel.size.y, expected_h) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44) or first_log_lbl.get_theme_font_size("font_size") != 32 or first_log_lbl.has_theme_font_override("font") or not second_log_lbl.has_theme_font_override("font") or not first_log_lbl.text.begins_with("• ") or second_log_lbl.text.begins_with("•"):
 		push_error("FAIL [News Popup Layout]: visible=%s pos=%s size=%s expected_h=%.1f title_sz=%d log_sz=%d" % [str(exp_panel.visible), str(exp_panel.position), str(exp_panel.size), expected_h, news_title.get_theme_font_size("font_size"), first_log_lbl.get_theme_font_size("font_size")])
 		quit(1)
 		return
@@ -69,7 +69,7 @@ func _initialize() -> void:
 	var tab0_rect: Rect2 = tab0_btn.get_global_rect()
 	var tab0_sb: StyleBoxFlat = tab0_btn.get_theme_stylebox("normal") as StyleBoxFlat
 	var tab2_sb: StyleBoxFlat = tab2_btn.get_theme_stylebox("normal") as StyleBoxFlat
-	if tab0_rect.size.y < 196.0 or tab0_rect.end.y > 2353.0 or tab0_sb.corner_radius_bottom_left != 64 or tab2_sb.corner_radius_bottom_right != 64:
+	if tab0_rect.size.y < 196.0 or tab0_rect.end.y > 2353.0 or tab0_sb.corner_radius_bottom_left != 64 or tab2_sb.corner_radius_bottom_right != 64 or tab0_btn.icon != UiIcons.get_icon("market", 60):
 		push_error("FAIL [Bottom Tab Bar]: rect=%s bl=%d br=%d" % [str(tab0_rect), tab0_sb.corner_radius_bottom_left, tab2_sb.corner_radius_bottom_right])
 		quit(1)
 		return
