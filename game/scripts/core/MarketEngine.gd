@@ -55,25 +55,21 @@ static func roll_daily_market(
 		var max_p := int(tuning.get(p_def["max_prop"]))
 		var base_price := float(rng.randi_range(min_p, max_p))
 		var affinity_mult := get_district_affinity_multiplier(district, pid, tuning)
-		var signal_tag := "normal"
-		if affinity_mult > 1.01:
-			signal_tag = "high"
-		elif affinity_mult < 0.99:
-			signal_tag = "low"
 
 		var ev_mult := 1.0
+		var event_tag := ""
 		if active_events.has(pid):
 			var et: String = active_events[pid]
 			if et == "spike":
 				ev_mult = tuning.spike_multiplier
-				signal_tag = "spike"
+				event_tag = "spike"
 			else:
 				ev_mult = 1.0 / maxf(tuning.flood_divisor, 1.0)
-				signal_tag = "flood"
+				event_tag = "flood"
 
 		var final_price := maxi(1, int(round(base_price * affinity_mult * ev_mult)))
 		prices[pid] = final_price
-		signals[pid] = signal_tag
+		signals[pid] = event_tag if event_tag != "" else _classify_price_signal(final_price, min_p, max_p)
 
 	# Safety guarantee: at least 6 products are always listed on any normal day.
 	if available_count < 6:
@@ -83,8 +79,9 @@ static func roll_daily_market(
 				var min_p := int(tuning.get(p_def["min_prop"]))
 				var max_p := int(tuning.get(p_def["max_prop"]))
 				var affinity_mult := get_district_affinity_multiplier(district, pid, tuning)
-				prices[pid] = maxi(1, int(round(float(rng.randi_range(min_p, max_p)) * affinity_mult)))
-				signals[pid] = "high" if affinity_mult > 1.01 else ("low" if affinity_mult < 0.99 else "normal")
+				var fallback_price := maxi(1, int(round(float(rng.randi_range(min_p, max_p)) * affinity_mult)))
+				prices[pid] = fallback_price
+				signals[pid] = _classify_price_signal(fallback_price, min_p, max_p)
 				available_count += 1
 				if available_count >= 6:
 					break
@@ -147,6 +144,15 @@ static func roll_forecast_event(
 		"product_name": rp["name"],
 		"event_type": et
 	}
+
+
+static func _classify_price_signal(final_price: int, min_p: int, max_p: int) -> String:
+	var span := float(max_p - min_p)
+	if float(final_price) <= float(min_p) + span * 0.25:
+		return "low"
+	if float(final_price) >= float(min_p) + span * 0.75:
+		return "high"
+	return "normal"
 
 
 static func _event_message_for(p_def: Dictionary, event_type: String) -> String:

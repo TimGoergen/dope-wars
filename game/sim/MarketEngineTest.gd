@@ -45,6 +45,25 @@ func _init() -> void:
 	_assert_true(absf(MarketEngine.get_district_affinity_multiplier(west_o, "cocaine", tuning) - 1.20) < 0.001, "West O Cocaine 1.20x")
 	_assert_true(absf(MarketEngine.get_district_affinity_multiplier(cb, "meth", tuning) - 0.80) < 0.001, "Council Bluffs Meth 0.80x")
 
+	# 4. Verify CHEAP ("low") and PRICY ("high") signals strictly match actual price quartiles
+	for _day in range(50):
+		for d_def in OmahaCatalog.DISTRICTS:
+			var did := String(d_def["id"])
+			var mres := MarketEngine.roll_daily_market(did, false, {}, tuning, rng)
+			var mprices: Dictionary = mres["prices"]
+			var msigs: Dictionary = mres["signals"]
+			for p_def in OmahaCatalog.PRODUCTS:
+				var pid: String = p_def["id"]
+				var pr := int(mprices[pid])
+				var sg := String(msigs[pid])
+				var min_p := int(tuning.get(p_def["min_prop"]))
+				var max_p := int(tuning.get(p_def["max_prop"]))
+				var span := float(max_p - min_p)
+				if sg == "low":
+					_assert_true(float(pr) <= float(min_p) + span * 0.25, "Low signal price check (%s: %d)" % [pid, pr])
+				elif sg == "high":
+					_assert_true(float(pr) >= float(min_p) + span * 0.75, "High signal price check (%s: %d)" % [pid, pr])
+
 	if _failures == 0:
 		print("ALL CHECKS PASSED")
 		quit(0)
