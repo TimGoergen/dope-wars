@@ -295,10 +295,10 @@ static func make_hero_header_box() -> StyleBoxFlat:
 	sb.corner_radius_top_right = 64
 	sb.corner_radius_bottom_left = 24
 	sb.corner_radius_bottom_right = 24
-	sb.content_margin_left = 28
-	sb.content_margin_right = 28
+	sb.content_margin_left = 24
+	sb.content_margin_right = 24
 	sb.content_margin_top = 24
-	sb.content_margin_bottom = 22
+	sb.content_margin_bottom = 16
 	return sb
 
 
@@ -370,9 +370,12 @@ static func build_modal_shell(
 
 	if allow_close:
 		var close_btn := Button.new()
-		close_btn.text = "X CLOSE"
-		close_btn.custom_minimum_size = Vector2(170, 72)
-		style_button(close_btn, BTN_DANGER, DEBT_CRIMSON, TEXT_PRIMARY, FONT_SMALL)
+		close_btn.text = ""
+		close_btn.icon = UiIcons.get_icon("close_x", 44)
+		close_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		close_btn.custom_minimum_size = Vector2(64, 64)
+		close_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		style_flat_inert_button(close_btn)
 		close_btn.pressed.connect(func() -> void:
 			Audio.play(&"tap")
 			if on_close.is_valid():
@@ -394,20 +397,5 @@ static func build_modal_shell(
 	body_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body_vbox.add_theme_constant_override("separation", 16)
 	scroll.add_child(body_vbox)
-
-	if allow_close:
-		var bottom_close := Button.new()
-		bottom_close.text = "BACK TO STREETS"
-		bottom_close.custom_minimum_size = Vector2(0, 84)
-		bottom_close.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		style_button(bottom_close, CARD_BG, BORDER_BRIGHT, TEXT_PRIMARY, FONT_BUTTON)
-		bottom_close.pressed.connect(func() -> void:
-			Audio.play(&"tap")
-			if on_close.is_valid():
-				on_close.call()
-			else:
-				overlay.visible = false
-		)
-		card_vbox.add_child(bottom_close)
 
 	return body_vbox

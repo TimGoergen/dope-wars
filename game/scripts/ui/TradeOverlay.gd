@@ -17,13 +17,13 @@ var _max_qty: int = 0
 
 
 func _init() -> void:
-	color = UiPalette.MODAL_BACKDROP
+	color = Color(0.0, 0.0, 0.0, 0.70)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	visible = false
 
 
-func open_for_product(state: GameState, product_id: String) -> void:
+func open_for_product(state: GameState, product_id: String, bounds_rect: Rect2 = Rect2()) -> void:
 	_state = state
 	_product_id = product_id
 
@@ -39,6 +39,13 @@ func open_for_product(state: GameState, product_id: String) -> void:
 		_mode = "dump"
 	else:
 		return
+
+	if bounds_rect.size.x > 0.0 and bounds_rect.size.y > 0.0:
+		set_anchors_preset(Control.PRESET_TOP_LEFT)
+		position = bounds_rect.position
+		size = bounds_rect.size
+	else:
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	_rebuild()
 	visible = true

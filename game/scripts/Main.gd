@@ -38,6 +38,7 @@ var _news_expand_panel: PanelContainer
 var _news_title_lbl: Label
 var _news_close_btn: Button
 var _news_expand_vbox: VBoxContainer
+var _market_board: PanelContainer
 var _product_rows: Dictionary = {} # product_id -> Dictionary of nodes
 
 # Spot & Bank Tab Dynamic VBox
@@ -251,7 +252,7 @@ func _build_dashboard_ui() -> void:
 func _build_hero_header(parent: VBoxContainer) -> void:
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(0, 268)
+	card.custom_minimum_size = Vector2(0, 420)
 	card.add_theme_stylebox_override("panel", UiPalette.make_hero_header_box())
 	parent.add_child(card)
 	_hero_card = card
@@ -307,21 +308,21 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 
 	_heat_lbl = UiPalette.add_hero_stat(r3, "siren", 44, "0%", UiPalette.FONT_HERO_ROW3, UiPalette.SPIKE_AMBER, HORIZONTAL_ALIGNMENT_RIGHT, true)
 
+	# Divider between Row 3 (Inventory/Health/Wanted) and Row 4 (Location Row)
+	var divider2 := ColorRect.new()
+	divider2.color = UiPalette.BORDER_SLATE
+	divider2.custom_minimum_size = Vector2(0, 3)
+	divider2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_child(divider2)
 
-func _build_market_tab() -> Control:
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 10)
-
-	# Top Strip: Left = Newspaper SVG Icon (frameless, press & hold to expand) | Middle = Centered Location Name | Right = Car SVG Icon (frameless)
+	# Row 4: Newspaper Button | Centered Location Name | Pin Travel Button
 	var top_strip := HBoxContainer.new()
 	top_strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_strip.custom_minimum_size = Vector2(0, 152)
+	top_strip.custom_minimum_size = Vector2(0, 136)
 	top_strip.add_theme_constant_override("separation", 12)
 	vbox.add_child(top_strip)
 
-	# Left: Frameless Newspaper SVG Icon (112x112, vertically & horizontally centered, same height as travel pin)
+	# Left: Frameless Newspaper SVG Icon (112x112, vertically & horizontally centered)
 	_scanner_card = PanelContainer.new()
 	_scanner_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scanner_card.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -356,7 +357,7 @@ func _build_market_tab() -> Control:
 	_loc_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_loc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	# Right: Frameless Location Pin SVG Travel Button (112x112 rounder/fatter pin icon, vertically & horizontally centered)
+	# Right: Frameless Location Pin SVG Travel Button (112x112 rounder/fatter pin icon)
 	_travel_btn = Button.new()
 	_travel_btn.text = ""
 	_travel_btn.icon = UiIcons.get_icon("pin", 112)
@@ -385,8 +386,16 @@ func _build_market_tab() -> Control:
 	)
 	top_strip.add_child(_finish_run_btn)
 
+
+func _build_market_tab() -> Control:
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 10)
+
 	# Filtered Active Product Board (Only shows available or held products so rows expand ~35% taller)
 	var board := PanelContainer.new()
+	_market_board = board
 	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	board.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 3, 12, 10))
@@ -425,7 +434,8 @@ func _build_market_tab() -> Control:
 			if int(cur_entry["qty"]) <= 0 and state.get_max_buyable(pid) <= 0:
 				return
 			Audio.play(&"tap")
-			_trade_overlay.open_for_product(state, pid)
+			var b_rect := _market_board.get_global_rect() if _market_board != null else Rect2()
+			_trade_overlay.open_for_product(state, pid, b_rect)
 		)
 		row_hbox.add_child(row_tap_btn)
 
@@ -583,19 +593,12 @@ func _open_travel_modal() -> void:
 		margin_node.add_theme_constant_override("margin_left", 18)
 		margin_node.add_theme_constant_override("margin_right", 18)
 		var card_vbox := vbox.get_parent().get_parent() as VBoxContainer
-		if card_vbox != null and card_vbox.get_child_count() >= 3:
+		if card_vbox != null and card_vbox.get_child_count() >= 2:
 			var hdr := card_vbox.get_child(0) as HBoxContainer
 			if hdr != null:
 				for hc in hdr.get_children():
 					if hc is Label:
 						(hc as Label).add_theme_font_size_override("font_size", UiPalette.FONT_TITLE)
-					elif hc is Button:
-						(hc as Button).custom_minimum_size = Vector2(186, 80)
-						(hc as Button).add_theme_font_size_override("font_size", UiPalette.FONT_BUTTON)
-			var btm_btn := card_vbox.get_child(card_vbox.get_child_count() - 1) as Button
-			if btm_btn != null:
-				btm_btn.custom_minimum_size = Vector2(0, 96)
-				btm_btn.add_theme_font_size_override("font_size", UiPalette.FONT_SUBHEAD)
 
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
 	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Tap any destination to drive (advances 1 Day)." % [
@@ -682,25 +685,6 @@ func _open_travel_modal() -> void:
 func _rebuild_spot_tab() -> void:
 	for c in _spot_vbox.get_children():
 		c.queue_free()
-
-	var cur_d := OmahaCatalog.get_district(state.current_district_id)
-
-	var top_row := HBoxContainer.new()
-	top_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_row.add_theme_constant_override("separation", 12)
-	_spot_vbox.add_child(top_row)
-
-	var loc_btn := Button.new()
-	loc_btn.text = "🚗 Travel from %s (%s)" % [cur_d["name"], cur_d["icon"]]
-	loc_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	loc_btn.custom_minimum_size = Vector2(0, 86)
-	loc_btn.disabled = state.is_final_day()
-	UiPalette.style_button(loc_btn, UiPalette.BTN_PRIMARY, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, UiPalette.FONT_SUBHEAD)
-	loc_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		_open_travel_modal()
-	)
-	top_row.add_child(loc_btn)
 
 	FacilityOverlay.build_district_facility_cards(_spot_vbox, state, func() -> void:
 		_auto_save()
@@ -861,7 +845,8 @@ func _on_quick_action_pressed(product_id: String) -> void:
 			Audio.play(&"buy")
 			Haptics.pulse(24.0)
 		else:
-			_trade_overlay.open_for_product(state, product_id)
+			var b_rect := _market_board.get_global_rect() if _market_board != null else Rect2()
+			_trade_overlay.open_for_product(state, product_id, b_rect)
 			return
 
 	_auto_save()
