@@ -186,14 +186,14 @@ static func _get_svg_markup(name: String) -> String:
 			</svg>"""
 		"bank":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<polygon points="32,6 6,22 58,22" fill="#38BDF8" stroke="#082F49" stroke-width="3" stroke-linejoin="round"/>
-				<circle cx="32" cy="16" r="3.5" fill="#FACC15"/>
-				<rect x="8" y="22" width="48" height="5" rx="1.5" fill="#7DD3FC" stroke="#082F49" stroke-width="2"/>
-				<rect x="13" y="27" width="6" height="21" fill="#E0F2FE" stroke="#082F49" stroke-width="2"/>
-				<rect x="29" y="27" width="6" height="21" fill="#E0F2FE" stroke="#082F49" stroke-width="2"/>
-				<rect x="45" y="27" width="6" height="21" fill="#E0F2FE" stroke="#082F49" stroke-width="2"/>
-				<rect x="8" y="48" width="48" height="5" rx="1.5" fill="#38BDF8" stroke="#082F49" stroke-width="2"/>
-				<rect x="4" y="53" width="56" height="6" rx="2" fill="#0284C7" stroke="#082F49" stroke-width="2"/>
+				<polygon points="32,4 4,21 60,21" fill="#38BDF8" stroke="#082F49" stroke-width="3" stroke-linejoin="round"/>
+				<circle cx="32" cy="15" r="3.5" fill="#FACC15"/>
+				<rect x="6" y="21" width="52" height="6" rx="1.5" fill="#7DD3FC" stroke="#082F49" stroke-width="2"/>
+				<rect x="11" y="27" width="7" height="24" fill="#E0F2FE" stroke="#082F49" stroke-width="2"/>
+				<rect x="28.5" y="27" width="7" height="24" fill="#E0F2FE" stroke="#082F49" stroke-width="2"/>
+				<rect x="46" y="27" width="7" height="24" fill="#E0F2FE" stroke="#082F49" stroke-width="2"/>
+				<rect x="6" y="51" width="52" height="6" rx="1.5" fill="#38BDF8" stroke="#082F49" stroke-width="2"/>
+				<rect x="2" y="57" width="60" height="6" rx="2" fill="#0284C7" stroke="#082F49" stroke-width="2"/>
 			</svg>"""
 		"calendar":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
@@ -324,11 +324,13 @@ static func _get_svg_markup(name: String) -> String:
 			</svg>"""
 		"crown":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<polygon points="8,48 12,18 25,31 32,12 39,31 52,18 56,48" fill="#FACC15" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>
-				<rect x="8" y="48" width="48" height="7" rx="2" fill="#EAB308" stroke="#0F172A" stroke-width="3"/>
-				<circle cx="32" cy="38" r="4" fill="#EF4444"/>
-				<circle cx="19" cy="40" r="3" fill="#38BDF8"/>
-				<circle cx="45" cy="40" r="3" fill="#38BDF8"/>
+				<g transform="translate(0, 4)">
+					<polygon points="6,46 10,14 24,28 32,8 40,28 54,14 58,46" fill="#FACC15" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>
+					<rect x="6" y="46" width="52" height="8" rx="2" fill="#EAB308" stroke="#0F172A" stroke-width="3"/>
+					<circle cx="32" cy="35" r="4.5" fill="#EF4444"/>
+					<circle cx="18" cy="37" r="3.5" fill="#38BDF8"/>
+					<circle cx="46" cy="37" r="3.5" fill="#38BDF8"/>
+				</g>
 			</svg>"""
 		"trash":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">

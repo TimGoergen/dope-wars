@@ -166,8 +166,8 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 	var pressed := make_box(bg.darkened(0.16), border, 20, 4, 14, 14)
 
 	for sb in [normal, hover, pressed]:
-		sb.content_margin_top = 18
-		sb.content_margin_bottom = 14
+		sb.content_margin_top = 28
+		sb.content_margin_bottom = 12
 		if tab_idx == 0:
 			sb.corner_radius_bottom_left = 64
 		elif tab_idx == 2:
