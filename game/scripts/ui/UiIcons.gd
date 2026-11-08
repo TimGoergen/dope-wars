@@ -412,8 +412,8 @@ static func _get_svg_markup(name: String) -> String:
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
 				<path d="M32 58 C24 52 7 39 7 26 C7 13.5 18 6 32 6 C46 6 57 13.5 57 26 C57 39 40 52 32 58 Z" fill="#EF4444" stroke="#0F172A" stroke-width="3.5" stroke-linejoin="round"/>
 				<path d="M15 21 C18 14 24 11 31 11" stroke="#FCA5A5" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-				<circle cx="32" cy="26" r="12" fill="#F8FAFC" stroke="#0F172A" stroke-width="3"/>
-				<path d="M25 26 H36 M33 21 L39 26 L33 31" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+				<circle cx="32" cy="26" r="14" fill="#0F172A" stroke="#052E16" stroke-width="2"/>
+				<polygon points="21,23 33,23 33,17 44,26 33,35 33,29 21,29" fill="#22C55E" stroke="#86EFAC" stroke-width="1.8" stroke-linejoin="round"/>
 			</svg>"""
 		"close_x":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
