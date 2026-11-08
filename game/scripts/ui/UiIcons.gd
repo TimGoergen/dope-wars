@@ -210,22 +210,25 @@ static func _get_svg_markup(name: String) -> String:
 			</svg>"""
 		"coat", "inventory":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<rect x="4" y="9" width="56" height="24" rx="7" fill="#090D16"/>
-				<path d="M 6 29 H 58 V 47 A 8 8 0 0 1 50 55 H 14 A 8 8 0 0 1 6 47 Z" fill="#090D16"/>
-				<path d="M 9 35 H 55 V 47 A 5 5 0 0 1 50 52 H 14 A 5 5 0 0 1 9 47 Z" fill="#5C2406"/>
-				<path d="M 12 12 H 14.5 V 29.5 H 12 A 5 5 0 0 1 7 24.5 V 17 A 5 5 0 0 1 12 12 Z" fill="#78350F"/>
-				<rect x="19.5" y="12" width="25" height="17.5" fill="#78350F"/>
-				<path d="M 49.5 12 H 52 A 5 5 0 0 1 57 17 V 24.5 A 5 5 0 0 1 52 29.5 H 49.5 Z" fill="#78350F"/>
-				<rect x="13.5" y="12" width="7" height="23" fill="#2A1003"/>
-				<rect x="43.5" y="12" width="7" height="23" fill="#2A1003"/>
-				<rect x="9" y="28.5" width="46" height="8" fill="#2A1003"/>
-				<rect x="22" y="22" width="20" height="20" rx="6.5" fill="#2A1003"/>
-				<rect x="27.5" y="36" width="9" height="11" rx="4" fill="#2A1003"/>
-				<rect x="15" y="12" width="4" height="22.5" fill="#FDE047"/>
-				<rect x="45" y="12" width="4" height="22.5" fill="#FDE047"/>
-				<rect x="9" y="30" width="46" height="5" fill="#FDE047"/>
-				<rect x="24" y="24" width="16" height="16" rx="5" fill="#FDE047"/>
-				<rect x="29.5" y="37" width="5" height="8" rx="2.5" fill="#FDE047"/>
+				<!-- Outer High-Contrast Gold/Amber Leather Trim Border -->
+				<rect x="3" y="8" width="58" height="25" rx="7.5" fill="#FACC15" stroke="#0F172A" stroke-width="2.5"/>
+				<path d="M 5 28 H 59 V 48 A 8.5 8.5 0 0 1 50.5 56.5 H 13.5 A 8.5 8.5 0 0 1 5 48 Z" fill="#FACC15" stroke="#0F172A" stroke-width="2.5"/>
+				<!-- Rich Warm Amber/Carhartt Leather Body -->
+				<rect x="5.5" y="10.5" width="53" height="20" rx="5" fill="#D97706"/>
+				<path d="M 7.5 29.5 H 56.5 V 47 A 6 6 0 0 1 50.5 53 H 13.5 A 6 6 0 0 1 7.5 47 Z" fill="#B45309"/>
+				<rect x="18" y="11" width="28" height="18" fill="#F59E0B"/>
+				<!-- Dark Leather Reinforcement Straps & Brass Buckles -->
+				<rect x="13.5" y="10.5" width="6.5" height="25" fill="#451A03"/>
+				<rect x="44" y="10.5" width="6.5" height="25" fill="#451A03"/>
+				<rect x="7.5" y="28" width="49" height="7" fill="#451A03"/>
+				<rect x="22" y="21" width="20" height="20" rx="6" fill="#451A03"/>
+				<rect x="27.5" y="35" width="9" height="11" rx="4" fill="#451A03"/>
+				<!-- Gleaming Brass Hardware / Buckles / Rivets -->
+				<rect x="15" y="11" width="3.5" height="24" fill="#FEF08A"/>
+				<rect x="45.5" y="11" width="3.5" height="24" fill="#FEF08A"/>
+				<rect x="7.5" y="29.5" width="49" height="4" fill="#FEF08A"/>
+				<rect x="24" y="23" width="16" height="16" rx="4.5" fill="#FEF08A"/>
+				<rect x="29" y="36.5" width="6" height="8" rx="2" fill="#FEF08A"/>
 			</svg>"""
 		"heart":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
