@@ -166,8 +166,8 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 	var pressed := make_box(bg.darkened(0.16), border, 20, 4, 14, 14)
 
 	for sb in [normal, hover, pressed]:
-		sb.content_margin_top = 28
-		sb.content_margin_bottom = 12
+		sb.content_margin_top = 54
+		sb.content_margin_bottom = 14
 		if tab_idx == 0:
 			sb.corner_radius_bottom_left = 64
 		elif tab_idx == 2:
@@ -176,7 +176,7 @@ static func style_bottom_tab_button(btn: Button, is_active: bool, tab_idx: int) 
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-	btn.add_theme_constant_override("icon_max_width", 112)
+	btn.add_theme_constant_override("icon_max_width", 128)
 	btn.add_theme_stylebox_override("normal", normal)
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
