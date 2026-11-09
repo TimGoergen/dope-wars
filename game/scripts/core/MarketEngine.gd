@@ -170,3 +170,52 @@ static func _event_message_for(p_def: Dictionary, event_type: String) -> String:
 	if event_type == "spike":
 		return "🔥 4x SPIKE: " + String(p_def.get("spike_msg", ""))
 	return "❄️ 1/4 FLOOD: " + String(p_def.get("flood_msg", ""))
+
+
+static func calc_price_tier(price: int, min_p: int, max_p: int) -> Dictionary:
+	if price <= 0:
+		return {
+			"active_count": 0,
+			"label": "NO BUYERS",
+			"color": Color("#64748B"),
+			"bg": Color("#0F172A")
+		}
+	var span := maxi(1, max_p - min_p)
+	var percent := clampf(float(price - min_p) / float(span), 0.0, 1.0)
+	var active_count := mini(5, int(floor(percent * 5.0)) + 1)
+	match active_count:
+		1:
+			return {
+				"active_count": 1,
+				"label": "★ STEAL",
+				"color": Color("#38BDF8"),
+				"bg": Color(0.22, 0.74, 0.97, 0.15)
+			}
+		2:
+			return {
+				"active_count": 2,
+				"label": "CHEAP",
+				"color": Color("#4ADE80"),
+				"bg": Color(0.29, 0.87, 0.50, 0.15)
+			}
+		3:
+			return {
+				"active_count": 3,
+				"label": "FAIR",
+				"color": Color("#94A3B8"),
+				"bg": Color(0.58, 0.64, 0.72, 0.15)
+			}
+		4:
+			return {
+				"active_count": 4,
+				"label": "HIGH",
+				"color": Color("#F59E0B"),
+				"bg": Color(0.96, 0.62, 0.04, 0.15)
+			}
+		_:
+			return {
+				"active_count": 5,
+				"label": "PRICY",
+				"color": Color("#EF4444"),
+				"bg": Color(0.94, 0.27, 0.27, 0.18)
+			}

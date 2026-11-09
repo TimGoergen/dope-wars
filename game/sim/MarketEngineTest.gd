@@ -77,6 +77,33 @@ func _init() -> void:
 			_assert_eq(gs.market_signals[pid], prev_sigs[pid], "Travel preview signal match (%s in %s)" % [pid, target_id])
 			_assert_eq(gs.market_prices[pid], prev_prices[pid], "Travel preview price match (%s in %s)" % [pid, target_id])
 
+	# 6. Verify 5-tier price meter calculation across full range
+	var t1 := MarketEngine.calc_price_tier(100, 100, 600)
+	_assert_eq(t1["active_count"], 1, "Min price has 1 active dollar")
+	_assert_eq(t1["label"], "★ STEAL", "Tier 1 label is STEAL")
+
+	var t2 := MarketEngine.calc_price_tier(250, 100, 600)
+	_assert_eq(t2["active_count"], 2, "30% position has 2 active dollars")
+	_assert_eq(t2["label"], "CHEAP", "Tier 2 label is CHEAP")
+
+	var t3 := MarketEngine.calc_price_tier(350, 100, 600)
+	_assert_eq(t3["active_count"], 3, "50% position has 3 active dollars")
+	_assert_eq(t3["label"], "FAIR", "Tier 3 label is FAIR")
+
+	var t4 := MarketEngine.calc_price_tier(450, 100, 600)
+	_assert_eq(t4["active_count"], 4, "70% position has 4 active dollars")
+	_assert_eq(t4["label"], "HIGH", "Tier 4 label is HIGH")
+
+	var t5 := MarketEngine.calc_price_tier(600, 100, 600)
+	_assert_eq(t5["active_count"], 5, "Max price has 5 active dollars")
+	_assert_eq(t5["label"], "PRICY", "Tier 5 label is PRICY")
+
+	var t_spike := MarketEngine.calc_price_tier(1200, 100, 600)
+	_assert_eq(t_spike["active_count"], 5, "Spike clamped to 5 active dollars")
+
+	var t_flood := MarketEngine.calc_price_tier(25, 100, 600)
+	_assert_eq(t_flood["active_count"], 1, "Flood clamped to 1 active dollar")
+
 	if _failures == 0:
 		print("ALL CHECKS PASSED")
 		quit(0)

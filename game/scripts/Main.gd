@@ -466,6 +466,44 @@ func _build_market_tab() -> Control:
 		var name_lbl := UiPalette.add_label(name_row, String(p_def["name"]), UiPalette.FONT_DRUG_NAME, UiPalette.TEXT_PRIMARY, false, true)
 		name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+		# 5-Tier "$$$$$" Price Meter + Companion Pill Badge (Above Norm: $X–$Y)
+		var meter_row := HBoxContainer.new()
+		meter_row.add_theme_constant_override("separation", 10)
+		meter_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		left_vbox.add_child(meter_row)
+
+		var meter_hbox := HBoxContainer.new()
+		meter_hbox.add_theme_constant_override("separation", 0)
+		meter_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		meter_row.add_child(meter_hbox)
+
+		var active_dollars := Label.new()
+		active_dollars.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		active_dollars.add_theme_font_size_override("font_size", 34)
+		active_dollars.add_theme_font_override("font", UiPalette.make_bold_font())
+		active_dollars.add_theme_constant_override("shadow_offset_x", 0)
+		active_dollars.add_theme_constant_override("shadow_offset_y", 0)
+		active_dollars.add_theme_constant_override("shadow_outline_size", 6)
+		meter_hbox.add_child(active_dollars)
+
+		var inactive_dollars := Label.new()
+		inactive_dollars.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		inactive_dollars.add_theme_font_size_override("font_size", 34)
+		inactive_dollars.add_theme_font_override("font", UiPalette.make_bold_font())
+		inactive_dollars.add_theme_color_override("font_color", Color(0.24, 0.30, 0.42, 0.45))
+		meter_hbox.add_child(inactive_dollars)
+
+		var tier_pill := PanelContainer.new()
+		tier_pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tier_pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		meter_row.add_child(tier_pill)
+
+		var tier_pill_lbl := Label.new()
+		tier_pill_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tier_pill_lbl.add_theme_font_size_override("font_size", 24)
+		tier_pill_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+		tier_pill.add_child(tier_pill_lbl)
+
 		var sub_lbl := UiPalette.add_label(left_vbox, "", UiPalette.FONT_DRUG_SUB, UiPalette.TEXT_SECONDARY, false, false)
 		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -491,6 +529,11 @@ func _build_market_tab() -> Control:
 			"row_tap_btn": row_tap_btn,
 			"badge_icon": badge_icon,
 			"name_lbl": name_lbl,
+			"meter_row": meter_row,
+			"active_dollars": active_dollars,
+			"inactive_dollars": inactive_dollars,
+			"tier_pill": tier_pill,
+			"tier_pill_lbl": tier_pill_lbl,
 			"sub_lbl": sub_lbl,
 			"price_lbl": price_lbl,
 			"quick_btn": quick_btn,
@@ -1006,17 +1049,35 @@ func _refresh_all() -> void:
 				badge = "  1/4 FLOOD!"
 				badge_icon.texture = UiIcons.get_icon("snowflake", 38)
 				badge_icon.visible = true
-			"high":
-				badge = "  PRICY"
-				badge_icon.texture = UiIcons.get_icon("fire", 34)
-				badge_icon.visible = true
-			"low":
-				badge = "  CHEAP"
-				badge_icon.texture = UiIcons.get_icon("snowflake", 34)
-				badge_icon.visible = true
 			_:
 				badge_icon.visible = false
 		name_lbl.text = "%s%s" % [p_def["name"], badge]
+
+		# 5-Tier "$$$$$" Price Meter & Companion Pill Badge
+		var meter_row: HBoxContainer = ui["meter_row"]
+		var active_dollars: Label = ui["active_dollars"]
+		var inactive_dollars: Label = ui["inactive_dollars"]
+		var tier_pill: PanelContainer = ui["tier_pill"]
+		var tier_pill_lbl: Label = ui["tier_pill_lbl"]
+
+		if price > 0:
+			meter_row.visible = true
+			var tier_info := MarketEngine.calc_price_tier(price, int(ui["min_price"]), int(ui["max_price"]))
+			var a_cnt := int(tier_info["active_count"])
+			var t_col: Color = tier_info["color"]
+			var t_bg: Color = tier_info["bg"]
+			var t_lbl: String = tier_info["label"]
+
+			active_dollars.text = "$".repeat(a_cnt)
+			active_dollars.add_theme_color_override("font_color", t_col)
+			active_dollars.add_theme_color_override("font_shadow_color", Color(t_col.r, t_col.g, t_col.b, 0.40))
+			inactive_dollars.text = "$".repeat(5 - a_cnt)
+
+			tier_pill.add_theme_stylebox_override("panel", UiPalette.make_box(t_bg, t_col, 8, 1, 10, 2))
+			tier_pill_lbl.text = t_lbl
+			tier_pill_lbl.add_theme_color_override("font_color", t_col)
+		else:
+			meter_row.visible = false
 
 		# Line 2: Held Qty + Avg Paid + P/L (if owned) OR Normal Price Range (if unowned)
 		if held > 0 and price > 0:
