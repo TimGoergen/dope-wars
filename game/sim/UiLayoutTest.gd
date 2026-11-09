@@ -270,6 +270,36 @@ func _initialize() -> void:
 
 	main.state.active_combat = {}
 	main.state.weapons.clear()
+	# Verify CombatOverlay post-encounter result modal layout
+	main.state.combat_result = {
+		"outcome": "victory",
+		"district": "North 24th St",
+		"officer": "OPD Gang Unit",
+		"tier": 2,
+		"rounds": 3,
+		"damage_dealt": 85,
+		"damage_taken": 20,
+		"cops_downed": 2,
+		"cash_reward": 500,
+		"rep_gain": 2,
+		"flavor": CombatEngine.generate_flavor_text({
+			"outcome": "victory",
+			"district": "North 24th St",
+			"officer": "OPD Gang Unit",
+			"rounds": 3,
+			"damage_dealt": 85,
+			"damage_taken": 20,
+			"cops_downed": 2,
+			"cash_reward": 500,
+			"rep_gain": 2
+		})
+	}
+	main._combat_overlay.refresh(main.state)
+	await process_frame
+	await process_frame
+	_assert_tree_within_bounds(main._combat_overlay, "CombatOverlay (Result View)")
+
+	main.state.clear_combat_result()
 	main._combat_overlay.refresh(main.state)
 
 	print("UiLayoutTest: PASS (all 3 tabs, 8 district spots, and all 8 modals strictly within 1080px width)")

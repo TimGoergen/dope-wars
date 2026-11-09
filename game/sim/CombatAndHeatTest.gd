@@ -59,6 +59,96 @@ func _init() -> void:
 	state.active_combat = {}
 	_assert_true(absf(state.heat - 32.0) < 0.01, "Bellevue decayed Heat by -18% (50 -> 32)")
 
+	# 5. Verify Combat Result Flavor Text & Encounter Summary
+	# 5a. Victory Result
+	state.active_combat = {
+		"active": true,
+		"tier": 1,
+		"leader_name": "Officer Hardass (OPD Patrol)",
+		"short_badge": "OPD",
+		"unit_hp": 25,
+		"cop_hp_list": [1], # 1 HP remaining
+		"initial_cop_count": 2,
+		"min_dmg": 4,
+		"max_dmg": 9,
+		"min_bounty": 1000,
+		"max_bounty": 2000,
+		"front_crew_hp": 0,
+		"round": 2,
+		"total_player_dmg": 25,
+		"total_cops_downed": 1,
+		"total_hp_lost": 8,
+		"total_armor_lost": 0,
+		"total_crew_lost": 0
+	}
+	state.weapons = ["beretta_9mm"]
+	var v_res := state.combat_fight()
+	_assert_true(bool(v_res.get("victory", false)), "Combat ended in victory")
+	_assert_true(state.has_combat_result(), "State has combat result after victory")
+	var res_vic: Dictionary = state.combat_result
+	_assert_eq(String(res_vic.get("outcome", "")), "victory", "Outcome is victory")
+	_assert_true(int(res_vic.get("bounty", 0)) >= 1000, "Bounty recorded in result")
+	_assert_true(String(res_vic.get("flavor_text", "")).contains("Officer Hardass"), "Flavor text mentions Officer Hardass")
+	_assert_true(String(res_vic.get("flavor_text", "")).contains("cash"), "Flavor text mentions cash bounty")
+	state.clear_combat_result()
+	_assert_true(not state.has_combat_result(), "clear_combat_result() resets combat_result")
+
+	# 5b. Escape Result
+	state.active_combat = {
+		"active": true,
+		"tier": 2,
+		"leader_name": "Sgt. Bob (Douglas Co. Sheriff)",
+		"short_badge": "SHERIFF",
+		"unit_hp": 55,
+		"cop_hp_list": [55],
+		"initial_cop_count": 1,
+		"min_dmg": 9,
+		"max_dmg": 16,
+		"min_bounty": 5000,
+		"max_bounty": 15000,
+		"front_crew_hp": 0,
+		"round": 1
+	}
+	# Set vehicle tier 3 to ensure high escape chance or force random
+	state.vehicle_tier = 3
+	# Mock escape by setting tuning or calling combat_run
+	var e_res: Dictionary = state.combat_run()
+	while not bool(e_res.get("escaped", false)) and state.is_in_combat():
+		state.health = 100
+		e_res = state.combat_run()
+	_assert_true(state.has_combat_result(), "State has combat result after escape")
+	var res_esc: Dictionary = state.combat_result
+	_assert_eq(String(res_esc.get("outcome", "")), "escaped", "Outcome is escaped")
+	_assert_true(String(res_esc.get("flavor_text", "")).contains("Sgt. Bob"), "Escape flavor text mentions Sgt. Bob")
+	state.clear_combat_result()
+
+	# 5c. Surrender Result
+	state.inventory["weed"] = {"qty": 10, "avg_paid": 500}
+	state.cash = 10000
+	state.active_combat = {
+		"active": true,
+		"tier": 3,
+		"leader_name": "Agent Miller (I-80 DEA Task Force)",
+		"short_badge": "DEA",
+		"unit_hp": 110,
+		"cop_hp_list": [110, 110],
+		"initial_cop_count": 2,
+		"min_dmg": 16,
+		"max_dmg": 28,
+		"min_bounty": 20000,
+		"max_bounty": 60000,
+		"round": 2
+	}
+	var s_res := state.combat_surrender()
+	_assert_true(bool(s_res.get("surrendered", false)), "Combat ended in surrender")
+	_assert_true(state.has_combat_result(), "State has combat result after surrender")
+	var res_surr: Dictionary = state.combat_result
+	_assert_eq(String(res_surr.get("outcome", "")), "surrendered", "Outcome is surrendered")
+	_assert_eq(int(res_surr.get("cash_lost", 0)), 2500, "25% cash lost ($2,500)")
+	_assert_true(String(res_surr.get("drugs_summary", "")).contains("10 Weed"), "Seized stash summarized")
+	_assert_true(String(res_surr.get("flavor_text", "")).contains("Agent Miller"), "Surrender flavor text mentions Agent Miller")
+	state.clear_combat_result()
+
 	if _failures == 0:
 		print("ALL CHECKS PASSED")
 		quit(0)

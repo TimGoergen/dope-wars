@@ -51,6 +51,7 @@ var casino_launder_used_today: bool = false
 
 # Active modals / encounters
 var active_combat: Dictionary = {}     # Empty if no combat; otherwise CombatEngine dictionary
+var combat_result: Dictionary = {}     # Empty if no resolved combat waiting to be dismissed
 var pending_choice_event: Dictionary = {} # Empty or { "type": "carhartt"|"trunk_gun", "cost": int, ... }
 
 # Scanner log & end-of-run state
@@ -111,6 +112,7 @@ func new_run(mode_days: int = 31, perks: Array = [], seed_val: int = 0) -> void:
 	casino_bet_used_today = false
 	casino_launder_used_today = false
 	active_combat = {}
+	combat_result = {}
 	pending_choice_event = {}
 	scanner_log.clear()
 	game_over = false
@@ -845,6 +847,14 @@ func is_in_combat() -> bool:
 	return bool(active_combat.get("active", false))
 
 
+func has_combat_result() -> bool:
+	return not combat_result.is_empty()
+
+
+func clear_combat_result() -> void:
+	combat_result = {}
+
+
 func combat_fight() -> Dictionary:
 	if not is_in_combat():
 		return {"ok": false, "reason": "No active combat"}
@@ -871,14 +881,52 @@ func combat_fight() -> Dictionary:
 				cops_killed_total += 1
 				_add_heat(tuning.heat_per_cop_kill)
 
+	active_combat["total_player_dmg"] = int(active_combat.get("total_player_dmg", 0)) + player_dmg_dealt
+	active_combat["total_cops_downed"] = int(active_combat.get("total_cops_downed", 0)) + cops_downed_this_round
+
 	# Check if all officers are defeated
 	if cops.is_empty():
 		var bounty := rng.randi_range(int(active_combat["min_bounty"]), int(active_combat["max_bounty"]))
 		cash += bounty
 		var leader_name := String(active_combat["leader_name"])
+		var tier := int(active_combat.get("tier", 1))
+		var short_badge := String(active_combat.get("short_badge", "OPD"))
+		var total_rounds := int(active_combat.get("round", 1))
+		var total_downed := int(active_combat.get("total_cops_downed", 0))
+		var total_player_dmg := int(active_combat.get("total_player_dmg", 0))
+		var total_hp := int(active_combat.get("total_hp_lost", 0))
+		var total_armor := int(active_combat.get("total_armor_lost", 0))
+		var total_crew := int(active_combat.get("total_crew_lost", 0))
+		var heat_gained := float(total_downed) * tuning.heat_per_cop_kill
+		var initial_cops := int(active_combat.get("initial_cop_count", total_downed))
+
+		combat_result = {
+			"outcome": "victory",
+			"title": "UNIT NEUTRALIZED!",
+			"subtitle": "Defeated %s in %s" % [leader_name, OmahaCatalog.get_district(current_district_id)["name"]],
+			"leader_name": leader_name,
+			"short_badge": short_badge,
+			"tier": tier,
+			"district_name": OmahaCatalog.get_district(current_district_id)["name"],
+			"rounds": total_rounds,
+			"bounty": bounty,
+			"cops_downed": total_downed,
+			"initial_cops": initial_cops,
+			"player_dmg_dealt": total_player_dmg,
+			"hp_lost": total_hp,
+			"armor_lost": total_armor,
+			"crew_killed": total_crew,
+			"heat_change": heat_gained,
+			"cash_lost": 0,
+			"drugs_summary": "",
+			"vehicle_name": OmahaCatalog.get_vehicle(vehicle_tier)["name"],
+			"day": day
+		}
+		combat_result["flavor_text"] = CombatEngine.generate_flavor_text(combat_result)
+
 		active_combat = {}
 		log_scanner("💥 Gunned down %s's unit! Looted %s!" % [leader_name, Money.format_short(bounty)])
-		return {"ok": true, "victory": true, "bounty": bounty}
+		return {"ok": true, "victory": true, "bounty": bounty, "result": combat_result}
 
 	# 2. Surviving officers return fire (Shared 50/50 Target Pool with Crew)
 	var cop_dmg_Result := _resolve_cop_return_fire(cops.size())
@@ -909,9 +957,42 @@ func combat_run() -> Dictionary:
 	var escape_chance := CombatEngine.get_escape_chance(active_combat, vehicle_tier, tuning)
 	if rng.randf() <= escape_chance:
 		var leader_name := String(active_combat["leader_name"])
+		var tier := int(active_combat.get("tier", 1))
+		var short_badge := String(active_combat.get("short_badge", "OPD"))
+		var total_rounds := int(active_combat.get("round", 1))
+		var total_downed := int(active_combat.get("total_cops_downed", 0))
+		var total_player_dmg := int(active_combat.get("total_player_dmg", 0))
+		var total_hp := int(active_combat.get("total_hp_lost", 0))
+		var total_armor := int(active_combat.get("total_armor_lost", 0))
+		var total_crew := int(active_combat.get("total_crew_lost", 0))
+
+		combat_result = {
+			"outcome": "escaped",
+			"title": "PURSUIT EVADED!",
+			"subtitle": "Lost %s in %s" % [leader_name, OmahaCatalog.get_district(current_district_id)["name"]],
+			"leader_name": leader_name,
+			"short_badge": short_badge,
+			"tier": tier,
+			"district_name": OmahaCatalog.get_district(current_district_id)["name"],
+			"rounds": total_rounds,
+			"bounty": 0,
+			"cops_downed": total_downed,
+			"initial_cops": int(active_combat.get("initial_cop_count", 1)),
+			"player_dmg_dealt": total_player_dmg,
+			"hp_lost": total_hp,
+			"armor_lost": total_armor,
+			"crew_killed": total_crew,
+			"heat_change": tuning.heat_per_run_attempt,
+			"cash_lost": 0,
+			"drugs_summary": "",
+			"vehicle_name": OmahaCatalog.get_vehicle(vehicle_tier)["name"],
+			"day": day
+		}
+		combat_result["flavor_text"] = CombatEngine.generate_flavor_text(combat_result)
+
 		active_combat = {}
 		log_scanner("💨 Cut through an alley off Leavenworth and lost %s!" % leader_name)
-		return {"ok": true, "escaped": true}
+		return {"ok": true, "escaped": true, "result": combat_result}
 
 	# Failed escape: cops get a free volley of shots
 	var cops: Array = active_combat["cop_hp_list"]
@@ -928,14 +1009,57 @@ func combat_surrender() -> Dictionary:
 	if not is_in_combat():
 		return {"ok": false, "reason": "No active combat"}
 	# Confiscate 100% of carried drugs and 25% of pocket cash; reset Heat to 10%
+	var seized_parts: Array[String] = []
+	var total_units := 0
 	for pid in inventory.keys():
+		var qty := int(inventory[pid].get("qty", 0))
+		if qty > 0:
+			var p_def := OmahaCatalog.get_product(pid)
+			seized_parts.append("%d %s" % [qty, p_def["name"]])
+			total_units += qty
 		inventory[pid] = {"qty": 0, "avg_paid": 0}
+	var drugs_summary := ", ".join(seized_parts) if not seized_parts.is_empty() else "None (Clean Coat)"
 	var cash_lost := int(round(float(cash) * tuning.surrender_cash_loss_pct))
 	cash -= cash_lost
 	heat = tuning.surrender_heat_reset
+
+	var leader_name := String(active_combat.get("leader_name", "OPD Patrol"))
+	var tier := int(active_combat.get("tier", 1))
+	var short_badge := String(active_combat.get("short_badge", "OPD"))
+	var total_rounds := int(active_combat.get("round", 1))
+	var total_downed := int(active_combat.get("total_cops_downed", 0))
+	var total_player_dmg := int(active_combat.get("total_player_dmg", 0))
+	var total_hp := int(active_combat.get("total_hp_lost", 0))
+	var total_armor := int(active_combat.get("total_armor_lost", 0))
+
+	combat_result = {
+		"outcome": "surrendered",
+		"title": "SURRENDER ACCEPTED",
+		"subtitle": "Arrested & processed by %s in %s" % [leader_name, OmahaCatalog.get_district(current_district_id)["name"]],
+		"leader_name": leader_name,
+		"short_badge": short_badge,
+		"tier": tier,
+		"district_name": OmahaCatalog.get_district(current_district_id)["name"],
+		"rounds": total_rounds,
+		"bounty": 0,
+		"cops_downed": total_downed,
+		"initial_cops": int(active_combat.get("initial_cop_count", 1)),
+		"player_dmg_dealt": total_player_dmg,
+		"hp_lost": total_hp,
+		"armor_lost": total_armor,
+		"crew_killed": 0,
+		"heat_change": -heat,
+		"cash_lost": cash_lost,
+		"drugs_summary": drugs_summary,
+		"drugs_units_lost": total_units,
+		"vehicle_name": OmahaCatalog.get_vehicle(vehicle_tier)["name"],
+		"day": day
+	}
+	combat_result["flavor_text"] = CombatEngine.generate_flavor_text(combat_result)
+
 	active_combat = {}
 	log_scanner("🚓 Surrendered! Cops seized your stash & %s cash (Heat reset to %.0f%%)." % [Money.format_short(cash_lost), heat])
-	return {"ok": true, "surrendered": true, "cash_lost": cash_lost}
+	return {"ok": true, "surrendered": true, "cash_lost": cash_lost, "result": combat_result}
 
 
 func _resolve_cop_return_fire(num_cops: int) -> Dictionary:
@@ -973,6 +1097,10 @@ func _resolve_cop_return_fire(num_cops: int) -> Dictionary:
 				dmg_to_armor += absorbed
 				dmg_to_health += hp_loss
 
+	active_combat["total_hp_lost"] = int(active_combat.get("total_hp_lost", 0)) + dmg_to_health
+	active_combat["total_armor_lost"] = int(active_combat.get("total_armor_lost", 0)) + dmg_to_armor
+	active_combat["total_crew_lost"] = int(active_combat.get("total_crew_lost", 0)) + crew_killed
+
 	if health <= 0:
 		health = 0
 		game_over = true
@@ -981,6 +1109,38 @@ func _resolve_cop_return_fire(num_cops: int) -> Dictionary:
 			OmahaCatalog.get_district(current_district_id)["name"],
 			day
 		]
+		var leader_name := String(active_combat["leader_name"])
+		var tier := int(active_combat.get("tier", 1))
+		var short_badge := String(active_combat.get("short_badge", "OPD"))
+		var total_rounds := int(active_combat.get("round", 1))
+		var total_downed := int(active_combat.get("total_cops_downed", 0))
+		var total_hp := int(active_combat.get("total_hp_lost", 0))
+		var total_armor := int(active_combat.get("total_armor_lost", 0))
+
+		combat_result = {
+			"outcome": "killed",
+			"title": "FATAL AMBUSH",
+			"subtitle": "Gunned down by %s in %s" % [leader_name, OmahaCatalog.get_district(current_district_id)["name"]],
+			"leader_name": leader_name,
+			"short_badge": short_badge,
+			"tier": tier,
+			"district_name": OmahaCatalog.get_district(current_district_id)["name"],
+			"rounds": total_rounds,
+			"bounty": 0,
+			"cops_downed": total_downed,
+			"initial_cops": int(active_combat.get("initial_cop_count", 1)),
+			"player_dmg_dealt": 0,
+			"hp_lost": total_hp,
+			"armor_lost": total_armor,
+			"crew_killed": 0,
+			"heat_change": 0.0,
+			"cash_lost": 0,
+			"drugs_summary": "",
+			"vehicle_name": OmahaCatalog.get_vehicle(vehicle_tier)["name"],
+			"day": day
+		}
+		combat_result["flavor_text"] = CombatEngine.generate_flavor_text(combat_result)
+
 		active_combat = {}
 
 	var summary := "-%d HP/Armor" % dmg_to_player
@@ -1156,6 +1316,7 @@ func to_dict() -> Dictionary:
 		"casino_bet_used_today": casino_bet_used_today,
 		"casino_launder_used_today": casino_launder_used_today,
 		"active_combat": active_combat.duplicate(true),
+		"combat_result": combat_result.duplicate(true),
 		"pending_choice_event": pending_choice_event.duplicate(true),
 		"scanner_log": scanner_log.duplicate(),
 		"game_over": game_over,
@@ -1226,6 +1387,7 @@ func from_dict(data: Dictionary) -> void:
 	casino_bet_used_today = bool(data.get("casino_bet_used_today", false))
 	casino_launder_used_today = bool(data.get("casino_launder_used_today", false))
 	active_combat = data.get("active_combat", {}).duplicate(true)
+	combat_result = data.get("combat_result", {}).duplicate(true)
 	pending_choice_event = data.get("pending_choice_event", {}).duplicate(true)
 
 	scanner_log.clear()

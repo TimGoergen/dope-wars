@@ -24,11 +24,20 @@ func refresh(state: GameState) -> void:
 	for c in get_children():
 		c.queue_free()
 
+	if _state.has_combat_result():
+		visible = true
+		_build_result_view()
+		return
+
 	if not _state.is_in_combat():
 		visible = false
 		return
 
 	visible = true
+	_build_combat_view()
+
+
+func _build_combat_view() -> void:
 	var enc := _state.active_combat
 	var cops: Array = enc.get("cop_hp_list", [])
 	var front_cop_hp := int(cops[0]) if not cops.is_empty() else 0
@@ -271,6 +280,194 @@ func refresh(state: GameState) -> void:
 		combat_updated.emit()
 	)
 	bottom_section.add_child(surr_btn)
+
+
+func _build_result_view() -> void:
+	var res: Dictionary = _state.combat_result
+	var outcome: String = String(res.get("outcome", "victory"))
+	var title: String = String(res.get("title", "ENCOUNTER RESOLVED"))
+	var subtitle: String = String(res.get("subtitle", ""))
+	var flavor_text: String = String(res.get("flavor_text", ""))
+	var rounds: int = int(res.get("rounds", 1))
+	var bounty: int = int(res.get("bounty", 0))
+	var cops_downed: int = int(res.get("cops_downed", 0))
+	var hp_lost: int = int(res.get("hp_lost", 0))
+	var armor_lost: int = int(res.get("armor_lost", 0))
+	var cash_lost: int = int(res.get("cash_lost", 0))
+	var tier: int = int(res.get("tier", 1))
+	var short_badge: String = String(res.get("short_badge", "OPD"))
+
+	var theme_col: Color = UiPalette.CASH_EMERALD
+	var header_text: String = "🏆 ENCOUNTER VICTORY — %s" % short_badge
+	var portrait_icon: String = "player_portrait"
+	var badge_text: String = "💥 UNIT DOWNED"
+	var badge_col: Color = UiPalette.CASH_EMERALD
+	var badge_bg: Color = Color("#0A2617")
+
+	match outcome:
+		"escaped":
+			theme_col = UiPalette.BANK_CYAN
+			header_text = "💨 PURSUIT EVADED — %s" % short_badge
+			portrait_icon = "car"
+			badge_text = "🚗 ESCAPED PURSUIT"
+			badge_col = UiPalette.BANK_CYAN
+			badge_bg = Color("#0D1D2D")
+		"surrendered":
+			theme_col = UiPalette.SPIKE_AMBER
+			header_text = "🏳️ SURRENDER ACCEPTED — %s" % short_badge
+			portrait_icon = UiIcons.cop_portrait_for_tier(tier)
+			badge_text = "🚓 PROCESSED & BAILED"
+			badge_col = UiPalette.SPIKE_AMBER
+			badge_bg = Color("#1E1B18")
+		"killed":
+			theme_col = UiPalette.POLICE_RED
+			header_text = "☠️ FATAL ENCOUNTER — %s" % short_badge
+			portrait_icon = UiIcons.cop_portrait_for_tier(tier)
+			badge_text = "☠️ KILLED IN ACTION"
+			badge_col = UiPalette.POLICE_RED
+			badge_bg = Color("#3B0D14")
+		_:
+			theme_col = UiPalette.CASH_EMERALD
+			header_text = "🏆 ENCOUNTER VICTORY — %s" % short_badge
+			portrait_icon = "player_portrait"
+			badge_text = "💥 UNIT DOWNED"
+			badge_col = UiPalette.CASH_EMERALD
+			badge_bg = Color("#0A2617")
+
+	var vbox := UiPalette.build_modal_shell(
+		self,
+		header_text,
+		theme_col,
+		false
+	)
+	vbox.add_theme_constant_override("separation", 18)
+
+	# 1. Outcome Dossier Panel (Stylistic Portrait + Headline + Subtitle)
+	var dossier_card := PanelContainer.new()
+	dossier_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dossier_card.add_theme_stylebox_override(
+		"panel",
+		UiPalette.make_box(UiPalette.CARD_BG, theme_col, 20, 3, 24, 20)
+	)
+	vbox.add_child(dossier_card)
+
+	var dossier_vbox := VBoxContainer.new()
+	dossier_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dossier_vbox.add_theme_constant_override("separation", 12)
+	dossier_card.add_child(dossier_vbox)
+
+	# Headline
+	var title_lbl := UiPalette.add_label(dossier_vbox, title, 36, theme_col, false, true)
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	# Stylistic Character Portrait
+	var portrait_center := CenterContainer.new()
+	portrait_center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dossier_vbox.add_child(portrait_center)
+	var portrait := UiIcons.create_icon_rect(portrait_icon, 160)
+	portrait_center.add_child(portrait)
+
+	# Outcome Badge
+	var b_box := PanelContainer.new()
+	b_box.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	b_box.add_theme_stylebox_override(
+		"panel",
+		UiPalette.make_box(badge_bg, theme_col, 10, 2, 18, 6)
+	)
+	dossier_vbox.add_child(b_box)
+	var b_lbl := Label.new()
+	b_lbl.text = badge_text
+	b_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	b_lbl.add_theme_font_size_override("font_size", 28)
+	b_lbl.add_theme_color_override("font_color", badge_col)
+	b_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+	b_box.add_child(b_lbl)
+
+	# Subtitle
+	if subtitle != "":
+		var sub_lbl := UiPalette.add_label(dossier_vbox, subtitle, 26, UiPalette.TEXT_SECONDARY)
+		sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	# 2. Atmospheric Flavor Text Story Bubble
+	var story_card := PanelContainer.new()
+	story_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	story_card.add_theme_stylebox_override(
+		"panel",
+		UiPalette.make_box(Color("#101726"), UiPalette.BORDER_SLATE, 16, 2, 24, 20)
+	)
+	vbox.add_child(story_card)
+
+	var story_lbl := UiPalette.add_label(story_card, flavor_text, 30, UiPalette.TEXT_PRIMARY)
+	story_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	story_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+
+	# 3. Telemetry & Outcome Badges Row
+	var tele_row := HBoxContainer.new()
+	tele_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tele_row.add_theme_constant_override("separation", 12)
+	vbox.add_child(tele_row)
+
+	match outcome:
+		"victory":
+			_create_tele_pill(tele_row, "💰 +%s" % Money.format_short(bounty), UiPalette.CASH_EMERALD, Color("#0B2518"))
+			_create_tele_pill(tele_row, "☠️ %d Down" % cops_downed, UiPalette.TEXT_PRIMARY, Color("#131B29"))
+			_create_tele_pill(tele_row, "⏱️ %d Rnd%s" % [rounds, "s" if rounds != 1 else ""], UiPalette.TEXT_SECONDARY, Color("#131B29"))
+			var total_dmg_taken := hp_lost + armor_lost
+			if total_dmg_taken > 0:
+				_create_tele_pill(tele_row, "💔 -%d HP" % total_dmg_taken, UiPalette.SPIKE_AMBER, Color("#26170B"))
+			else:
+				_create_tele_pill(tele_row, "✨ Unhit", UiPalette.CASH_EMERALD, Color("#0B2518"))
+		"escaped":
+			_create_tele_pill(tele_row, "🚗 %s" % String(res.get("vehicle_name", "Vehicle")), UiPalette.BANK_CYAN, Color("#0B1D2D"))
+			_create_tele_pill(tele_row, "🎒 Stash Safe", UiPalette.CASH_EMERALD, Color("#0B2518"))
+			_create_tele_pill(tele_row, "⏱️ %d Rnd%s" % [rounds, "s" if rounds != 1 else ""], UiPalette.TEXT_SECONDARY, Color("#131B29"))
+			_create_tele_pill(tele_row, "🚨 +5% Heat", UiPalette.SPIKE_AMBER, Color("#26170B"))
+		"surrendered":
+			_create_tele_pill(tele_row, "💸 -%s" % Money.format_short(cash_lost), UiPalette.DEBT_CRIMSON, Color("#3B0D14"))
+			_create_tele_pill(tele_row, "🎒 %d Lost" % int(res.get("drugs_units_lost", 0)), UiPalette.SPIKE_AMBER, Color("#26170B"))
+			_create_tele_pill(tele_row, "🚨 Heat 10%", UiPalette.BANK_CYAN, Color("#0B1D2D"))
+		"killed":
+			_create_tele_pill(tele_row, "☠️ Fatal", UiPalette.POLICE_RED, Color("#3B0D14"))
+			_create_tele_pill(tele_row, "⏱️ %d Rnds" % rounds, UiPalette.TEXT_SECONDARY, Color("#131B29"))
+			_create_tele_pill(tele_row, "📅 Day %d" % int(res.get("day", 1)), UiPalette.GOLD_ACCENT, Color("#1E1B18"))
+
+	# 4. Prominent Close & Move On Button
+	var close_btn := Button.new()
+	close_btn.text = "CLOSE & MOVE ON" if outcome != "killed" else "VIEW RUN SUMMARY ➔"
+	close_btn.icon = UiIcons.get_icon("check" if outcome != "killed" else "close_x", 48)
+	close_btn.custom_minimum_size = Vector2(0, 104)
+	close_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var btn_bg: Color = UiPalette.BTN_SUCCESS if (outcome == "victory" or outcome == "escaped") else (UiPalette.BTN_AMBER if outcome == "surrendered" else UiPalette.BTN_DANGER)
+	var btn_border: Color = UiPalette.CASH_EMERALD if (outcome == "victory" or outcome == "escaped") else (UiPalette.SPIKE_AMBER if outcome == "surrendered" else UiPalette.POLICE_RED)
+	UiPalette.style_button(close_btn, btn_bg, btn_border, UiPalette.TEXT_PRIMARY, 38)
+	close_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		Haptics.pulse(20.0)
+		_state.clear_combat_result()
+		combat_updated.emit()
+	)
+	vbox.add_child(close_btn)
+
+
+func _create_tele_pill(parent: HBoxContainer, text: String, text_col: Color, bg_col: Color) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	p.add_theme_stylebox_override(
+		"panel",
+		UiPalette.make_box(bg_col, UiPalette.BORDER_SLATE, 12, 1, 8, 8)
+	)
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 24)
+	lbl.add_theme_color_override("font_color", text_col)
+	lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+	p.add_child(lbl)
+	parent.add_child(p)
+	return p
 
 
 func _build_character_panel(

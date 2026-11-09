@@ -153,7 +153,7 @@ func _build_dashboard_ui() -> void:
 
 	_combat_overlay = CombatOverlay.new()
 	_combat_overlay.combat_updated.connect(func() -> void:
-		if state.game_over:
+		if state.game_over and not state.has_combat_result():
 			SaveManager.record_finished_run(meta, state)
 			SaveManager.save_data(meta)
 			_summary_overlay.open_summary(state, meta, true)
