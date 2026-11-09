@@ -39,6 +39,10 @@ var _news_title_lbl: Label
 var _news_close_btn: Button
 var _news_expand_vbox: VBoxContainer
 var _market_board: PanelContainer
+var _market_scroll: ScrollContainer
+var _board_vbox: VBoxContainer
+var _top_fade: TextureRect
+var _bottom_fade: TextureRect
 var _product_rows: Dictionary = {} # product_id -> Dictionary of nodes
 
 # Spot & Bank Tab Dynamic VBox
@@ -393,7 +397,7 @@ func _build_market_tab() -> Control:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 10)
 
-	# Filtered Active Product Board (Only shows available or held products so rows expand ~35% taller)
+	# Filtered Active Product Board with fixed 178px row height and scrollable overflow
 	var board := PanelContainer.new()
 	_market_board = board
 	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -401,11 +405,26 @@ func _build_market_tab() -> Control:
 	board.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 3, 12, 10))
 	vbox.add_child(board)
 
+	var board_wrapper := Control.new()
+	board_wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	board_wrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	board.add_child(board_wrapper)
+
+	var scroll := ScrollContainer.new()
+	_market_scroll = scroll
+	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	board_wrapper.add_child(scroll)
+
 	var board_vbox := VBoxContainer.new()
+	_board_vbox = board_vbox
 	board_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	board_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	board_vbox.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	board_vbox.add_theme_constant_override("separation", 8)
-	board.add_child(board_vbox)
+	scroll.add_child(board_vbox)
 
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
@@ -413,8 +432,9 @@ func _build_market_tab() -> Control:
 		var row_bg_col := UiPalette.CARD_BG if (row_idx % 2 == 1) else UiPalette.CARD_ALT_BG
 
 		var row_panel := PanelContainer.new()
+		row_panel.custom_minimum_size = Vector2(0, 178)
 		row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		row_panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		row_panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg_col, UiPalette.BORDER_SLATE, 12, 2, 16, 8))
 		board_vbox.add_child(row_panel)
 
@@ -541,7 +561,83 @@ func _build_market_tab() -> Control:
 			"max_price": int(tuning.get(String(p_def["max_prop"])))
 		}
 
+	# Top Dynamic Fade Overlay (indicates content above when scrolled down)
+	var top_fade := TextureRect.new()
+	_top_fade = top_fade
+	top_fade.anchor_left = 0.0
+	top_fade.anchor_right = 1.0
+	top_fade.anchor_top = 0.0
+	top_fade.anchor_bottom = 0.0
+	top_fade.offset_top = 0.0
+	top_fade.offset_bottom = 80.0
+	top_fade.grow_vertical = Control.GROW_DIRECTION_END
+	top_fade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	top_fade.stretch_mode = TextureRect.STRETCH_SCALE
+	top_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top_fade.texture = UiPalette.make_vertical_gradient(
+		UiPalette.PANEL_BG,
+		Color(UiPalette.PANEL_BG.r, UiPalette.PANEL_BG.g, UiPalette.PANEL_BG.b, 0.0)
+	)
+	top_fade.modulate.a = 0.0
+	top_fade.visible = false
+	board_wrapper.add_child(top_fade)
+
+	# Bottom Dynamic Fade Overlay (indicates content below when scrolled up)
+	var btm_fade := TextureRect.new()
+	_bottom_fade = btm_fade
+	btm_fade.anchor_left = 0.0
+	btm_fade.anchor_right = 1.0
+	btm_fade.anchor_top = 1.0
+	btm_fade.anchor_bottom = 1.0
+	btm_fade.offset_top = -80.0
+	btm_fade.offset_bottom = 0.0
+	btm_fade.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	btm_fade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	btm_fade.stretch_mode = TextureRect.STRETCH_SCALE
+	btm_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btm_fade.texture = UiPalette.make_vertical_gradient(
+		Color(UiPalette.PANEL_BG.r, UiPalette.PANEL_BG.g, UiPalette.PANEL_BG.b, 0.0),
+		UiPalette.PANEL_BG
+	)
+	btm_fade.modulate.a = 0.0
+	btm_fade.visible = false
+	board_wrapper.add_child(btm_fade)
+
+	var vbar := scroll.get_v_scroll_bar()
+	vbar.value_changed.connect(func(_val: float) -> void:
+		_update_market_scroll_fading()
+	)
+
 	return vbox
+
+
+func _update_market_scroll_fading() -> void:
+	if _market_scroll == null:
+		return
+	var vbar := _market_scroll.get_v_scroll_bar()
+	if vbar == null:
+		return
+	var max_scroll := vbar.max_value - vbar.page
+	if max_scroll <= 1.0:
+		if _top_fade != null:
+			_top_fade.visible = false
+			_top_fade.modulate.a = 0.0
+		if _bottom_fade != null:
+			_bottom_fade.visible = false
+			_bottom_fade.modulate.a = 0.0
+		return
+
+	var cur_val := float(vbar.value)
+	if _top_fade != null:
+		var top_a := clampf(cur_val / 40.0, 0.0, 1.0)
+		_top_fade.visible = top_a > 0.01
+		_top_fade.modulate.a = top_a
+
+	if _bottom_fade != null:
+		var dist_to_bottom := max_scroll - cur_val
+		var btm_a := clampf(dist_to_bottom / 40.0, 0.0, 1.0)
+		_bottom_fade.visible = btm_a > 0.01
+		_bottom_fade.modulate.a = btm_a
 
 
 func _build_spot_tab() -> Control:
@@ -844,6 +940,8 @@ func _start_new_run(mode_days: int) -> void:
 	var perks: Array = meta.get("active_perks", [])
 	state.new_run(mode_days, perks)
 	_auto_save()
+	if _market_scroll != null:
+		_market_scroll.scroll_vertical = 0
 	_refresh_all()
 
 
@@ -882,6 +980,8 @@ func _on_district_button_pressed(district_id: String) -> void:
 		Haptics.pulse(18.0)
 
 	_auto_save()
+	if _market_scroll != null:
+		_market_scroll.scroll_vertical = 0
 	_refresh_all()
 
 
@@ -912,6 +1012,8 @@ func _on_quick_action_pressed(product_id: String) -> void:
 			return
 
 	_auto_save()
+	if _market_scroll != null:
+		_market_scroll.scroll_vertical = 0
 	_refresh_all()
 
 
@@ -1011,40 +1113,7 @@ func _refresh_all() -> void:
 	else:
 		_news_icon_rect.texture = UiIcons.get_icon("newspaper", 112)
 
-	# 3. Filtered Active Product Board: Limited to at most 9 drug items
-	var candidate_pids: Array[String] = []
-	for p_def in OmahaCatalog.PRODUCTS:
-		var pid := String(p_def["id"])
-		var price := int(state.market_prices.get(pid, 0))
-		var entry: Dictionary = state.inventory.get(pid, {"qty": 0, "avg_paid": 0})
-		var held := int(entry["qty"])
-		if (price > 0) or (held > 0):
-			candidate_pids.append(pid)
-
-	var visible_pids: Dictionary = {}
-	if candidate_pids.size() <= 9:
-		for pid in candidate_pids:
-			visible_pids[pid] = true
-	else:
-		# Prioritize: 1) Held products (whether for sale locally or not), 2) Spike/Flood events, 3) Catalog order up to 9
-		for pid in candidate_pids:
-			var entry: Dictionary = state.inventory.get(pid, {"qty": 0, "avg_paid": 0})
-			if int(entry["qty"]) > 0:
-				visible_pids[pid] = true
-		for pid in candidate_pids:
-			if visible_pids.size() >= 9:
-				break
-			if visible_pids.has(pid):
-				continue
-			var sig := String(state.market_signals.get(pid, "normal"))
-			if sig == "spike" or sig == "flood":
-				visible_pids[pid] = true
-		for pid in candidate_pids:
-			if visible_pids.size() >= 9:
-				break
-			if not visible_pids.has(pid):
-				visible_pids[pid] = true
-
+	# 3. Active Product Board (Shows available or held products with fixed 178px row height)
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
 		var ui: Dictionary = _product_rows[pid]
@@ -1063,8 +1132,8 @@ func _refresh_all() -> void:
 		var price_lbl: Label = ui["price_lbl"]
 		var quick_btn: Button = ui["quick_btn"]
 
-		# Limit visible rows to at most 9 products
-		var show_row: bool = visible_pids.has(pid)
+		# Show row if it's available in this market OR if player is holding inventory
+		var show_row := (price > 0) or (held > 0)
 		panel.visible = show_row
 		if not show_row:
 			continue
@@ -1193,6 +1262,8 @@ func _refresh_all() -> void:
 	# 6. Refresh Active Modals (Combat or Street Encounter)
 	_combat_overlay.refresh(state)
 	_encounter_overlay.refresh(state)
+
+	call_deferred(&"_update_market_scroll_fading")
 
 
 func _auto_save() -> void:

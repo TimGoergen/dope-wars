@@ -15,36 +15,48 @@ func _initialize() -> void:
 
 	await process_frame
 	await process_frame
+	main.state.new_run(31, [])
+	main._refresh_all()
+	await process_frame
+	await process_frame
 	print("main.size=", main.size, " main.min=", main.get_combined_minimum_size())
 
 	# 1. Check Tab 0 (Market) + Hero Header geometry & camera-cutout clearance
 	_assert_tree_within_bounds(main, "Tab 0 (Market)")
-	var visible_market_rows := 0
 	for p_def in OmahaCatalog.PRODUCTS:
 		var row_panel: PanelContainer = main._product_rows[String(p_def["id"])]["panel"]
-		if row_panel.visible:
-			visible_market_rows += 1
-	if visible_market_rows > 9 or visible_market_rows < 1:
-		push_error("FAIL [Market Tab Item Cap]: visible_market_rows=%d (expected <= 9)" % visible_market_rows)
-		quit(1)
-		return
+		if row_panel.custom_minimum_size.y != 178:
+			push_error("FAIL [Row Fixed Height]: expected custom_minimum_size.y == 178, got %d" % int(row_panel.custom_minimum_size.y))
+			quit(1)
+			return
 
-	# Verify with held inventory (including unlisted items) the market board still caps at 9
-	main.state.inventory["crack"] = {"qty": 5, "avg_paid": 500}
-	main.state.inventory["heroin"] = {"qty": 2, "avg_paid": 2000}
-	main.state.inventory["pcp"] = {"qty": 3, "avg_paid": 800}
-	main._refresh_all()
-	var held_market_rows := 0
+	# Verify scroll container and dynamic fade with > 8 products (e.g. all 12 products active)
 	for p_def in OmahaCatalog.PRODUCTS:
-		var row_panel: PanelContainer = main._product_rows[String(p_def["id"])]["panel"]
-		if row_panel.visible:
-			held_market_rows += 1
-	if held_market_rows > 9 or held_market_rows < 1:
-		push_error("FAIL [Market Tab Cap with Inventory]: held_market_rows=%d (expected <= 9)" % held_market_rows)
+		main.state.market_prices[String(p_def["id"])] = 100
+	main._refresh_all()
+	await process_frame
+	await process_frame
+	var vbar: VScrollBar = main._market_scroll.get_v_scroll_bar()
+	var max_scroll: float = vbar.max_value - vbar.page
+	if max_scroll <= 1.0:
+		push_error("FAIL [Market Scrollable]: Expected scrollable overflow with 12 products, max_scroll=%.1f" % max_scroll)
 		quit(1)
 		return
+	if not main._bottom_fade.visible:
+		push_error("FAIL [Dynamic Bottom Fade]: Expected bottom fade visible when scrolled to top with >8 products")
+		quit(1)
+		return
+	main._market_scroll.scroll_vertical = 80
+	main._update_market_scroll_fading()
+	if not main._top_fade.visible:
+		push_error("FAIL [Dynamic Top Fade]: Expected top fade visible when scrolled down")
+		quit(1)
+		return
+	main._market_scroll.scroll_vertical = 0
 	main.state.inventory.clear()
 	main._refresh_all()
+	await process_frame
+	await process_frame
 	var hero_rect: Rect2 = (main._hero_card as Control).get_global_rect()
 	if hero_rect.position.y < 44.0 or hero_rect.size.y < 260.0:
 		push_error("FAIL [Hero Header]: rect=%s (expected y >= 44 and height >= 260)" % str(hero_rect))
