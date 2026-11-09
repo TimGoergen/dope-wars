@@ -426,18 +426,19 @@ static func build_lawyer_card(vbox: VBoxContainer, state: GameState, on_action: 
 
 	var cost_part := state.get_lawyer_cost(false)
 	var cost_all := state.get_lawyer_cost(true)
+	var drop_pct := state.heat * 0.10
 
 	UiPalette.add_label(inner, "⚖️ West O Defense Attorney", 44, UiPalette.POLICE_RED, false, true)
-	UiPalette.add_label(inner, "Police Heat: %.0f%% (%s)" % [
+	UiPalette.add_label(inner, "Police Heat: %.1f%% (%s)" % [
 		state.heat,
 		CombatEngine.get_cop_tier_for_heat(state.heat)["leader_name"]
 	], 34, UiPalette.TEXT_SECONDARY)
 
 	var part_btn := Button.new()
-	part_btn.text = "📂 Suppress (-35%% Heat) — %s" % Money.format(cost_part)
+	part_btn.text = "📂 Suppress Warrants (-10%% • -%.1f%% Heat) — %s" % [drop_pct, Money.format(cost_part)]
 	part_btn.custom_minimum_size = Vector2(0, 104)
 	part_btn.disabled = (state.heat <= 0.1) or (state.cash < cost_part)
-	UiPalette.style_button(part_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, 38)
+	UiPalette.style_button(part_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, 36)
 	part_btn.pressed.connect(func() -> void:
 		state.hire_lawyer(false)
 		Audio.play(&"cash_register")
@@ -446,10 +447,10 @@ static func build_lawyer_card(vbox: VBoxContainer, state: GameState, on_action: 
 	inner.add_child(part_btn)
 
 	var all_btn := Button.new()
-	all_btn.text = "⚖️ Expunge All (0%% Heat) — %s" % Money.format(cost_all)
+	all_btn.text = "⚖️ Expunge All (Clear to 0%% Heat) — %s" % Money.format(cost_all)
 	all_btn.custom_minimum_size = Vector2(0, 108)
 	all_btn.disabled = (state.heat <= 0.1) or (state.cash < cost_all)
-	UiPalette.style_button(all_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, 40)
+	UiPalette.style_button(all_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, 38)
 	all_btn.pressed.connect(func() -> void:
 		state.hire_lawyer(true)
 		Audio.play(&"victory_fanfare")

@@ -466,7 +466,7 @@ func _build_market_tab() -> Control:
 		var name_lbl := UiPalette.add_label(name_row, String(p_def["name"]), UiPalette.FONT_DRUG_NAME, UiPalette.TEXT_PRIMARY, false, true)
 		name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		var sub_lbl := UiPalette.add_label(left_vbox, "", UiPalette.FONT_TINY, UiPalette.TEXT_SECONDARY, false, false)
+		var sub_lbl := UiPalette.add_label(left_vbox, "", UiPalette.FONT_DRUG_SUB, UiPalette.TEXT_SECONDARY, false, false)
 		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 		# Big Price Display

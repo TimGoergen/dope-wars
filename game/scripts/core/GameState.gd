@@ -490,10 +490,17 @@ func casino_launder_chips(amount: int) -> Dictionary:
 	return {"ok": true, "wired": wired_to_bank, "cut": house_cut, "heat": heat}
 
 
+func get_lawyer_cost_per_heat_pct() -> float:
+	var nw_factor := float(maxi(0, get_net_worth())) * 0.0003
+	return float(tuning.lawyer_cost_per_heat) + nw_factor
+
+
 func get_lawyer_cost(clear_all: bool) -> int:
-	var nw_factor := int(floor(float(maxi(0, get_net_worth())) * 0.015))
-	var base := tuning.lawyer_base_cost + int(heat * 60.0) + nw_factor
-	return base * 2 if clear_all else base
+	if heat <= 0.1:
+		return 0
+	var rate := get_lawyer_cost_per_heat_pct()
+	var heat_cleared := heat if clear_all else (heat * tuning.lawyer_relative_suppress_pct)
+	return maxi(50 if not clear_all else 100, int(round(heat_cleared * rate)))
 
 
 func hire_lawyer(clear_all: bool) -> Dictionary:
@@ -505,10 +512,11 @@ func hire_lawyer(clear_all: bool) -> Dictionary:
 	cash -= cost
 	if clear_all:
 		heat = 0.0
-		log_scanner("⚖️ Farnam St. Attorney cleared all warrants! Heat is now 0%%.")
+		log_scanner("⚖️ Farnam St. Attorney expunged all warrants! Heat is now 0%%.")
 	else:
-		_reduce_heat(tuning.lawyer_partial_heat_drop)
-		log_scanner("⚖️ Farnam St. Attorney quashed patrol sightings (Heat: %.0f%%)." % heat)
+		var drop := heat * tuning.lawyer_relative_suppress_pct
+		_reduce_heat(drop)
+		log_scanner("⚖️ Farnam St. Attorney suppressed 10%% of warrants (Heat: %.1f%%)." % heat)
 	return {"ok": true, "cost": cost, "heat": heat}
 
 

@@ -46,6 +46,7 @@ const FONT_SELL_BTN := 60
 const FONT_DRUG_BTN := 45
 const FONT_DRUG_PRICE := 46
 const FONT_DRUG_NAME := 44
+const FONT_DRUG_SUB := 46
 const FONT_HERO := 48
 const FONT_TITLE := 46
 const FONT_HEADER := 38
