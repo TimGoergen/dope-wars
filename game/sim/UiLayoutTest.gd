@@ -74,12 +74,25 @@ func _initialize() -> void:
 		quit(1)
 		return
 
-	# 2. Check Travel Modal
+	# 2. Check Travel Modal (empty inventory & bolded held inventory)
 	main._open_travel_modal()
 	await process_frame
 	await process_frame
-	_assert_tree_within_bounds(main._travel_overlay, "Travel Modal")
+	_assert_tree_within_bounds(main._travel_overlay, "Travel Modal (Empty Inv)")
 	main._travel_overlay.visible = false
+
+	main.state.inventory["weed"] = {"qty": 5, "avg_paid": 100}
+	var test_str: String = main._format_product_list_travel(["weed", "cocaine"])
+	if not test_str.contains("[b]Weed[/b]") or test_str.contains("[b]Cocaine[/b]"):
+		push_error("FAIL [Travel Screen]: Expected [b]Weed[/b] and unbolded Cocaine, got '%s'" % test_str)
+		quit(1)
+		return
+	main._open_travel_modal()
+	await process_frame
+	await process_frame
+	_assert_tree_within_bounds(main._travel_overlay, "Travel Modal (Held Inv)")
+	main._travel_overlay.visible = false
+	main.state.inventory.clear()
 
 	# 3. Check Tab 1 (Spot & Bank) across all 8 Omaha districts + Facility Modal
 	for d_def in OmahaCatalog.DISTRICTS:

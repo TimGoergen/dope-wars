@@ -269,6 +269,47 @@ static func add_label(
 	return lbl
 
 
+static func add_rich_label(
+	parent: Node,
+	text: String,
+	font_sz: int = FONT_ROW_MAIN,
+	col: Color = TEXT_PRIMARY,
+	wrap: bool = true
+) -> RichTextLabel:
+	var extracted := UiIcons.extract_leading_icon(text)
+	var icon_name := String(extracted["icon"])
+	var clean_text := String(extracted["text"]) if icon_name != "" else UiIcons.strip_emojis(text)
+
+	var target_parent: Node = parent
+	if icon_name != "" and parent is VBoxContainer:
+		var hb := HBoxContainer.new()
+		hb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hb.add_theme_constant_override("separation", 10)
+		hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		parent.add_child(hb)
+		var ic := UiIcons.create_icon_rect(icon_name, clampi(font_sz + 8, 28, 48))
+		ic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hb.add_child(ic)
+		target_parent = hb
+
+	var rtl := RichTextLabel.new()
+	rtl.bbcode_enabled = true
+	rtl.fit_content = true
+	rtl.scroll_active = false
+	rtl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rtl.add_theme_font_size_override("normal_font_size", font_sz)
+	rtl.add_theme_font_size_override("bold_font_size", font_sz)
+	rtl.add_theme_font_override("bold_font", make_bold_font())
+	rtl.add_theme_color_override("default_color", col)
+	if wrap:
+		rtl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rtl.text = clean_text
+	if target_parent != parent:
+		rtl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	target_parent.add_child(rtl)
+	return rtl
+
+
 static func add_hero_label(
 	parent: Node,
 	text: String,

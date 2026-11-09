@@ -620,6 +620,23 @@ func _format_product_list_short(ids: Array) -> String:
 	return ", ".join(names)
 
 
+func _format_product_list_travel(ids: Array) -> String:
+	if ids.is_empty():
+		return "None"
+	var names: Array[String] = []
+	for id_val in ids:
+		var pid := String(id_val)
+		var p := OmahaCatalog.get_product(pid)
+		var pname := String(p.get("name", pid))
+		var entry: Dictionary = state.inventory.get(pid, {})
+		var qty := int(entry.get("qty", 0))
+		if qty > 0:
+			names.append("[b]%s[/b]" % pname)
+		else:
+			names.append(pname)
+	return ", ".join(names)
+
+
 func _open_travel_modal() -> void:
 	for c in _travel_overlay.get_children():
 		c.queue_free()
@@ -699,10 +716,10 @@ func _open_travel_modal() -> void:
 				cheap_ids.append(pid)
 			elif sig == "high" or sig == "spike":
 				high_ids.append(pid)
-		var cheap_str := _format_product_list_short(cheap_ids) if not cheap_ids.is_empty() else "None"
-		var high_str := _format_product_list_short(high_ids) if not high_ids.is_empty() else "None"
-		UiPalette.add_label(affinities_vbox, "🏷️ Cheap: %s" % cheap_str, 28, UiPalette.CASH_EMERALD, true, true)
-		UiPalette.add_label(affinities_vbox, "📈 Pricy: %s" % high_str, 28, UiPalette.SPIKE_AMBER, true, true)
+		var cheap_str := _format_product_list_travel(cheap_ids)
+		var high_str := _format_product_list_travel(high_ids)
+		UiPalette.add_rich_label(affinities_vbox, "🏷️ Cheap: %s" % cheap_str, 28, UiPalette.CASH_EMERALD, true)
+		UiPalette.add_rich_label(affinities_vbox, "📈 Pricy: %s" % high_str, 28, UiPalette.SPIKE_AMBER, true)
 
 		var go_btn := Button.new()
 		go_btn.text = "📍 CURRENT SPOT" if is_here else "🚗 DRIVE HERE"
