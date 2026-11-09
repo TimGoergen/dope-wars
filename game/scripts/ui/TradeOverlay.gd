@@ -98,11 +98,11 @@ func _rebuild() -> void:
 
 	var close_btn := Button.new()
 	close_btn.text = ""
-	close_btn.icon = UiIcons.get_icon("close_x", 48)
+	close_btn.icon = UiIcons.get_icon("close_x", 62)
 	close_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	close_btn.custom_minimum_size = Vector2(68, 68)
+	close_btn.custom_minimum_size = Vector2(90, 90)
 	close_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	UiPalette.style_flat_inert_button(close_btn)
+	UiPalette.style_close_button(close_btn)
 	close_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		visible = false

@@ -220,11 +220,11 @@ func _build_dashboard_ui() -> void:
 
 	_news_close_btn = Button.new()
 	_news_close_btn.text = ""
-	_news_close_btn.icon = UiIcons.get_icon("close_x", 44)
+	_news_close_btn.icon = UiIcons.get_icon("close_x", 62)
 	_news_close_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_news_close_btn.custom_minimum_size = Vector2(64, 64)
+	_news_close_btn.custom_minimum_size = Vector2(90, 90)
 	_news_close_btn.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	UiPalette.style_flat_inert_button(_news_close_btn)
+	UiPalette.style_close_button(_news_close_btn)
 	_news_close_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		_set_news_expanded(false)

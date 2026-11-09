@@ -91,6 +91,21 @@ static func style_flat_inert_button(btn: Button) -> void:
 	btn.add_theme_color_override("icon_disabled_color", Color(1.0, 1.0, 1.0, 0.35))
 
 
+static func style_close_button(btn: Button) -> void:
+	btn.flat = false
+	btn.focus_mode = Control.FOCUS_NONE
+	var normal := make_box(Color("#131B29"), BORDER_BRIGHT, 0, 3, 0, 0)
+	var hover := make_box(Color("#1E293B"), GOLD_ACCENT, 0, 3, 0, 0)
+	var pressed := make_box(Color("#0B0F17"), BORDER_BRIGHT, 0, 3, 0, 0)
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", pressed)
+	btn.add_theme_stylebox_override("focus", normal)
+	btn.add_theme_color_override("icon_normal_color", TEXT_PRIMARY)
+	btn.add_theme_color_override("icon_hover_color", GOLD_ACCENT)
+	btn.add_theme_color_override("icon_pressed_color", TEXT_SECONDARY)
+
+
 static func make_box(
 	bg: Color,
 	border: Color = Color.TRANSPARENT,
@@ -390,11 +405,11 @@ static func build_modal_shell(
 	if allow_close:
 		var close_btn := Button.new()
 		close_btn.text = ""
-		close_btn.icon = UiIcons.get_icon("close_x", 44)
+		close_btn.icon = UiIcons.get_icon("close_x", 62)
 		close_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		close_btn.custom_minimum_size = Vector2(64, 64)
+		close_btn.custom_minimum_size = Vector2(90, 90)
 		close_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		style_flat_inert_button(close_btn)
+		style_close_button(close_btn)
 		close_btn.pressed.connect(func() -> void:
 			Audio.play(&"tap")
 			if on_close.is_valid():

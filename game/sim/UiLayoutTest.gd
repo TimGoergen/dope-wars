@@ -59,7 +59,7 @@ func _initialize() -> void:
 	var expected_h := roundf((1440.0 - scanner_card.get_global_rect().position.y) * 1.25)
 	var first_log_lbl: Label = main._news_expand_vbox.get_child(0) as Label
 	var second_log_lbl: Label = main._news_expand_vbox.get_child(1) as Label
-	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 810.0) or not is_equal_approx(exp_panel.size.y, expected_h) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 44) or first_log_lbl.get_theme_font_size("font_size") != 32 or first_log_lbl.has_theme_font_override("font") or not second_log_lbl.has_theme_font_override("font") or not first_log_lbl.text.begins_with("• ") or second_log_lbl.text.begins_with("•"):
+	if not exp_panel.visible or not main._news_overlay.visible or not is_equal_approx(exp_panel.position.x, 108.0) or not is_equal_approx(exp_panel.size.x, 810.0) or not is_equal_approx(exp_panel.size.y, expected_h) or news_title.get_theme_font_size("font_size") != 50 or news_close.icon != UiIcons.get_icon("close_x", 62) or first_log_lbl.get_theme_font_size("font_size") != 32 or first_log_lbl.has_theme_font_override("font") or not second_log_lbl.has_theme_font_override("font") or not first_log_lbl.text.begins_with("• ") or second_log_lbl.text.begins_with("•"):
 		push_error("FAIL [News Popup Layout]: visible=%s pos=%s size=%s expected_h=%.1f title_sz=%d log_sz=%d" % [str(exp_panel.visible), str(exp_panel.position), str(exp_panel.size), expected_h, news_title.get_theme_font_size("font_size"), first_log_lbl.get_theme_font_size("font_size")])
 		quit(1)
 		return
