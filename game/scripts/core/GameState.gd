@@ -572,11 +572,10 @@ func buy_vehicle(target_tier: int) -> Dictionary:
 func drive_to_district(target_district_id: String) -> Dictionary:
 	if game_over or run_completed or is_in_combat():
 		return {"ok": false, "reason": "Cannot travel right now"}
-	if target_district_id == current_district_id:
-		return {"ok": false, "reason": "Already parked in this neighborhood"}
 	if is_final_day():
 		return {"ok": false, "reason": "Final Day reached — tap Finish Run when done trading"}
 
+	var is_staying := (target_district_id == current_district_id)
 	current_district_id = target_district_id
 	day += 1
 	vip_intel_bought_today = false
@@ -598,7 +597,10 @@ func drive_to_district(target_district_id: String) -> Dictionary:
 	else:
 		_reduce_heat(tuning.heat_passive_decay)
 
-	log_scanner("🚗 Day %d: Pulled into %s." % [day, d_def["name"]])
+	if is_staying:
+		log_scanner("📅 Day %d: Stayed in %s for another day." % [day, d_def["name"]])
+	else:
+		log_scanner("🚗 Day %d: Pulled into %s." % [day, d_def["name"]])
 
 	# 3. Check Big Sal's 7-day unpaid loan enforcers
 	if debt > 0 and days_since_loan_payment >= tuning.enforcer_unpaid_days:
@@ -649,13 +651,6 @@ func _trigger_big_sal_enforcers() -> void:
 
 
 func get_next_day_market_preview(district_id: String) -> Dictionary:
-	if district_id == current_district_id:
-		return {
-			"prices": market_prices,
-			"signals": market_signals,
-			"events": active_market_events,
-			"messages": []
-		}
 	if not next_day_markets.has(district_id):
 		var next_is_final := (not is_endless) and ((day + 1) >= max_days)
 		next_day_markets[district_id] = MarketEngine.roll_daily_market(

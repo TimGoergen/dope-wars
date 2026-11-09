@@ -661,7 +661,7 @@ func _open_travel_modal() -> void:
 						(hc as Label).add_theme_font_size_override("font_size", UiPalette.FONT_TITLE)
 
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
-	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Tap any destination to drive (advances 1 Day)." % [
+	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Choose a destination to drive or stay for a day (advances 1 Day)." % [
 		cur_d["icon"], cur_d["name"]
 	], UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_SECONDARY)
 
@@ -679,7 +679,7 @@ func _open_travel_modal() -> void:
 		var card := PanelContainer.new()
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		var card_bg := UiPalette.BTN_PRIMARY if is_here else UiPalette.CARD_BG
+		var card_bg := UiPalette.CARD_BG
 		var card_border := UiPalette.GOLD_ACCENT if is_here else UiPalette.BORDER_BRIGHT
 		card.add_theme_stylebox_override("panel", UiPalette.make_box(card_bg, card_border, 18, 4, 18, 16))
 		grid.add_child(card)
@@ -722,12 +722,12 @@ func _open_travel_modal() -> void:
 		UiPalette.add_rich_label(affinities_vbox, "📈 Pricy: %s" % high_str, 28, UiPalette.SPIKE_AMBER, true)
 
 		var go_btn := Button.new()
-		go_btn.text = "📍 CURRENT SPOT" if is_here else "🚗 DRIVE HERE"
+		go_btn.text = "📅 STAY FOR A DAY" if is_here else "🚗 DRIVE HERE"
 		go_btn.custom_minimum_size = Vector2(0, 96)
-		go_btn.disabled = is_here or state.is_final_day()
+		go_btn.disabled = state.is_final_day()
 		UiPalette.style_button(
 			go_btn,
-			UiPalette.BTN_DISABLED if is_here else UiPalette.BTN_SUCCESS,
+			UiPalette.BTN_PRIMARY if is_here else UiPalette.BTN_SUCCESS,
 			UiPalette.GOLD_ACCENT if is_here else UiPalette.CASH_EMERALD,
 			UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY,
 			UiPalette.FONT_SUBHEAD,
@@ -850,8 +850,7 @@ func _start_new_run(mode_days: int) -> void:
 # --- Dashboard Interactions & State Refresh -----------------------------------------------------
 
 func _on_district_button_pressed(district_id: String) -> void:
-	if district_id == state.current_district_id:
-		return
+	var is_staying := (district_id == state.current_district_id)
 	var res := state.drive_to_district(district_id)
 	if not bool(res.get("ok", false)):
 		return
@@ -875,6 +874,9 @@ func _on_district_button_pressed(district_id: String) -> void:
 		else:
 			Audio.play(&"event_flood")
 		Haptics.pulse(28.0)
+	elif is_staying:
+		Audio.play(&"tap")
+		Haptics.pulse(20.0)
 	else:
 		Audio.play(&"drive_engine")
 		Haptics.pulse(18.0)

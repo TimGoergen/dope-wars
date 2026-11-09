@@ -77,6 +77,20 @@ func _init() -> void:
 			_assert_eq(gs.market_signals[pid], prev_sigs[pid], "Travel preview signal match (%s in %s)" % [pid, target_id])
 			_assert_eq(gs.market_prices[pid], prev_prices[pid], "Travel preview price match (%s in %s)" % [pid, target_id])
 
+	# Verify staying in the same district advances day and matches preview 100%
+	var stay_id := gs.current_district_id
+	var stay_prev := gs.get_next_day_market_preview(stay_id)
+	var stay_sigs: Dictionary = stay_prev["signals"].duplicate()
+	var stay_prices: Dictionary = stay_prev["prices"].duplicate()
+	var prev_day := gs.day
+	gs.drive_to_district(stay_id)
+	_assert_eq(gs.day, prev_day + 1, "Stay for a day advances day count")
+	_assert_eq(gs.current_district_id, stay_id, "Stay for a day preserves district")
+	for p_def in OmahaCatalog.PRODUCTS:
+		var pid: String = p_def["id"]
+		_assert_eq(gs.market_signals[pid], stay_sigs[pid], "Stay preview signal match (%s in %s)" % [pid, stay_id])
+		_assert_eq(gs.market_prices[pid], stay_prices[pid], "Stay preview price match (%s in %s)" % [pid, stay_id])
+
 	# 6. Verify 5-tier price meter calculation across full range
 	var t1 := MarketEngine.calc_price_tier(100, 100, 600)
 	_assert_eq(t1["active_count"], 1, "Min price has 1 active dollar")

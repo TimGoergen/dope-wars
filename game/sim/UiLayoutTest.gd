@@ -91,6 +91,18 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_assert_tree_within_bounds(main._travel_overlay, "Travel Modal (Held Inv)")
+
+	# Verify Stay for a Day button is enabled and works
+	var cur_did: String = main.state.current_district_id
+	var initial_day: int = main.state.day
+	main._on_district_button_pressed(cur_did)
+	if main.state.day != initial_day + 1 or main.state.current_district_id != cur_did:
+		push_error("FAIL [Stay for a Day]: Day did not advance (%d -> %d) or district changed (%s -> %s)" % [
+			initial_day, main.state.day, cur_did, main.state.current_district_id
+		])
+		quit(1)
+		return
+
 	main._travel_overlay.visible = false
 	main.state.inventory.clear()
 
