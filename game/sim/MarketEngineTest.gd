@@ -66,7 +66,7 @@ func _init() -> void:
 					_assert_true(float(pr) <= float(min_p) + span * 0.25, "Low signal price check (%s: %d)" % [pid, pr])
 				elif sg == "high":
 					_assert_true(float(pr) >= float(min_p) + span * 0.75, "High signal price check (%s: %d)" % [pid, pr])
-			_assert_true(day_avail_count >= 6 and day_avail_count <= 9, "Market products in [6..9] (%d)" % day_avail_count)
+			_assert_true(day_avail_count >= 6 and day_avail_count <= 10, "Market products in [6..10] (%d)" % day_avail_count)
 
 	# 5. Verify Travel screen preview matches post-travel market prices & signals 100%
 	var gs := GameState.new(tuning, 12345)

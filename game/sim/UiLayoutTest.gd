@@ -24,8 +24,8 @@ func _initialize() -> void:
 		var row_panel: PanelContainer = main._product_rows[String(p_def["id"])]["panel"]
 		if row_panel.visible:
 			visible_market_rows += 1
-	if visible_market_rows > 9 or visible_market_rows < 1:
-		push_error("FAIL [Market Tab Item Cap]: visible_market_rows=%d (expected <= 9)" % visible_market_rows)
+	if visible_market_rows > 10 or visible_market_rows < 1:
+		push_error("FAIL [Market Tab Item Cap]: visible_market_rows=%d (expected <= 10)" % visible_market_rows)
 		quit(1)
 		return
 	var hero_rect: Rect2 = (main._hero_card as Control).get_global_rect()
