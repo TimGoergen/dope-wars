@@ -29,7 +29,7 @@ extends Resource
 @export var enforcer_cash_seize_pct: float = 0.25
 
 # --- 3. Market Engine, Affinities & 4x/1/4 Events -----------------------------------------------
-@export var market_availability_chance: float = 0.75
+@export var market_availability_chance: float = 0.60
 @export var spike_multiplier: float = 4.0
 @export var flood_divisor: float = 4.0
 @export var max_events_per_day: int = 2

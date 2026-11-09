@@ -16,7 +16,7 @@ const TUNABLE_KEYS := [
 	["loan_interest_rate", "Big Sal Daily Interest (0.10)", false],
 	["bank_interest_rate", "Bank Daily Interest (0.05)", false],
 	["street_atm_fee_rate", "Street ATM Fee (0.05)", false],
-	["market_availability_chance", "Market Drug Availability (0.75)", false],
+	["market_availability_chance", "Market Drug Availability (0.60)", false],
 	["spike_multiplier", "Spike Event Mult (4.0)", false],
 	["flood_divisor", "Flood Event Div (4.0)", false],
 	["event_slot_chance", "Daily Event Chance (0.35)", false],
