@@ -1011,7 +1011,40 @@ func _refresh_all() -> void:
 	else:
 		_news_icon_rect.texture = UiIcons.get_icon("newspaper", 112)
 
-	# 3. Filtered Active Product Board (Only show available or held products so rows expand ~35% taller)
+	# 3. Filtered Active Product Board: Limited to at most 9 drug items
+	var candidate_pids: Array[String] = []
+	for p_def in OmahaCatalog.PRODUCTS:
+		var pid := String(p_def["id"])
+		var price := int(state.market_prices.get(pid, 0))
+		var entry: Dictionary = state.inventory.get(pid, {"qty": 0, "avg_paid": 0})
+		var held := int(entry["qty"])
+		if (price > 0) or (held > 0):
+			candidate_pids.append(pid)
+
+	var visible_pids: Dictionary = {}
+	if candidate_pids.size() <= 9:
+		for pid in candidate_pids:
+			visible_pids[pid] = true
+	else:
+		# Prioritize: 1) Held products, 2) Spike/Flood events, 3) Catalog order up to 9
+		for pid in candidate_pids:
+			var entry: Dictionary = state.inventory.get(pid, {"qty": 0, "avg_paid": 0})
+			if int(entry["qty"]) > 0:
+				visible_pids[pid] = true
+		for pid in candidate_pids:
+			if visible_pids.size() >= 9:
+				break
+			if visible_pids.has(pid):
+				continue
+			var sig := String(state.market_signals.get(pid, "normal"))
+			if sig == "spike" or sig == "flood":
+				visible_pids[pid] = true
+		for pid in candidate_pids:
+			if visible_pids.size() >= 9:
+				break
+			if not visible_pids.has(pid):
+				visible_pids[pid] = true
+
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
 		var ui: Dictionary = _product_rows[pid]
@@ -1030,8 +1063,8 @@ func _refresh_all() -> void:
 		var price_lbl: Label = ui["price_lbl"]
 		var quick_btn: Button = ui["quick_btn"]
 
-		# Hide unlisted rows unless the player is carrying that product
-		var show_row := (price > 0) or (held > 0)
+		# Limit visible rows to at most 9 products
+		var show_row: bool = visible_pids.has(pid)
 		panel.visible = show_row
 		if not show_row:
 			continue

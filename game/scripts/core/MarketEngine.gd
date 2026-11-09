@@ -97,6 +97,17 @@ static func roll_daily_market(
 				if available_count >= 6:
 					break
 
+	# Maximum cap: at most 9 products are listed on any normal day.
+	if not is_final_day and available_count > 9:
+		for i in range(OmahaCatalog.PRODUCTS.size() - 1, -1, -1):
+			if available_count <= 9:
+				break
+			var pid: String = OmahaCatalog.PRODUCTS[i]["id"]
+			if int(prices.get(pid, 0)) > 0 and not active_events.has(pid):
+				prices[pid] = 0
+				signals[pid] = "unlisted"
+				available_count -= 1
+
 	return {
 		"prices": prices,
 		"signals": signals,
