@@ -151,8 +151,19 @@ func _initialize() -> void:
 	main._combat_overlay.refresh(main.state)
 	await process_frame
 	await process_frame
-	_assert_tree_within_bounds(main._combat_overlay, "CombatOverlay")
+	_assert_tree_within_bounds(main._combat_overlay, "CombatOverlay (Opening)")
+
+	main.state.weapons.clear()
+	main.state.weapons.append("glock_19")
+	main.state.combat_fight()
+	if main.state.is_in_combat():
+		main._combat_overlay.refresh(main.state)
+		await process_frame
+		await process_frame
+		_assert_tree_within_bounds(main._combat_overlay, "CombatOverlay (Action Glow)")
+
 	main.state.active_combat = {}
+	main.state.weapons.clear()
 	main._combat_overlay.refresh(main.state)
 
 	print("UiLayoutTest: PASS (all 3 tabs, 8 district spots, and all 8 modals strictly within 1080px width)")

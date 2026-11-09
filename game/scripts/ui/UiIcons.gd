@@ -467,6 +467,29 @@ static func _get_svg_markup(name: String) -> String:
 				<line x1="32" y1="18" x2="32" y2="46" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
 				<line x1="38" y1="20" x2="38" y2="44" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
 			</svg>"""
+		"player_portrait", "player_hustler":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="32" r="30" fill="#090D16" stroke="#F59E0B" stroke-width="2.5"/>
+				<path d="M10 62 C10 47 18 43 32 43 C46 43 54 47 54 62 Z" fill="#1E293B" stroke="#0F172A" stroke-width="2"/>
+				<polygon points="32,46 26,43 38,43" fill="#090D16"/>
+				<path d="M25 45 C28 53 36 53 39 45" stroke="#FACC15" stroke-width="2" fill="none"/>
+				<circle cx="32" cy="53" r="2.5" fill="#FACC15" stroke="#B45309" stroke-width="0.8"/>
+				<rect x="28" y="36" width="8" height="9" fill="#FDBA74"/>
+				<path d="M22 26 C22 20 42 20 42 26 C42 37 38 43 32 43 C26 43 22 37 22 26 Z" fill="#FDBA74" stroke="#9A3412" stroke-width="1.2"/>
+				<ellipse cx="21" cy="30" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<ellipse cx="43" cy="30" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<circle cx="21" cy="32" r="1.2" fill="#FACC15"/>
+				<path d="M24 35 C26 39 38 39 40 35 C40 39 37 43 32 43 C27 43 24 39 24 35 Z" fill="#7C2D12" opacity="0.4"/>
+				<path d="M27 38 Q32 41 37 37" stroke="#7C2D12" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+				<path d="M21 25 C21 21 31 21 31 25 C31 31 23 32 21 25 Z" fill="#090D16" stroke="#F59E0B" stroke-width="1.2"/>
+				<path d="M33 25 C33 21 43 21 43 25 C43 31 35 32 33 25 Z" fill="#090D16" stroke="#F59E0B" stroke-width="1.2"/>
+				<line x1="30" y1="23.5" x2="34" y2="23.5" stroke="#F59E0B" stroke-width="1.5"/>
+				<line x1="23" y1="24" x2="28" y2="29" stroke="#FDE68A" stroke-width="1.2" opacity="0.9"/>
+				<line x1="35" y1="24" x2="40" y2="29" stroke="#FDE68A" stroke-width="1.2" opacity="0.9"/>
+				<path d="M19 22 C19 12 45 12 45 22 Z" fill="#3B82F6" stroke="#1D4ED8" stroke-width="1.5"/>
+				<path d="M17 22 Q32 25 47 22" stroke="#1D4ED8" stroke-width="2.5" fill="none"/>
+				<rect x="29" y="14" width="6" height="4" rx="1" fill="#F59E0B"/>
+			</svg>"""
 		"cop_hardass", "cop_profile":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
 				<circle cx="32" cy="32" r="30" fill="#0A1128" stroke="#3B82F6" stroke-width="2.5"/>
