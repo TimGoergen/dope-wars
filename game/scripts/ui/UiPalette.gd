@@ -89,29 +89,27 @@ static func make_vertical_gradient(top_color: Color, bottom_color: Color, w: int
 	return tex
 
 
-static func make_pronounced_edge_fade(edge_color: Color, at_top: bool, h: int = 180) -> GradientTexture2D:
+static func make_pronounced_edge_fade(edge_color: Color, at_top: bool, h: int = 130) -> GradientTexture2D:
 	var grad := Gradient.new()
 	var transparent := Color(edge_color.r, edge_color.g, edge_color.b, 0.0)
 	if at_top:
 		grad.colors = PackedColorArray([
 			Color(edge_color.r, edge_color.g, edge_color.b, 1.0),
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.96),
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.78),
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.42),
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.12),
+			Color(edge_color.r, edge_color.g, edge_color.b, 0.85),
+			Color(edge_color.r, edge_color.g, edge_color.b, 0.50),
+			Color(edge_color.r, edge_color.g, edge_color.b, 0.20),
 			transparent
 		])
-		grad.offsets = PackedFloat32Array([0.0, 0.22, 0.48, 0.72, 0.88, 1.0])
+		grad.offsets = PackedFloat32Array([0.0, 0.25, 0.55, 0.80, 1.0])
 	else:
 		grad.colors = PackedColorArray([
 			transparent,
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.12),
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.42),
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.78),
-			Color(edge_color.r, edge_color.g, edge_color.b, 0.96),
+			Color(edge_color.r, edge_color.g, edge_color.b, 0.20),
+			Color(edge_color.r, edge_color.g, edge_color.b, 0.50),
+			Color(edge_color.r, edge_color.g, edge_color.b, 0.85),
 			Color(edge_color.r, edge_color.g, edge_color.b, 1.0)
 		])
-		grad.offsets = PackedFloat32Array([0.0, 0.12, 0.28, 0.52, 0.78, 1.0])
+		grad.offsets = PackedFloat32Array([0.0, 0.20, 0.45, 0.75, 1.0])
 	var tex := GradientTexture2D.new()
 	tex.gradient = grad
 	tex.fill_from = Vector2(0.0, 0.0)
