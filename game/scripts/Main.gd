@@ -535,7 +535,7 @@ func _build_bottom_tab_bar(parent: VBoxContainer) -> void:
 
 	var tab_defs := [
 		["MARKET", "market", 0],
-		["COMMERCE", "bank", 1],
+		["LOCALS", "bank", 1],
 		["KINGPIN", "crown", 2]
 	]
 
@@ -1074,7 +1074,7 @@ func _refresh_all() -> void:
 
 	# 5. Update Tab 1 button icon with current neighborhood spot SVG icon
 	if _tab_buttons.size() >= 2:
-		_tab_buttons[1].text = "COMMERCE"
+		_tab_buttons[1].text = "LOCALS"
 		_tab_buttons[1].icon = UiIcons.get_icon(UiIcons.icon_for_district(state.current_district_id), 124)
 
 	# 6. Refresh Active Modals (Combat or Street Encounter)
