@@ -658,7 +658,8 @@ func get_next_day_market_preview(district_id: String) -> Dictionary:
 			next_is_final,
 			pending_forecast_event,
 			tuning,
-			rng
+			rng,
+			_get_held_product_ids()
 		)
 	return next_day_markets[district_id]
 
@@ -675,7 +676,8 @@ func _roll_market_for_current_district(forced_event: Dictionary = {}) -> void:
 			is_final_day(),
 			forced_event,
 			tuning,
-			rng
+			rng,
+			_get_held_product_ids()
 		)
 	market_prices = result["prices"]
 	market_signals = result["signals"]

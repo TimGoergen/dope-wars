@@ -8,7 +8,8 @@ static func roll_daily_market(
 	is_final_day: bool,
 	guaranteed_event: Dictionary,
 	tuning: TuningConfig,
-	rng: RandomNumberGenerator
+	rng: RandomNumberGenerator,
+	held_product_ids: Array = []
 ) -> Dictionary:
 	var district := OmahaCatalog.get_district(district_id)
 	var prices: Dictionary = {}
@@ -97,16 +98,23 @@ static func roll_daily_market(
 				if available_count >= 6:
 					break
 
-	# Maximum cap: at most 10 products are listed on any normal day.
-	if not is_final_day and available_count > 10:
-		for i in range(OmahaCatalog.PRODUCTS.size() - 1, -1, -1):
-			if available_count <= 10:
-				break
-			var pid: String = OmahaCatalog.PRODUCTS[i]["id"]
-			if int(prices.get(pid, 0)) > 0 and not active_events.has(pid):
-				prices[pid] = 0
-				signals[pid] = "unlisted"
-				available_count -= 1
+	# Maximum cap: at most 9 total products (available + unlisted held items) on any normal day.
+	if not is_final_day:
+		var unlisted_held := 0
+		for h_pid in held_product_ids:
+			if int(prices.get(String(h_pid), 0)) == 0:
+				unlisted_held += 1
+		var total_shown := available_count + unlisted_held
+		if total_shown > 9:
+			for i in range(OmahaCatalog.PRODUCTS.size() - 1, -1, -1):
+				if total_shown <= 9:
+					break
+				var pid: String = OmahaCatalog.PRODUCTS[i]["id"]
+				if int(prices.get(pid, 0)) > 0 and not active_events.has(pid):
+					prices[pid] = 0
+					signals[pid] = "unlisted"
+					available_count -= 1
+					total_shown -= 1
 
 	return {
 		"prices": prices,

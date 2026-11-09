@@ -24,10 +24,27 @@ func _initialize() -> void:
 		var row_panel: PanelContainer = main._product_rows[String(p_def["id"])]["panel"]
 		if row_panel.visible:
 			visible_market_rows += 1
-	if visible_market_rows > 10 or visible_market_rows < 1:
-		push_error("FAIL [Market Tab Item Cap]: visible_market_rows=%d (expected <= 10)" % visible_market_rows)
+	if visible_market_rows > 9 or visible_market_rows < 1:
+		push_error("FAIL [Market Tab Item Cap]: visible_market_rows=%d (expected <= 9)" % visible_market_rows)
 		quit(1)
 		return
+
+	# Verify with held inventory (including unlisted items) the market board still caps at 9
+	main.state.inventory["crack"] = {"qty": 5, "avg_paid": 500}
+	main.state.inventory["heroin"] = {"qty": 2, "avg_paid": 2000}
+	main.state.inventory["pcp"] = {"qty": 3, "avg_paid": 800}
+	main._refresh_all()
+	var held_market_rows := 0
+	for p_def in OmahaCatalog.PRODUCTS:
+		var row_panel: PanelContainer = main._product_rows[String(p_def["id"])]["panel"]
+		if row_panel.visible:
+			held_market_rows += 1
+	if held_market_rows > 9 or held_market_rows < 1:
+		push_error("FAIL [Market Tab Cap with Inventory]: held_market_rows=%d (expected <= 9)" % held_market_rows)
+		quit(1)
+		return
+	main.state.inventory.clear()
+	main._refresh_all()
 	var hero_rect: Rect2 = (main._hero_card as Control).get_global_rect()
 	if hero_rect.position.y < 44.0 or hero_rect.size.y < 260.0:
 		push_error("FAIL [Hero Header]: rect=%s (expected y >= 44 and height >= 260)" % str(hero_rect))

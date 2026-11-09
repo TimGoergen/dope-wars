@@ -66,7 +66,19 @@ func _init() -> void:
 					_assert_true(float(pr) <= float(min_p) + span * 0.25, "Low signal price check (%s: %d)" % [pid, pr])
 				elif sg == "high":
 					_assert_true(float(pr) >= float(min_p) + span * 0.75, "High signal price check (%s: %d)" % [pid, pr])
-			_assert_true(day_avail_count >= 6 and day_avail_count <= 10, "Market products in [6..10] (%d)" % day_avail_count)
+			_assert_true(day_avail_count >= 6 and day_avail_count <= 9, "Market products in [6..9] (%d)" % day_avail_count)
+
+	# Verify held products in inventory are factored into the 9-item maximum cap
+	for i in range(20):
+		var test_held: Array = ["heroin", "oxycodone", "pcp"]
+		var h_res := MarketEngine.roll_daily_market("downtown", false, {}, tuning, rng, test_held)
+		var h_prices: Dictionary = h_res["prices"]
+		var total_active := 0
+		for p_def in OmahaCatalog.PRODUCTS:
+			var pid: String = p_def["id"]
+			if int(h_prices.get(pid, 0)) > 0 or test_held.has(pid):
+				total_active += 1
+		_assert_true(total_active <= 9, "Total market items with held inventory <= 9 (%d)" % total_active)
 
 	# 5. Verify Travel screen preview matches post-travel market prices & signals 100%
 	var gs := GameState.new(tuning, 12345)
