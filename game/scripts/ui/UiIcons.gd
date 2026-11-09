@@ -141,6 +141,16 @@ static func cop_portrait_for_tier(tier: int) -> String:
 			return "cop_hardass"
 
 
+static func encounter_portrait_for_type(type: String) -> String:
+	match type:
+		"carhartt":
+			return "person_vendor"
+		"trunk_gun":
+			return "person_dealer"
+		_:
+			return "person_vendor"
+
+
 static func extract_leading_icon(raw_text: String) -> Dictionary:
 	var trimmed := raw_text.strip_edges()
 	for emoji_key in EMOJI_TO_ICON.keys():
@@ -489,6 +499,45 @@ static func _get_svg_markup(name: String) -> String:
 				<path d="M19 22 C19 12 45 12 45 22 Z" fill="#3B82F6" stroke="#1D4ED8" stroke-width="1.5"/>
 				<path d="M17 22 Q32 25 47 22" stroke="#1D4ED8" stroke-width="2.5" fill="none"/>
 				<rect x="29" y="14" width="6" height="4" rx="1" fill="#F59E0B"/>
+			</svg>"""
+		"person_vendor", "person_carhartt":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="32" r="30" fill="#181512" stroke="#F59E0B" stroke-width="2.5"/>
+				<path d="M10 62 C10 46 17 42 32 42 C47 42 54 46 54 62 Z" fill="#92400E" stroke="#451A03" stroke-width="2"/>
+				<path d="M22 43 L32 54 L42 43" stroke="#451A03" stroke-width="2" fill="none"/>
+				<polygon points="32,45 26,42 38,42" fill="#78350F"/>
+				<rect x="28" y="35" width="8" height="9" fill="#FDBA74"/>
+				<path d="M22 26 C22 20 42 20 42 26 C42 37 38 43 32 43 C26 43 22 37 22 26 Z" fill="#FDBA74" stroke="#9A3412" stroke-width="1.2"/>
+				<ellipse cx="21" cy="30" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<ellipse cx="43" cy="30" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<path d="M22 32 C22 43 26 46 32 46 C38 46 42 43 42 32 C40 37 36 38 32 38 C28 38 24 37 22 32 Z" fill="#451A03"/>
+				<path d="M27 34 Q32 37 37 34" stroke="#78350F" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+				<circle cx="28" cy="27" r="1.8" fill="#1C1917"/>
+				<circle cx="36" cy="27" r="1.8" fill="#1C1917"/>
+				<path d="M32 26 L31 31 L33 31" stroke="#9A3412" stroke-width="1.2" fill="none"/>
+				<path d="M19 25 C19 13 45 13 45 25 Z" fill="#1E293B" stroke="#0F172A" stroke-width="1.5"/>
+				<path d="M17 24 Q32 27 47 24 Q47 27 45 27 Q32 30 19 27 Z" fill="#334155" stroke="#0F172A" stroke-width="1.2"/>
+			</svg>"""
+		"person_dealer", "person_trunk":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="32" r="30" fill="#14111E" stroke="#C084FC" stroke-width="2.5"/>
+				<path d="M10 62 C10 47 18 43 32 43 C46 43 54 47 54 62 Z" fill="#1E1B2E" stroke="#0F0C18" stroke-width="2"/>
+				<line x1="32" y1="43" x2="32" y2="62" stroke="#A855F7" stroke-width="2"/>
+				<polygon points="32,46 26,43 38,43" fill="#DC2626"/>
+				<path d="M26 44 C29 51 35 51 38 44" stroke="#FACC15" stroke-width="1.8" fill="none"/>
+				<rect x="28" y="36" width="8" height="9" fill="#FDBA74"/>
+				<path d="M22 26 C22 20 42 20 42 26 C42 37 38 43 32 43 C26 43 22 37 22 26 Z" fill="#FDBA74" stroke="#9A3412" stroke-width="1.2"/>
+				<path d="M18 24 C17 14 47 14 46 24 C49 28 48 36 44 38 C44 28 44 22 40 20 C32 18 24 20 20 25 C19 32 18 36 17 38 Z" fill="#171717"/>
+				<ellipse cx="21" cy="30" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<ellipse cx="43" cy="30" rx="2.5" ry="4" fill="#FDBA74" stroke="#9A3412" stroke-width="1"/>
+				<circle cx="21" cy="32" r="1.2" fill="#FACC15"/>
+				<path d="M21 25 C21 21 31 21 31 25 C31 31 24 32 21 25 Z" fill="#0F172A" stroke="#FACC15" stroke-width="1.2"/>
+				<path d="M33 25 C33 21 43 21 43 25 C43 31 36 32 33 25 Z" fill="#0F172A" stroke="#FACC15" stroke-width="1.2"/>
+				<line x1="30" y1="23.5" x2="34" y2="23.5" stroke="#FACC15" stroke-width="1.5"/>
+				<line x1="23" y1="24" x2="28" y2="29" stroke="#E9D5FF" stroke-width="1.2" opacity="0.9"/>
+				<line x1="35" y1="24" x2="40" y2="29" stroke="#E9D5FF" stroke-width="1.2" opacity="0.9"/>
+				<path d="M28 37 Q33 40 37 36" stroke="#9A3412" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+				<line x1="36" y1="37" x2="42" y2="39" stroke="#FDE047" stroke-width="1.2"/>
 			</svg>"""
 		"cop_hardass", "cop_profile":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
