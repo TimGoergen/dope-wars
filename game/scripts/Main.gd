@@ -45,6 +45,12 @@ var _top_fade: TextureRect
 var _bottom_fade: TextureRect
 var _product_rows: Dictionary = {} # product_id -> Dictionary of nodes
 
+# Market Drag-to-Scroll State
+var _market_drag_scrolled := false
+var _market_drag_start_pos := Vector2.ZERO
+var _market_drag_start_scroll := 0
+var _market_is_dragging := false
+
 # Spot & Bank Tab Dynamic VBox
 var _spot_vbox: VBoxContainer
 
@@ -403,11 +409,14 @@ func _build_market_tab() -> Control:
 	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	board.add_theme_stylebox_override("panel", UiPalette.make_box(UiPalette.PANEL_BG, UiPalette.BORDER_SLATE, 16, 3, 12, 10))
+	board.gui_input.connect(_on_market_scroll_input)
 	vbox.add_child(board)
 
 	var board_wrapper := Control.new()
+	board_wrapper.mouse_filter = Control.MOUSE_FILTER_PASS
 	board_wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board_wrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	board_wrapper.gui_input.connect(_on_market_scroll_input)
 	board.add_child(board_wrapper)
 
 	var scroll := ScrollContainer.new()
@@ -417,6 +426,7 @@ func _build_market_tab() -> Control:
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.gui_input.connect(_on_market_scroll_input)
 	board_wrapper.add_child(scroll)
 
 	var board_vbox := VBoxContainer.new()
@@ -433,9 +443,11 @@ func _build_market_tab() -> Control:
 
 		var row_panel := PanelContainer.new()
 		row_panel.custom_minimum_size = Vector2(0, 178)
+		row_panel.mouse_filter = Control.MOUSE_FILTER_PASS
 		row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		row_panel.add_theme_stylebox_override("panel", UiPalette.make_box(row_bg_col, UiPalette.BORDER_SLATE, 12, 2, 16, 8))
+		row_panel.gui_input.connect(_on_market_scroll_input)
 		board_vbox.add_child(row_panel)
 
 		var row_hbox := HBoxContainer.new()
@@ -449,7 +461,10 @@ func _build_market_tab() -> Control:
 		UiPalette.style_flat_inert_button(row_tap_btn)
 		row_tap_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_tap_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		row_tap_btn.gui_input.connect(_on_market_scroll_input)
 		row_tap_btn.pressed.connect(func() -> void:
+			if _market_drag_scrolled:
+				return
 			var cur_entry: Dictionary = state.inventory.get(pid, {"qty": 0, "avg_paid": 0})
 			if int(cur_entry["qty"]) <= 0 and state.get_max_buyable(pid) <= 0:
 				return
@@ -538,7 +553,10 @@ func _build_market_tab() -> Control:
 		quick_btn.custom_minimum_size = Vector2(296, 0)
 		quick_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_DRUG_BTN, 12)
+		quick_btn.gui_input.connect(_on_market_scroll_input)
 		quick_btn.pressed.connect(func() -> void:
+			if _market_drag_scrolled:
+				return
 			_on_quick_action_pressed(pid)
 		)
 		row_hbox.add_child(quick_btn)
@@ -604,11 +622,54 @@ func _build_market_tab() -> Control:
 	board_wrapper.add_child(btm_fade)
 
 	var vbar := scroll.get_v_scroll_bar()
+	vbar.custom_minimum_size = Vector2(16, 0)
+	var grabber_box := UiPalette.make_box(UiPalette.BORDER_SLATE, Color.TRANSPARENT, 6, 0, 0, 0)
+	var grabber_hl := UiPalette.make_box(UiPalette.BANK_CYAN, Color.TRANSPARENT, 6, 0, 0, 0)
+	vbar.add_theme_stylebox_override("grabber", grabber_box)
+	vbar.add_theme_stylebox_override("grabber_highlight", grabber_hl)
+	vbar.add_theme_stylebox_override("grabber_pressed", grabber_hl)
 	vbar.value_changed.connect(func(_val: float) -> void:
+		_update_market_scroll_fading()
+	)
+	vbar.changed.connect(func() -> void:
 		_update_market_scroll_fading()
 	)
 
 	return vbox
+
+
+func _on_market_scroll_input(event: InputEvent) -> void:
+	if (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT) or event is InputEventScreenTouch:
+		if event.pressed:
+			_market_drag_scrolled = false
+			_market_is_dragging = true
+			_market_drag_start_pos = event.position if event is InputEventScreenTouch else event.global_position
+			_market_drag_start_scroll = _market_scroll.scroll_vertical if _market_scroll != null else 0
+		else:
+			_market_is_dragging = false
+			if _market_drag_scrolled:
+				call_deferred(&"_clear_market_drag_scrolled")
+	elif (event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0) or event is InputEventScreenDrag:
+		if not _market_is_dragging:
+			return
+		var gpos: Vector2 = event.position if (event is InputEventScreenDrag or event is InputEventScreenTouch) else event.global_position
+		var diff_y: float = gpos.y - _market_drag_start_pos.y
+		if not _market_drag_scrolled and absf(diff_y) >= 12.0:
+			_market_drag_scrolled = true
+		if _market_drag_scrolled and _market_scroll != null:
+			_market_scroll.scroll_vertical = int(_market_drag_start_scroll - diff_y)
+			_update_market_scroll_fading()
+
+
+func _clear_market_drag_scrolled() -> void:
+	_market_drag_scrolled = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if (event is InputEventMouseButton and not event.pressed) or (event is InputEventScreenTouch and not event.pressed):
+		_market_is_dragging = false
+		if _market_drag_scrolled:
+			call_deferred(&"_clear_market_drag_scrolled")
 
 
 func _update_market_scroll_fading() -> void:

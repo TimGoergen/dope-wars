@@ -53,6 +53,49 @@ func _initialize() -> void:
 		quit(1)
 		return
 	main._market_scroll.scroll_vertical = 0
+	main._update_market_scroll_fading()
+
+	# Verify Drag-to-Scroll interaction over product row button
+	var weed_panel: PanelContainer = main._product_rows["weed"]["panel"]
+	var tap_btn: Button = main._product_rows["weed"]["row_tap_btn"]
+	var drag_start: Vector2 = tap_btn.get_global_rect().get_center()
+
+	var ev_d_down := InputEventMouseButton.new()
+	ev_d_down.button_index = MOUSE_BUTTON_LEFT
+	ev_d_down.pressed = true
+	ev_d_down.position = drag_start
+	ev_d_down.global_position = drag_start
+	tap_btn.emit_signal("gui_input", ev_d_down)
+	await process_frame
+
+	var ev_d_motion := InputEventMouseMotion.new()
+	ev_d_motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+	ev_d_motion.position = drag_start - Vector2(0, 150)
+	ev_d_motion.global_position = drag_start - Vector2(0, 150)
+	ev_d_motion.relative = Vector2(0, -150)
+	tap_btn.emit_signal("gui_input", ev_d_motion)
+	await process_frame
+
+	var ev_d_up := InputEventMouseButton.new()
+	ev_d_up.button_index = MOUSE_BUTTON_LEFT
+	ev_d_up.pressed = false
+	ev_d_up.position = drag_start - Vector2(0, 150)
+	ev_d_up.global_position = drag_start - Vector2(0, 150)
+	tap_btn.emit_signal("gui_input", ev_d_up)
+	await process_frame
+	await process_frame
+
+	if main._market_scroll.scroll_vertical <= 0:
+		push_error("FAIL [Market Drag-to-Scroll]: Expected scroll_vertical > 0 after drag, got %d" % main._market_scroll.scroll_vertical)
+		quit(1)
+		return
+	if main._trade_overlay.visible:
+		push_error("FAIL [Market Drag-to-Scroll]: Trade overlay should NOT open on drag gesture")
+		quit(1)
+		return
+
+	main._market_scroll.scroll_vertical = 0
+	main._update_market_scroll_fading()
 	main.state.inventory.clear()
 	main._refresh_all()
 	await process_frame

@@ -49,6 +49,10 @@ project/assembly_name="Dope Wars- Omaha"
 
 common/default_scroll_deadzone=30
 
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [rendering]
 
 renderer/rendering_method="mobile"
