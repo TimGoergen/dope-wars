@@ -587,15 +587,12 @@ func _build_market_tab() -> Control:
 	top_fade.anchor_top = 0.0
 	top_fade.anchor_bottom = 0.0
 	top_fade.offset_top = 0.0
-	top_fade.offset_bottom = 80.0
+	top_fade.offset_bottom = 180.0
 	top_fade.grow_vertical = Control.GROW_DIRECTION_END
 	top_fade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	top_fade.stretch_mode = TextureRect.STRETCH_SCALE
 	top_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	top_fade.texture = UiPalette.make_vertical_gradient(
-		UiPalette.PANEL_BG,
-		Color(UiPalette.PANEL_BG.r, UiPalette.PANEL_BG.g, UiPalette.PANEL_BG.b, 0.0)
-	)
+	top_fade.texture = UiPalette.make_pronounced_edge_fade(UiPalette.PANEL_BG, true, 180)
 	top_fade.modulate.a = 0.0
 	top_fade.visible = false
 	board_wrapper.add_child(top_fade)
@@ -607,16 +604,13 @@ func _build_market_tab() -> Control:
 	btm_fade.anchor_right = 1.0
 	btm_fade.anchor_top = 1.0
 	btm_fade.anchor_bottom = 1.0
-	btm_fade.offset_top = -80.0
+	btm_fade.offset_top = -180.0
 	btm_fade.offset_bottom = 0.0
 	btm_fade.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	btm_fade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	btm_fade.stretch_mode = TextureRect.STRETCH_SCALE
 	btm_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	btm_fade.texture = UiPalette.make_vertical_gradient(
-		Color(UiPalette.PANEL_BG.r, UiPalette.PANEL_BG.g, UiPalette.PANEL_BG.b, 0.0),
-		UiPalette.PANEL_BG
-	)
+	btm_fade.texture = UiPalette.make_pronounced_edge_fade(UiPalette.PANEL_BG, false, 180)
 	btm_fade.modulate.a = 0.0
 	btm_fade.visible = false
 	board_wrapper.add_child(btm_fade)
@@ -690,13 +684,13 @@ func _update_market_scroll_fading() -> void:
 
 	var cur_val := float(vbar.value)
 	if _top_fade != null:
-		var top_a := clampf(cur_val / 40.0, 0.0, 1.0)
+		var top_a := clampf(cur_val / 30.0, 0.0, 1.0)
 		_top_fade.visible = top_a > 0.01
 		_top_fade.modulate.a = top_a
 
 	if _bottom_fade != null:
 		var dist_to_bottom := max_scroll - cur_val
-		var btm_a := clampf(dist_to_bottom / 40.0, 0.0, 1.0)
+		var btm_a := clampf(dist_to_bottom / 30.0, 0.0, 1.0)
 		_bottom_fade.visible = btm_a > 0.01
 		_bottom_fade.modulate.a = btm_a
 

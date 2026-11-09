@@ -42,14 +42,14 @@ func _initialize() -> void:
 		push_error("FAIL [Market Scrollable]: Expected scrollable overflow with 12 products, max_scroll=%.1f" % max_scroll)
 		quit(1)
 		return
-	if not main._bottom_fade.visible:
-		push_error("FAIL [Dynamic Bottom Fade]: Expected bottom fade visible when scrolled to top with >8 products")
+	if not main._bottom_fade.visible or main._bottom_fade.offset_top != -180.0:
+		push_error("FAIL [Dynamic Bottom Fade]: Expected bottom fade visible (offset_top=-180.0), got visible=%s offset=%f" % [str(main._bottom_fade.visible), main._bottom_fade.offset_top])
 		quit(1)
 		return
 	main._market_scroll.scroll_vertical = 80
 	main._update_market_scroll_fading()
-	if not main._top_fade.visible:
-		push_error("FAIL [Dynamic Top Fade]: Expected top fade visible when scrolled down")
+	if not main._top_fade.visible or main._top_fade.offset_bottom != 180.0:
+		push_error("FAIL [Dynamic Top Fade]: Expected top fade visible (offset_bottom=180.0), got visible=%s offset=%f" % [str(main._top_fade.visible), main._top_fade.offset_bottom])
 		quit(1)
 		return
 	main._market_scroll.scroll_vertical = 0
