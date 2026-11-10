@@ -77,6 +77,15 @@ func _initialize() -> void:
 			push_error("FAIL [Market Row SELL btn]: expected 'SELL', got '%s'" % q_btn.text)
 			quit(1)
 			return
+		var s_lbl: Label = ui_row["sub_lbl"]
+		if s_lbl.text.contains("Avg"):
+			push_error("FAIL [Market Row Sub]: expected 'Avg' removed, got '%s'" % s_lbl.text)
+			quit(1)
+			return
+		if not s_lbl.text.contains("+") and not s_lbl.text.contains("-"):
+			push_error("FAIL [Market Row Sub]: expected +/- sign in relative profit, got '%s'" % s_lbl.text)
+			quit(1)
+			return
 
 	main.state.inventory.clear()
 	main.state.market_signals.erase("cocaine")

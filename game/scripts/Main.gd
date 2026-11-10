@@ -1269,13 +1269,14 @@ func _refresh_all() -> void:
 		else:
 			meter_row.visible = false
 
-		# Line 2: Held Qty + Avg Paid + P/L (if owned) OR Normal Price Range (if unowned)
+		# Line 2: Held Qty + Relative Profit with +/- sign (if owned) OR Normal Price Range (if unowned)
 		if held > 0 and price > 0:
 			var pl := held * (price - avg_paid)
-			sub_lbl.text = "Held: %d  •  Avg %s  •  %s" % [held, Money.format_short(avg_paid), Money.format_pl(pl)]
+			var pl_str := ("+" + Money.format_short(pl)) if pl > 0 else (Money.format_short(pl) if pl < 0 else "+$0")
+			sub_lbl.text = "Held: %d  •  %s" % [held, pl_str]
 			sub_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD if pl >= 0 else UiPalette.SPIKE_AMBER)
 		elif held > 0 and price <= 0:
-			sub_lbl.text = "Held: %d (Avg %s)  •  No Local Buyers" % [held, Money.format_short(avg_paid)]
+			sub_lbl.text = "Held: %d  •  No Local Buyers" % held
 			sub_lbl.add_theme_color_override("font_color", UiPalette.GOLD_ACCENT)
 		else:
 			sub_lbl.text = "Norm: %s–%s" % [Money.format_short(int(ui["min_price"])), Money.format_short(int(ui["max_price"]))]
