@@ -66,6 +66,7 @@ var _encounter_overlay: EncounterOverlay
 var _legacy_overlay: LegacyOverlay
 var _summary_overlay: RunSummaryOverlay
 var _dev_tuning_overlay: DevTuningOverlay
+var _start_screen: StartScreen
 
 
 func _ready() -> void:
@@ -82,11 +83,12 @@ func _ready() -> void:
 		var pref_days := int(meta.get("preferred_mode_days", tuning.default_run_days))
 		var perks: Array = meta.get("active_perks", [])
 		state.new_run(pref_days, perks)
-		_auto_save()
 
 	_build_dashboard_ui()
+	_build_start_screen()
 	_show_tab(0)
 	_refresh_all()
+	show_start_screen()
 
 
 func _build_dashboard_ui() -> void:
@@ -175,14 +177,11 @@ func _build_dashboard_ui() -> void:
 		SaveManager.save_data(meta)
 		_refresh_all()
 	)
-	_legacy_overlay.start_new_run_requested.connect(func(mode_days: int) -> void:
-		_start_new_run(mode_days)
-	)
 	add_child(_legacy_overlay)
 
 	_summary_overlay = RunSummaryOverlay.new()
 	_summary_overlay.play_again_requested.connect(func() -> void:
-		_show_tab(2)
+		show_start_screen()
 	)
 	add_child(_summary_overlay)
 
@@ -997,11 +996,59 @@ func _rebuild_kingpin_tab() -> void:
 		meta,
 		func() -> void:
 			SaveManager.save_data(meta)
-			_rebuild_kingpin_tab(),
-		func(days_val: int) -> void:
-			_start_new_run(days_val)
-			_show_tab(0)
+			_rebuild_kingpin_tab()
 	)
+
+	var exit_menu_btn := Button.new()
+	exit_menu_btn.text = "🏠 Return to Start Screen"
+	exit_menu_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	exit_menu_btn.custom_minimum_size = Vector2(0, 84)
+	UiPalette.style_button(exit_menu_btn, UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON)
+	exit_menu_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		_auto_save()
+		SaveManager.save_data(meta)
+		show_start_screen()
+	)
+	_kingpin_vbox.add_child(exit_menu_btn)
+
+
+func _build_start_screen() -> void:
+	if _start_screen != null:
+		return
+	_start_screen = StartScreen.new()
+	_start_screen.continue_requested.connect(func() -> void:
+		hide_start_screen()
+		_show_tab(0)
+		_refresh_all()
+	)
+	_start_screen.start_new_run_requested.connect(func(mode_days: int) -> void:
+		_start_new_run(mode_days)
+		hide_start_screen()
+		_show_tab(0)
+	)
+	_start_screen.hall_of_fame_requested.connect(func() -> void:
+		_summary_overlay.open_summary(state, meta, false)
+	)
+	_start_screen.perks_requested.connect(func() -> void:
+		_legacy_overlay.open_modal(meta)
+	)
+	_start_screen.meta_updated.connect(func() -> void:
+		_rebuild_kingpin_tab()
+	)
+	add_child(_start_screen)
+
+
+func show_start_screen() -> void:
+	if _start_screen == null:
+		_build_start_screen()
+	_start_screen.open_start_screen(meta, state)
+	_start_screen.visible = true
+
+
+func hide_start_screen() -> void:
+	if _start_screen != null:
+		_start_screen.visible = false
 
 
 func _start_new_run(mode_days: int) -> void:
@@ -1009,6 +1056,7 @@ func _start_new_run(mode_days: int) -> void:
 	var perks: Array = meta.get("active_perks", [])
 	state.new_run(mode_days, perks)
 	_auto_save()
+	SaveManager.save_data(meta)
 	if _market_scroll != null:
 		_market_scroll.scroll_vertical = 0
 	_refresh_all()

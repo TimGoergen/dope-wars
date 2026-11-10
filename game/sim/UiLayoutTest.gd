@@ -15,6 +15,8 @@ func _initialize() -> void:
 
 	await process_frame
 	await process_frame
+	_assert_tree_within_bounds(main._start_screen, "StartScreen (Initial)")
+	main.hide_start_screen()
 	main.state.new_run(31, [])
 	main._refresh_all()
 	await process_frame
@@ -365,6 +367,28 @@ func _initialize() -> void:
 	await process_frame
 	_assert_tree_within_bounds(main._dev_tuning_overlay, "DevTuningOverlay")
 	main._dev_tuning_overlay.visible = false
+
+	# Test StartScreen with an active run
+	main.meta["current_run"] = main.state.to_dict()
+	main.show_start_screen()
+	await process_frame
+	await process_frame
+	_assert_tree_within_bounds(main._start_screen, "StartScreen (With Active Run)")
+	if not main._start_screen._continue_box.visible:
+		push_error("FAIL [StartScreen]: Expected continue box visible when active run present")
+		quit(1)
+		return
+	# Trigger confirm overlay by attempting new game
+	main._start_screen._on_new_game_pressed(31)
+	await process_frame
+	await process_frame
+	if not main._start_screen._confirm_overlay.visible:
+		push_error("FAIL [StartScreen]: Expected confirm overlay when active run present")
+		quit(1)
+		return
+	_assert_tree_within_bounds(main._start_screen._confirm_overlay, "StartScreen Confirm Overlay")
+	main._start_screen._confirm_overlay.visible = false
+	main.hide_start_screen()
 
 	# 6. Check CombatOverlay & EncounterOverlay
 	main.state.pending_choice_event = {

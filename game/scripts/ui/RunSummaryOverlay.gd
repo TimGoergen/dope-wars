@@ -22,15 +22,20 @@ func open_summary(state: GameState, meta: Dictionary, show_run_banner: bool = tr
 	for c in get_children():
 		c.queue_free()
 
+	var is_end_of_run: bool = show_run_banner and (_state.run_completed or _state.game_over)
 	var header_text := "🏆 OMAHA HALL OF FAME"
-	if show_run_banner and (_state.run_completed or _state.game_over):
+	if is_end_of_run:
 		header_text = "🏆 RUN COMPLETE!" if _state.run_completed else "💀 WASTED IN OMAHA"
 
 	var vbox := UiPalette.build_modal_shell(
 		self,
 		header_text,
 		UiPalette.GOLD_ACCENT if not _state.game_over else UiPalette.DEBT_CRIMSON,
-		true
+		true,
+		func() -> void:
+			visible = false
+			if is_end_of_run:
+				play_again_requested.emit()
 	)
 
 	if show_run_banner and (_state.run_completed or _state.game_over):
@@ -72,13 +77,22 @@ func open_summary(state: GameState, meta: Dictionary, show_run_banner: bool = tr
 			fate_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var new_btn := Button.new()
-	new_btn.text = "🚗 NEW RUN / PERKS"
-	new_btn.custom_minimum_size = Vector2(0, 88)
-	UiPalette.style_button(new_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_HEADER)
-	new_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		visible = false
-		play_again_requested.emit()
-	)
+	if is_end_of_run:
+		new_btn.text = "🏠 RETURN TO START SCREEN"
+		new_btn.custom_minimum_size = Vector2(0, 96)
+		UiPalette.style_button(new_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, UiPalette.FONT_HEADER)
+		new_btn.pressed.connect(func() -> void:
+			Audio.play(&"tap")
+			visible = false
+			play_again_requested.emit()
+		)
+	else:
+		new_btn.text = "Close Leaderboard"
+		new_btn.custom_minimum_size = Vector2(0, 84)
+		UiPalette.style_button(new_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_BUTTON)
+		new_btn.pressed.connect(func() -> void:
+			Audio.play(&"tap")
+			visible = false
+		)
 	vbox.add_child(new_btn)
 	visible = true
