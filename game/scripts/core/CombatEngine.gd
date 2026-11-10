@@ -116,15 +116,15 @@ static func generate_flavor_text(res: Dictionary) -> String:
 		"victory":
 			var text := ""
 			if tier >= 3:
-				text = "A deafening silence falls over the pavement in %s. Against all odds, you took down Agent Miller's heavily armed DEA Task Force in a fierce %d-round firefight. Their tactical cruisers sit smoking and riddled with bullet holes on the shoulder. Rummaging through their command vehicle, you cracked a seized lockbox and pocketed %s in unmarked cash! You neutralized %d federal officers and melted away before state backup arrived." % [
+				text = "You won! A deafening silence falls over the pavement in %s. Against all odds, you took down Agent Miller's heavily armed DEA Task Force in a fierce %d-round firefight. Their tactical cruisers sit smoking and riddled with bullet holes on the shoulder. Rummaging through their command vehicle, you cracked a seized lockbox and pocketed %s in unmarked cash! You neutralized %d federal officers and melted away before state backup arrived." % [
 					district, rounds, Money.format(bounty), cops_downed
 				]
 			elif tier == 2:
-				text = "The flashing red and blue lights flicker against the brick walls of %s as the last cruiser falls silent. Sgt. Bob and his Douglas County deputies completely underestimated your firepower over %d intense rounds. Prying open their cruiser lockbox, you secured %s in civil forfeiture cash. With %d cruisers decommissioned, you reloaded and vanished down the back streets." % [
+				text = "You won! The flashing red and blue lights flicker against the brick walls of %s as the last cruiser falls silent. Sgt. Bob and his Douglas County deputies completely underestimated your firepower over %d intense rounds. Prying open their cruiser lockbox, you secured %s in civil forfeiture cash. With %d cruisers decommissioned, you reloaded and vanished down the back streets." % [
 					district, rounds, Money.format(bounty), cops_downed
 				]
 			else:
-				text = "The gunsmoke slowly clears over an empty parking lot in %s. Officer Hardass and the OPD patrol squad have been completely neutralized after %d rounds of close-quarters shooting. Radio dispatch crackles with frantic calls for backup, but you're already digging through their squad car. You pocketed %s in cash and took down %d cruiser units. The neighborhood is yours." % [
+				text = "You won! The gunsmoke slowly clears over an empty parking lot in %s. Officer Hardass and the OPD patrol squad have been completely neutralized after %d rounds of close-quarters shooting. Radio dispatch crackles with frantic calls for backup, but you're already digging through their squad car. You pocketed %s in cash and took down %d cruiser units. The neighborhood is yours." % [
 					district, rounds, Money.format(bounty), cops_downed
 				]
 			if crew_killed > 0:
@@ -133,22 +133,22 @@ static func generate_flavor_text(res: Dictionary) -> String:
 
 		"escaped":
 			if rounds <= 1:
-				return "You slammed the accelerator on your %s the instant %s triggered their sirens in %s! Tires smoking and engine roaring, you whipped hard through a tight alleyway off 24th Street and sliced across oncoming traffic. Behind an old warehouse, you killed your lights in the darkness as the cruiser convoy blew past on the main avenue. Clean getaway—your stash and cash remain completely untouched." % [
+				return "You won! You slammed the accelerator on your %s the instant %s triggered their sirens in %s! Tires smoking and engine roaring, you whipped hard through a tight alleyway off 24th Street and sliced across oncoming traffic. Behind an old warehouse, you killed your lights in the darkness as the cruiser convoy blew past on the main avenue. Clean getaway—your stash and cash remain completely untouched." % [
 					vehicle_name, leader_name, district
 				]
 			else:
-				return "After %d harrowing rounds evading roadblocks and taking fire in %s, you found an opening and floored your %s! Sparking off a concrete guardrail, you blew through a yellow light and weaved through heavy industrial traffic. %s's cruisers were trapped behind a stalled semi, losing your trail completely. You took some damage in the pursuit, but you shook the tail and escaped with your stash intact!" % [
+				return "You won! After %d harrowing rounds evading roadblocks and taking fire in %s, you found an opening and floored your %s! Sparking off a concrete guardrail, you blew through a yellow light and weaved through heavy industrial traffic. %s's cruisers were trapped behind a stalled semi, losing your trail completely. You took some damage in the pursuit, but you shook the tail and escaped with your stash intact!" % [
 					rounds, district, vehicle_name, leader_name
 				]
 
 		"surrendered":
 			var stash_desc := drugs_summary if drugs_summary != "" else "No contraband found"
-			return "Blinded by high-powered spotlights and pinned behind cover in %s, you realized you were hopelessly outgunned. You threw your piece onto the concrete and stepped out with your hands raised high.\n\n%s's officers slammed you against the cruiser hood and searched every pocket of your coat. They seized %s from your wallet and confiscated your entire drug stash (%s) as evidence.\n\nAfter a grueling night in central booking, your lawyer posted bail. You're back on the street with empty pockets, but your Heat has cooled down to 10%%." % [
+			return "You lose. Blinded by high-powered spotlights and pinned behind cover in %s, you realized you were hopelessly outgunned. You threw your piece onto the concrete and stepped out with your hands raised high.\n\n%s's officers slammed you against the cruiser hood and searched every pocket of your coat. They seized %s from your wallet and confiscated your entire drug stash (%s) as evidence.\n\nAfter a grueling night in central booking, your lawyer posted bail. You're back on the street with empty pockets, but your Heat has cooled down to 10%%." % [
 				district, leader_name, Money.format(cash_lost), stash_desc
 			]
 
 		"killed":
-			return "A devastating volley of gunfire from %s shatters your windshield and punches through your cover in %s. As your vision fades and the cold asphalt rushes up to meet you, the distant wail of sirens and flashing red-and-blue lights blur into the night. Your street run comes to a bloody end on Day %d—just another cautionary tale on the evening news." % [
+			return "You lose. A devastating volley of gunfire from %s shatters your windshield and punches through your cover in %s. As your vision fades and the cold asphalt rushes up to meet you, the distant wail of sirens and flashing red-and-blue lights blur into the night. Your street run comes to a bloody end on Day %d—just another cautionary tale on the evening news." % [
 				leader_name, district, day
 			]
 

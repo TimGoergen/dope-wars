@@ -297,40 +297,43 @@ func _build_result_view() -> void:
 	var tier: int = int(res.get("tier", 1))
 	var short_badge: String = String(res.get("short_badge", "OPD"))
 
-	var theme_col: Color = UiPalette.CASH_EMERALD
-	var header_text: String = "🏆 ENCOUNTER VICTORY — %s" % short_badge
+	var is_win := (outcome == "victory" or outcome == "escaped")
+	var outcome_headline := "You won!" if is_win else "You lose."
+
+	var theme_col: Color = UiPalette.CASH_EMERALD if is_win else UiPalette.POLICE_RED
+	var header_text: String = "🏆 YOU WON! — %s NEUTRALIZED" % short_badge
 	var portrait_icon: String = "player_portrait"
-	var badge_text: String = "💥 UNIT DOWNED"
+	var badge_text: String = "🏆 YOU WON!"
 	var badge_col: Color = UiPalette.CASH_EMERALD
 	var badge_bg: Color = Color("#0A2617")
 
 	match outcome:
 		"escaped":
 			theme_col = UiPalette.BANK_CYAN
-			header_text = "💨 PURSUIT EVADED — %s" % short_badge
+			header_text = "💨 YOU WON! — %s EVADED" % short_badge
 			portrait_icon = "car"
-			badge_text = "🚗 ESCAPED PURSUIT"
+			badge_text = "💨 YOU WON! (ESCAPED)"
 			badge_col = UiPalette.BANK_CYAN
 			badge_bg = Color("#0D1D2D")
 		"surrendered":
 			theme_col = UiPalette.SPIKE_AMBER
-			header_text = "🏳️ SURRENDER ACCEPTED — %s" % short_badge
+			header_text = "🏳️ YOU LOSE. — SURRENDERED TO %s" % short_badge
 			portrait_icon = UiIcons.cop_portrait_for_tier(tier)
-			badge_text = "🚓 PROCESSED & BAILED"
+			badge_text = "❌ YOU LOSE. (SURRENDERED)"
 			badge_col = UiPalette.SPIKE_AMBER
 			badge_bg = Color("#1E1B18")
 		"killed":
 			theme_col = UiPalette.POLICE_RED
-			header_text = "☠️ FATAL ENCOUNTER — %s" % short_badge
+			header_text = "☠️ YOU LOSE. — KILLED BY %s" % short_badge
 			portrait_icon = UiIcons.cop_portrait_for_tier(tier)
-			badge_text = "☠️ KILLED IN ACTION"
+			badge_text = "☠️ YOU LOSE. (KILLED)"
 			badge_col = UiPalette.POLICE_RED
 			badge_bg = Color("#3B0D14")
 		_:
 			theme_col = UiPalette.CASH_EMERALD
-			header_text = "🏆 ENCOUNTER VICTORY — %s" % short_badge
+			header_text = "🏆 YOU WON! — %s NEUTRALIZED" % short_badge
 			portrait_icon = "player_portrait"
-			badge_text = "💥 UNIT DOWNED"
+			badge_text = "🏆 YOU WON! (UNIT DOWNED)"
 			badge_col = UiPalette.CASH_EMERALD
 			badge_bg = Color("#0A2617")
 
@@ -356,8 +359,12 @@ func _build_result_view() -> void:
 	dossier_vbox.add_theme_constant_override("separation", 12)
 	dossier_card.add_child(dossier_vbox)
 
-	# Headline
-	var title_lbl := UiPalette.add_label(dossier_vbox, title, 36, theme_col, false, true)
+	# Main Outcome Clear Headline: "You won!" or "You lose."
+	var outcome_lbl := UiPalette.add_label(dossier_vbox, outcome_headline, 56, theme_col, false, true)
+	outcome_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	# Secondary Context Headline
+	var title_lbl := UiPalette.add_label(dossier_vbox, title, 32, UiPalette.TEXT_PRIMARY, false, true)
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	# Stylistic Character Portrait
@@ -434,13 +441,20 @@ func _build_result_view() -> void:
 
 	# 4. Prominent Close & Move On Button
 	var close_btn := Button.new()
-	close_btn.text = "CLOSE & MOVE ON" if outcome != "killed" else "VIEW RUN SUMMARY ➔"
-	close_btn.icon = UiIcons.get_icon("check" if outcome != "killed" else "close_x", 48)
+	if is_win:
+		close_btn.text = "CLOSE & MOVE ON (YOU WON)"
+		close_btn.icon = UiIcons.get_icon("check", 48)
+	elif outcome == "surrendered":
+		close_btn.text = "CLOSE & MOVE ON (YOU LOSE)"
+		close_btn.icon = UiIcons.get_icon("close_x", 48)
+	else:
+		close_btn.text = "VIEW RUN SUMMARY (YOU LOSE) ➔"
+		close_btn.icon = UiIcons.get_icon("close_x", 48)
 	close_btn.custom_minimum_size = Vector2(0, 104)
 	close_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	var btn_bg: Color = UiPalette.BTN_SUCCESS if (outcome == "victory" or outcome == "escaped") else (UiPalette.BTN_AMBER if outcome == "surrendered" else UiPalette.BTN_DANGER)
-	var btn_border: Color = UiPalette.CASH_EMERALD if (outcome == "victory" or outcome == "escaped") else (UiPalette.SPIKE_AMBER if outcome == "surrendered" else UiPalette.POLICE_RED)
+	var btn_bg: Color = UiPalette.BTN_SUCCESS if is_win else (UiPalette.BTN_AMBER if outcome == "surrendered" else UiPalette.BTN_DANGER)
+	var btn_border: Color = UiPalette.CASH_EMERALD if is_win else (UiPalette.SPIKE_AMBER if outcome == "surrendered" else UiPalette.POLICE_RED)
 	UiPalette.style_button(close_btn, btn_bg, btn_border, UiPalette.TEXT_PRIMARY, 38)
 	close_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")

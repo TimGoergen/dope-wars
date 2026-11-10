@@ -87,6 +87,7 @@ func _init() -> void:
 	_assert_true(state.has_combat_result(), "State has combat result after victory")
 	var res_vic: Dictionary = state.combat_result
 	_assert_eq(String(res_vic.get("outcome", "")), "victory", "Outcome is victory")
+	_assert_true(String(res_vic.get("flavor_text", "")).begins_with("You won!"), "Victory flavor text starts with 'You won!'")
 	_assert_true(int(res_vic.get("bounty", 0)) >= 1000, "Bounty recorded in result")
 	_assert_true(String(res_vic.get("flavor_text", "")).contains("Officer Hardass"), "Flavor text mentions Officer Hardass")
 	_assert_true(String(res_vic.get("flavor_text", "")).contains("cash"), "Flavor text mentions cash bounty")
@@ -119,6 +120,7 @@ func _init() -> void:
 	_assert_true(state.has_combat_result(), "State has combat result after escape")
 	var res_esc: Dictionary = state.combat_result
 	_assert_eq(String(res_esc.get("outcome", "")), "escaped", "Outcome is escaped")
+	_assert_true(String(res_esc.get("flavor_text", "")).begins_with("You won!"), "Escape flavor text starts with 'You won!'")
 	_assert_true(String(res_esc.get("flavor_text", "")).contains("Sgt. Bob"), "Escape flavor text mentions Sgt. Bob")
 	state.clear_combat_result()
 
@@ -144,6 +146,7 @@ func _init() -> void:
 	_assert_true(state.has_combat_result(), "State has combat result after surrender")
 	var res_surr: Dictionary = state.combat_result
 	_assert_eq(String(res_surr.get("outcome", "")), "surrendered", "Outcome is surrendered")
+	_assert_true(String(res_surr.get("flavor_text", "")).begins_with("You lose."), "Surrender flavor text starts with 'You lose.'")
 	_assert_eq(int(res_surr.get("cash_lost", 0)), 2500, "25% cash lost ($2,500)")
 	_assert_true(String(res_surr.get("drugs_summary", "")).contains("10 Weed"), "Seized stash summarized")
 	_assert_true(String(res_surr.get("flavor_text", "")).contains("Agent Miller"), "Surrender flavor text mentions Agent Miller")
