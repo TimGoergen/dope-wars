@@ -469,13 +469,40 @@ static func _get_svg_markup(name: String) -> String:
 				<circle cx="32" cy="42" r="4" fill="#0F172A"/>
 			</svg>"""
 		"slider_grabber":
-			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<circle cx="32" cy="32" r="28" fill="#0F172A" stroke="#FACC15" stroke-width="4"/>
-				<circle cx="32" cy="32" r="23" fill="#FACC15"/>
-				<circle cx="32" cy="32" r="19" fill="#FEF08A"/>
-				<line x1="26" y1="20" x2="26" y2="44" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
-				<line x1="32" y1="18" x2="32" y2="46" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
-				<line x1="38" y1="20" x2="38" y2="44" stroke="#854D0E" stroke-width="3" stroke-linecap="round"/>
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 64" width="160" height="64">
+				<rect x="6" y="8" width="148" height="52" rx="10" fill="#000000" opacity="0.65"/>
+				<rect x="4" y="4" width="152" height="56" rx="10" fill="#0A0F1D" stroke="#000000" stroke-width="2.5"/>
+				<rect x="8" y="8" width="144" height="48" rx="8" fill="#FACC15"/>
+				<rect x="11" y="10" width="138" height="21" rx="6" fill="#FEF08A" opacity="0.85"/>
+				<path d="M 11,38 L 11,48 A 6 6 0 0 0 17,54 L 143,54 A 6 6 0 0 0 149,48 L 149,38 Z" fill="#B45309" opacity="0.75"/>
+				<polygon points="34,26 26,32 34,38" fill="#854D0E" opacity="0.8"/>
+				<polygon points="126,26 134,32 126,38" fill="#854D0E" opacity="0.8"/>
+				<rect x="62" y="15" width="4" height="34" rx="2" fill="#78350F"/>
+				<rect x="74" y="15" width="4" height="34" rx="2" fill="#78350F"/>
+				<rect x="86" y="15" width="4" height="34" rx="2" fill="#78350F"/>
+				<rect x="98" y="15" width="4" height="34" rx="2" fill="#78350F"/>
+				<rect x="64" y="15" width="2" height="34" rx="1" fill="#FEF08A" opacity="0.65"/>
+				<rect x="76" y="15" width="2" height="34" rx="1" fill="#FEF08A" opacity="0.65"/>
+				<rect x="88" y="15" width="2" height="34" rx="1" fill="#FEF08A" opacity="0.65"/>
+				<rect x="100" y="15" width="2" height="34" rx="1" fill="#FEF08A" opacity="0.65"/>
+			</svg>"""
+		"slider_grabber_highlight":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 64" width="160" height="64">
+				<rect x="4" y="6" width="152" height="54" rx="10" fill="#000000" opacity="0.75"/>
+				<rect x="3" y="3" width="154" height="58" rx="11" fill="#FEF08A" stroke="#FACC15" stroke-width="3"/>
+				<rect x="8" y="8" width="144" height="48" rx="8" fill="#FDE047"/>
+				<rect x="11" y="10" width="138" height="21" rx="6" fill="#FFFFFF" opacity="0.9"/>
+				<path d="M 11,38 L 11,48 A 6 6 0 0 0 17,54 L 143,54 A 6 6 0 0 0 149,48 L 149,38 Z" fill="#D97706" opacity="0.8"/>
+				<polygon points="34,26 26,32 34,38" fill="#92400E" opacity="0.9"/>
+				<polygon points="126,26 134,32 126,38" fill="#92400E" opacity="0.9"/>
+				<rect x="62" y="15" width="4" height="34" rx="2" fill="#92400E"/>
+				<rect x="74" y="15" width="4" height="34" rx="2" fill="#92400E"/>
+				<rect x="86" y="15" width="4" height="34" rx="2" fill="#92400E"/>
+				<rect x="98" y="15" width="4" height="34" rx="2" fill="#92400E"/>
+				<rect x="64" y="15" width="2" height="34" rx="1" fill="#FFFFFF" opacity="0.85"/>
+				<rect x="76" y="15" width="2" height="34" rx="1" fill="#FFFFFF" opacity="0.85"/>
+				<rect x="88" y="15" width="2" height="34" rx="1" fill="#FFFFFF" opacity="0.85"/>
+				<rect x="100" y="15" width="2" height="34" rx="1" fill="#FFFFFF" opacity="0.85"/>
 			</svg>"""
 		"player_portrait", "player_hustler":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">

@@ -93,7 +93,7 @@ func _rebuild() -> void:
 	header.add_theme_constant_override("separation", 12)
 	main_vbox.add_child(header)
 
-	var title_lbl := UiPalette.add_label(header, String(p_def["name"]), 52, UiPalette.GOLD_ACCENT, false, true)
+	var title_lbl := UiPalette.add_label(header, String(p_def["name"]), 62, UiPalette.GOLD_ACCENT, false, true)
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var close_btn := Button.new()
@@ -115,19 +115,86 @@ func _rebuild() -> void:
 	div.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_vbox.add_child(div)
 
-	# 2. Market & Stash Summary (Large 34px stats)
+	# 2. Market & Stash Summary with Price Rating / Tag Info
 	var summary_vbox := VBoxContainer.new()
 	summary_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	summary_vbox.add_theme_constant_override("separation", 8)
+	summary_vbox.add_theme_constant_override("separation", 10)
 	main_vbox.add_child(summary_vbox)
 
 	var mkt_str := Money.format(price) if price > 0 else "No Local Buyers"
 	var avg_str := Money.format(avg_paid) if held > 0 else "—"
-	UiPalette.add_label(summary_vbox, "Market Price: %s" % mkt_str, 34, UiPalette.TEXT_PRIMARY, true, true)
-	UiPalette.add_label(summary_vbox, "Stash Held: %d  •  Avg Paid: %s" % [held, avg_str], 32, UiPalette.BANK_CYAN, true, false)
-	UiPalette.add_label(summary_vbox, "Coat Space Free: %d" % _state.get_free_capacity(), 32, UiPalette.TEXT_SECONDARY, true, false)
 
-	# 3. Mode Toggle Buttons: [BUY] | [SELL] | [🗑️ DROP] (Enlarged to 96px height)
+	var min_p := int(_state.tuning.get(String(p_def["min_prop"])))
+	var max_p := int(_state.tuning.get(String(p_def["max_prop"])))
+	var sig := String(_state.market_signals.get(_product_id, "normal"))
+	var tier_info := MarketEngine.calc_price_tier(price, min_p, max_p)
+	var a_cnt := int(tier_info["active_count"])
+	var t_col: Color = tier_info["color"]
+	var t_bg: Color = tier_info["bg"]
+	var t_lbl: String = tier_info["label"]
+
+	var tag_text := t_lbl
+	var price_color := UiPalette.TEXT_PRIMARY
+	if sig == "spike":
+		tag_text = "🔥 4× SPIKE!"
+		t_col = UiPalette.SPIKE_AMBER
+		t_bg = UiPalette.SPIKE_BG
+		a_cnt = 5
+		price_color = UiPalette.SPIKE_AMBER
+	elif sig == "flood":
+		tag_text = "❄️ 1/4 FLOOD!"
+		t_col = UiPalette.FLOOD_CYAN
+		t_bg = UiPalette.FLOOD_BG
+		a_cnt = 1
+		price_color = UiPalette.FLOOD_CYAN
+	elif a_cnt <= 2:
+		price_color = UiPalette.CASH_EMERALD
+	elif a_cnt >= 4:
+		price_color = UiPalette.SPIKE_AMBER
+
+	# Line 1: Market Price + Rating / Tag Pill Badge
+	var price_row := HBoxContainer.new()
+	price_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	price_row.add_theme_constant_override("separation", 14)
+	summary_vbox.add_child(price_row)
+
+	var mkt_lbl := UiPalette.add_label(price_row, "Market Price: %s" % mkt_str, 50, price_color, true, true)
+	mkt_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+
+	if price > 0:
+		var pill := PanelContainer.new()
+		pill.add_theme_stylebox_override("panel", UiPalette.make_box(t_bg, t_col, 10, 2, 14, 4))
+		pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		price_row.add_child(pill)
+
+		var pill_hbox := HBoxContainer.new()
+		pill_hbox.add_theme_constant_override("separation", 8)
+		pill.add_child(pill_hbox)
+
+		var meter_lbl := Label.new()
+		meter_lbl.text = "$".repeat(a_cnt)
+		meter_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+		meter_lbl.add_theme_font_size_override("font_size", 38)
+		meter_lbl.add_theme_color_override("font_color", t_col)
+		pill_hbox.add_child(meter_lbl)
+
+		var tag_lbl := Label.new()
+		tag_lbl.text = tag_text
+		tag_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+		tag_lbl.add_theme_font_size_override("font_size", 36)
+		tag_lbl.add_theme_color_override("font_color", t_col)
+		pill_hbox.add_child(tag_lbl)
+
+	# Line 2: Normal Range context
+	UiPalette.add_label(summary_vbox, "Normal Market Range: %s – %s" % [Money.format(min_p), Money.format(max_p)], 40, UiPalette.TEXT_MUTED, true, false)
+
+	# Line 3: Stash Held + Avg Paid (Large 44px stat)
+	UiPalette.add_label(summary_vbox, "Stash Held: %d  •  Avg Paid: %s" % [held, avg_str], 44, UiPalette.BANK_CYAN, true, false)
+
+	# Line 4: Coat Space Free (Large 44px stat)
+	UiPalette.add_label(summary_vbox, "Coat Free Space: %d" % _state.get_free_capacity(), 44, UiPalette.TEXT_SECONDARY, true, false)
+
+	# 3. Mode Toggle Buttons: [BUY] | [SELL] | [🗑️ DROP]
 	var mode_row := HBoxContainer.new()
 	mode_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mode_row.add_theme_constant_override("separation", 14)
@@ -136,14 +203,14 @@ func _rebuild() -> void:
 	var buy_tab := Button.new()
 	buy_tab.text = "BUY (%d)" % max_buy
 	buy_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	buy_tab.custom_minimum_size = Vector2(0, 96)
+	buy_tab.custom_minimum_size = Vector2(0, 104)
 	buy_tab.disabled = (max_buy <= 0)
 	UiPalette.style_button(
 		buy_tab,
 		UiPalette.BTN_PRIMARY if _mode == "buy" else UiPalette.CARD_BG,
 		UiPalette.BANK_CYAN if _mode == "buy" else UiPalette.BORDER_SLATE,
 		UiPalette.TEXT_PRIMARY,
-		UiPalette.FONT_SUBHEAD
+		42
 	)
 	buy_tab.pressed.connect(func() -> void:
 		Audio.play(&"tap")
@@ -155,14 +222,14 @@ func _rebuild() -> void:
 	var sell_tab := Button.new()
 	sell_tab.text = "SELL (%d)" % held
 	sell_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	sell_tab.custom_minimum_size = Vector2(0, 96)
+	sell_tab.custom_minimum_size = Vector2(0, 104)
 	sell_tab.disabled = (held <= 0) or (price <= 0)
 	UiPalette.style_button(
 		sell_tab,
 		UiPalette.BTN_SUCCESS if _mode == "sell" else UiPalette.CARD_BG,
 		UiPalette.CASH_EMERALD if _mode == "sell" else UiPalette.BORDER_SLATE,
 		UiPalette.TEXT_PRIMARY,
-		UiPalette.FONT_SUBHEAD
+		42
 	)
 	sell_tab.pressed.connect(func() -> void:
 		Audio.play(&"tap")
@@ -175,13 +242,13 @@ func _rebuild() -> void:
 		var drop_tab := Button.new()
 		drop_tab.text = "🗑️ DROP (%d)" % held
 		drop_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		drop_tab.custom_minimum_size = Vector2(0, 96)
+		drop_tab.custom_minimum_size = Vector2(0, 104)
 		UiPalette.style_button(
 			drop_tab,
 			UiPalette.BTN_DANGER if _mode == "dump" else UiPalette.CARD_BG,
 			UiPalette.DEBT_CRIMSON if _mode == "dump" else UiPalette.BORDER_SLATE,
 			UiPalette.TEXT_PRIMARY,
-			UiPalette.FONT_SUBHEAD
+			42
 		)
 		drop_tab.pressed.connect(func() -> void:
 			Audio.play(&"tap")
@@ -190,12 +257,12 @@ func _rebuild() -> void:
 		)
 		mode_row.add_child(drop_tab)
 
-	# 4. Quantity Readout & Chunky Slider (48px quantity title, 48px slider with tactile grabber)
-	_qty_label = UiPalette.add_label(main_vbox, "Quantity: 0", 48, UiPalette.GOLD_ACCENT)
+	# 4. Quantity Readout & Chunky Slider (58px quantity title, tactile grabber)
+	_qty_label = UiPalette.add_label(main_vbox, "Quantity: 0", 58, UiPalette.GOLD_ACCENT)
 	_qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	_qty_slider = HSlider.new()
-	_qty_slider.custom_minimum_size = Vector2(0, 48)
+	_qty_slider.custom_minimum_size = Vector2(0, 56)
 	_qty_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_qty_slider.step = 1
 	UiPalette.style_slider(_qty_slider)
@@ -204,13 +271,14 @@ func _rebuild() -> void:
 	)
 	main_vbox.add_child(_qty_slider)
 
-	# 5. Large Preview Label (42px)
-	_preview_label = UiPalette.add_label(main_vbox, "", 42, UiPalette.CASH_EMERALD)
+	# 5. Large Preview Label (50px)
+	_preview_label = UiPalette.add_label(main_vbox, "", 50, UiPalette.CASH_EMERALD)
 	_preview_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_preview_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	# 6. Big Confirm Action Button (112px tall, 48px font)
+	# 6. Big Confirm Action Button (116px tall, 56px font)
 	_confirm_btn = Button.new()
-	_confirm_btn.custom_minimum_size = Vector2(0, 112)
+	_confirm_btn.custom_minimum_size = Vector2(0, 116)
 	_confirm_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_confirm_btn.pressed.connect(func() -> void:
 		_commit_trade()
@@ -250,19 +318,19 @@ func _update_preview() -> void:
 		_preview_label.text = "Cost: %s  •  Cash Left: %s" % [Money.format(cost), Money.format(_state.cash - cost)]
 		_preview_label.add_theme_color_override("font_color", UiPalette.BANK_CYAN)
 		_confirm_btn.text = "✅ BUY %d" % qty
-		UiPalette.style_button(_confirm_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, 46)
+		UiPalette.style_button(_confirm_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, 56)
 	elif _mode == "sell":
 		var rev := qty * price
 		var pl := qty * (price - avg_paid)
 		_preview_label.text = "Payout: %s  •  Profit/Loss: %s" % [Money.format(rev), Money.format_pl(pl)]
 		_preview_label.add_theme_color_override("font_color", UiPalette.CASH_EMERALD if pl >= 0 else UiPalette.SPIKE_AMBER)
 		_confirm_btn.text = "💵 SELL %d" % qty
-		UiPalette.style_button(_confirm_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, 46)
+		UiPalette.style_button(_confirm_btn, UiPalette.BTN_SUCCESS, UiPalette.CASH_EMERALD, UiPalette.TEXT_PRIMARY, 56)
 	else:
 		_preview_label.text = "Drop %d units down storm drain ($0 recovery • Frees %d Space)" % [qty, qty]
 		_preview_label.add_theme_color_override("font_color", UiPalette.DEBT_CRIMSON)
 		_confirm_btn.text = "🗑️ DROP %d UNITS" % qty
-		UiPalette.style_button(_confirm_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, 46)
+		UiPalette.style_button(_confirm_btn, UiPalette.BTN_DANGER, UiPalette.DEBT_CRIMSON, UiPalette.TEXT_PRIMARY, 56)
 	_confirm_btn.disabled = (qty <= 0)
 
 

@@ -208,14 +208,24 @@ func _initialize() -> void:
 	_assert_tree_within_bounds(main, "Tab 2 (Kingpin)")
 
 	# 5. Check TradeOverlay (both unowned and owned with 3rd DROP tab), LegacyOverlay, RunSummaryOverlay, DevTuningOverlay
+	var grabber_tex := UiIcons.get_icon("slider_grabber", 48)
+	if grabber_tex == null or grabber_tex.get_height() != 48 or grabber_tex.get_width() < 96:
+		push_error("FAIL [Slider Grabber Rectangular]: Expected height=48, width>=96, got %dx%d" % [
+			grabber_tex.get_width() if grabber_tex else 0,
+			grabber_tex.get_height() if grabber_tex else 0
+		])
+		quit(1)
+		return
+
 	for p_def in OmahaCatalog.PRODUCTS:
 		var pid := String(p_def["id"])
 		if int(main.state.market_prices.get(pid, 0)) > 0:
 			main.state.inventory[pid] = {"qty": 10, "avg_paid": 100}
-			main._trade_overlay.open_for_product(main.state, pid)
+			var b_rect := (main._market_board as Control).get_global_rect()
+			main._trade_overlay.open_for_product(main.state, pid, b_rect)
 			await process_frame
 			await process_frame
-			_assert_tree_within_bounds(main._trade_overlay, "TradeOverlay (%s with DROP tab)" % pid)
+			_assert_tree_within_bounds(main._trade_overlay, "TradeOverlay (%s with DROP tab & board_rect)" % pid)
 			main._trade_overlay.visible = false
 			main.state.inventory[pid] = {"qty": 0, "avg_paid": 0}
 			break

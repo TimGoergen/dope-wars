@@ -218,17 +218,18 @@ static func style_button(
 
 static func style_slider(slider: HSlider) -> void:
 	var grabber_tex := UiIcons.get_icon("slider_grabber", 48)
+	var grabber_hl := UiIcons.get_icon("slider_grabber_highlight", 48)
 	slider.add_theme_icon_override("grabber", grabber_tex)
-	slider.add_theme_icon_override("grabber_highlight", grabber_tex)
+	slider.add_theme_icon_override("grabber_highlight", grabber_hl)
 	slider.add_theme_icon_override("grabber_disabled", grabber_tex)
 
 	var track_bg := make_box(CARD_BG, BORDER_SLATE, 8, 2, 0, 0)
-	track_bg.content_margin_top = 16
-	track_bg.content_margin_bottom = 16
+	track_bg.content_margin_top = 18
+	track_bg.content_margin_bottom = 18
 
-	var track_fill := make_box(GOLD_ACCENT, GOLD_ACCENT, 8, 0, 0, 0)
-	track_fill.content_margin_top = 16
-	track_fill.content_margin_bottom = 16
+	var track_fill := make_box(BANK_CYAN, BANK_CYAN, 8, 0, 0, 0)
+	track_fill.content_margin_top = 18
+	track_fill.content_margin_bottom = 18
 
 	slider.add_theme_stylebox_override("slider", track_bg)
 	slider.add_theme_stylebox_override("grabber_area", track_fill)
