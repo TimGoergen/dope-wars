@@ -152,48 +152,83 @@ func _rebuild() -> void:
 	elif a_cnt >= 4:
 		price_color = UiPalette.SPIKE_AMBER
 
-	# Line 1: Market Price + Rating / Tag Pill Badge
-	var price_row := HBoxContainer.new()
-	price_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	price_row.add_theme_constant_override("separation", 14)
-	summary_vbox.add_child(price_row)
-
-	var mkt_lbl := UiPalette.add_label(price_row, "Market Price: %s" % mkt_str, 50, price_color, false, true)
+	# Line 1: Market Price (Large 50px stat)
+	var mkt_lbl := UiPalette.add_label(summary_vbox, "Market Price: %s" % mkt_str, 50, price_color, false, true)
 	mkt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	mkt_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+
+	# Line 2: Dollar Sign Rating Meter ($$$$$) + Companion Price Tag Pill + Normal Range
+	var rating_row := HBoxContainer.new()
+	rating_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rating_row.add_theme_constant_override("separation", 12)
+	summary_vbox.add_child(rating_row)
+
+	var r_title := Label.new()
+	r_title.text = "Price Rating:"
+	r_title.add_theme_font_override("font", UiPalette.make_bold_font())
+	r_title.add_theme_font_size_override("font_size", 40)
+	r_title.add_theme_color_override("font_color", UiPalette.TEXT_SECONDARY)
+	r_title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	rating_row.add_child(r_title)
 
 	if price > 0:
+		var meter_hbox := HBoxContainer.new()
+		meter_hbox.add_theme_constant_override("separation", 0)
+		meter_hbox.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		rating_row.add_child(meter_hbox)
+
+		var active_dollars := Label.new()
+		active_dollars.text = "$".repeat(a_cnt)
+		active_dollars.add_theme_font_override("font", UiPalette.make_bold_font())
+		active_dollars.add_theme_font_size_override("font_size", 42)
+		active_dollars.add_theme_color_override("font_color", t_col)
+		active_dollars.add_theme_constant_override("shadow_offset_x", 0)
+		active_dollars.add_theme_constant_override("shadow_offset_y", 0)
+		active_dollars.add_theme_constant_override("shadow_outline_size", 6)
+		active_dollars.add_theme_color_override("font_shadow_color", Color(t_col.r, t_col.g, t_col.b, 0.40))
+		meter_hbox.add_child(active_dollars)
+
+		var inactive_dollars := Label.new()
+		inactive_dollars.text = "$".repeat(maxi(0, 5 - a_cnt))
+		inactive_dollars.add_theme_font_override("font", UiPalette.make_bold_font())
+		inactive_dollars.add_theme_font_size_override("font_size", 42)
+		inactive_dollars.add_theme_color_override("font_color", Color(0.24, 0.30, 0.42, 0.45))
+		meter_hbox.add_child(inactive_dollars)
+
 		var pill := PanelContainer.new()
-		pill.add_theme_stylebox_override("panel", UiPalette.make_box(t_bg, t_col, 10, 2, 14, 4))
+		pill.add_theme_stylebox_override("panel", UiPalette.make_box(t_bg, t_col, 8, 2, 12, 4))
 		pill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		price_row.add_child(pill)
-
-		var pill_hbox := HBoxContainer.new()
-		pill_hbox.add_theme_constant_override("separation", 8)
-		pill.add_child(pill_hbox)
-
-		var meter_lbl := Label.new()
-		meter_lbl.text = "$".repeat(a_cnt)
-		meter_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-		meter_lbl.add_theme_font_size_override("font_size", 38)
-		meter_lbl.add_theme_color_override("font_color", t_col)
-		pill_hbox.add_child(meter_lbl)
+		rating_row.add_child(pill)
 
 		var tag_lbl := Label.new()
 		tag_lbl.text = tag_text
 		tag_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-		tag_lbl.add_theme_font_size_override("font_size", 36)
+		tag_lbl.add_theme_font_size_override("font_size", 32)
 		tag_lbl.add_theme_color_override("font_color", t_col)
-		pill_hbox.add_child(tag_lbl)
+		pill.add_child(tag_lbl)
 
-	# Line 2: Normal Range context
-	UiPalette.add_label(summary_vbox, "Normal Market Range: %s – %s" % [Money.format(min_p), Money.format(max_p)], 40, UiPalette.TEXT_MUTED, false, false)
+		var norm_lbl := Label.new()
+		norm_lbl.text = "• Norm: %s–%s" % [Money.format(min_p), Money.format(max_p)]
+		norm_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+		norm_lbl.add_theme_font_size_override("font_size", 36)
+		norm_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
+		norm_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		rating_row.add_child(norm_lbl)
+	else:
+		var no_buy_lbl := Label.new()
+		no_buy_lbl.text = "NO LOCAL BUYERS (Norm: %s–%s)" % [Money.format(min_p), Money.format(max_p)]
+		no_buy_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+		no_buy_lbl.add_theme_font_size_override("font_size", 36)
+		no_buy_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
+		no_buy_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		rating_row.add_child(no_buy_lbl)
 
 	# Line 3: Stash Held + Avg Paid (Large 44px stat)
-	UiPalette.add_label(summary_vbox, "Stash Held: %d  •  Avg Paid: %s" % [held, avg_str], 44, UiPalette.BANK_CYAN, false, false)
+	var stash_lbl := UiPalette.add_label(summary_vbox, "Stash Held: %d  •  Avg Paid: %s" % [held, avg_str], 44, UiPalette.BANK_CYAN, false, false)
+	stash_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 
 	# Line 4: Coat Space Free (Large 44px stat)
-	UiPalette.add_label(summary_vbox, "Coat Free Space: %d" % _state.get_free_capacity(), 44, UiPalette.TEXT_SECONDARY, false, false)
+	var coat_lbl := UiPalette.add_label(summary_vbox, "Coat Free Space: %d" % _state.get_free_capacity(), 44, UiPalette.TEXT_SECONDARY, false, false)
+	coat_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 
 	# 3. Mode Toggle Buttons: [BUY] | [SELL] | [🗑️ DROP]
 	var mode_row := HBoxContainer.new()

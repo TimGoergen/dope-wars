@@ -229,6 +229,7 @@ func _initialize() -> void:
 
 			# Verify Market Price label is single line and horizontally rendered
 			var mkt_lbl_found := false
+			var rating_lbl_found := false
 			for node in main._trade_overlay.find_children("*", "Label", true, false):
 				var l := node as Label
 				if l.text.begins_with("Market Price:"):
@@ -241,8 +242,14 @@ func _initialize() -> void:
 						push_error("FAIL [Market Price Horizontal]: Expected 1 line, got %d (height=%.1f)" % [l.get_line_count(), l.size.y])
 						quit(1)
 						return
+				elif l.text == "Price Rating:":
+					rating_lbl_found = true
 			if not mkt_lbl_found:
 				push_error("FAIL [Market Price Horizontal]: Could not find 'Market Price:' label in TradeOverlay")
+				quit(1)
+				return
+			if not rating_lbl_found:
+				push_error("FAIL [Price Rating Display]: Could not find 'Price Rating:' label in TradeOverlay")
 				quit(1)
 				return
 
