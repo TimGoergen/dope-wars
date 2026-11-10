@@ -46,8 +46,8 @@ func _initialize() -> void:
 		var p_rect := p_lbl.get_global_rect()
 		var q_rect := q_btn.get_global_rect()
 		var gap := q_rect.position.x - p_rect.end.x
-		if gap < 24.0:
-			push_error("FAIL [Market Row Spacing (BUY)]: pid=%s gap=%.1f < 24.0 (price_end=%.1f btn_start=%.1f)" % [pid, gap, p_rect.end.x, q_rect.position.x])
+		if gap < 30.0:
+			push_error("FAIL [Market Row Spacing (BUY)]: pid=%s gap=%.1f < 30.0 (price_end=%.1f btn_start=%.1f)" % [pid, gap, p_rect.end.x, q_rect.position.x])
 			quit(1)
 			return
 
@@ -69,8 +69,8 @@ func _initialize() -> void:
 		var p_rect := p_lbl.get_global_rect()
 		var q_rect := q_btn.get_global_rect()
 		var gap := q_rect.position.x - p_rect.end.x
-		if gap < 24.0:
-			push_error("FAIL [Market Row Spacing (SELL)]: pid=%s gap=%.1f < 24.0 (price_end=%.1f btn_start=%.1f)" % [test_pid, gap, p_rect.end.x, q_rect.position.x])
+		if gap < 30.0:
+			push_error("FAIL [Market Row Spacing (SELL)]: pid=%s gap=%.1f < 30.0 (price_end=%.1f btn_start=%.1f)" % [test_pid, gap, p_rect.end.x, q_rect.position.x])
 			quit(1)
 			return
 		if q_btn.text != "SELL":

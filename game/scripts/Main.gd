@@ -453,7 +453,7 @@ func _build_market_tab() -> Control:
 		var row_hbox := HBoxContainer.new()
 		row_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		row_hbox.add_theme_constant_override("separation", 30)
+		row_hbox.add_theme_constant_override("separation", 36)
 		row_panel.add_child(row_hbox)
 
 		# Left/Middle clickable area to open the Trade Slider Modal
@@ -477,7 +477,7 @@ func _build_market_tab() -> Control:
 
 		var info_hbox := HBoxContainer.new()
 		info_hbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		info_hbox.add_theme_constant_override("separation", 12)
+		info_hbox.add_theme_constant_override("separation", 16)
 		info_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row_tap_btn.add_child(info_hbox)
 
