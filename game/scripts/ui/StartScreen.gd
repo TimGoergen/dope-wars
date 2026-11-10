@@ -68,7 +68,7 @@ func _build_ui() -> void:
 
 	# 2. Subtle Dark Gradient Scrim across the lower 58% for button readability
 	var scrim := TextureRect.new()
-	scrim.texture = UiPalette.make_vertical_gradient(Color(0.02, 0.04, 0.08, 0.0), Color(0.02, 0.04, 0.08, 0.96), 32, 256)
+	scrim.texture = UiPalette.make_vertical_gradient(Color(0.02, 0.04, 0.08, 0.0), Color(0.02, 0.04, 0.08, 0.40), 32, 256)
 	scrim.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	scrim.stretch_mode = TextureRect.STRETCH_SCALE
 	scrim.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -93,12 +93,12 @@ func _build_ui() -> void:
 	main_vbox.add_theme_constant_override("separation", 16)
 	margin.add_child(main_vbox)
 
-	# Card container wrapping buttons
+	# Card container wrapping buttons (50% transparency per user request)
 	_buttons_card = PanelContainer.new()
 	_buttons_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_buttons_card.add_theme_stylebox_override("panel", UiPalette.make_box(
-		Color(0.05, 0.08, 0.13, 0.90),
-		UiPalette.BORDER_SLATE,
+		Color(0.05, 0.08, 0.13, 0.50),
+		Color(UiPalette.BORDER_SLATE.r, UiPalette.BORDER_SLATE.g, UiPalette.BORDER_SLATE.b, 0.70),
 		20,
 		2,
 		20,
@@ -115,7 +115,7 @@ func _build_ui() -> void:
 	_continue_box = PanelContainer.new()
 	_continue_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_continue_box.add_theme_stylebox_override("panel", UiPalette.make_box(
-		Color(0.08, 0.16, 0.12, 0.92),
+		Color(0.08, 0.16, 0.12, 0.60),
 		UiPalette.CASH_EMERALD,
 		16,
 		3,
@@ -150,42 +150,42 @@ func _build_ui() -> void:
 	var section_lbl := UiPalette.add_label(card_vbox, "START A NEW RUN", 41, UiPalette.BANK_CYAN, false)
 	section_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-	# New Game - 31 Days (Omaha flavor: 30th & Ames / Big Sal / Old Market sprint)
+	# New Game - 31 Days (Omaha flavor: tight & concise)
 	_btn_31 = _create_new_game_button(
 		"New Game - 31 Days",
-		"The 30th & Ames Quick Hustle • Settle with Big Sal before month-end",
+		"30th & Ames Sprint • Beat Big Sal",
 		31,
-		UiPalette.BTN_PRIMARY,
+		Color(0.12, 0.25, 0.68, 0.65),
 		UiPalette.BANK_CYAN
 	)
 	card_vbox.add_child(_btn_31)
 
-	# New Game - 60 Days (Omaha flavor: South O to West O / 24th St & Maple St strips)
+	# New Game - 60 Days (Omaha flavor: tight & concise)
 	_btn_60 = _create_new_game_button(
 		"New Game - 60 Days",
-		"South O to West O Expansion • Rule the 24th St & Maple St strips",
+		"South O to West O • Run 24th St",
 		60,
-		UiPalette.CARD_BG,
+		Color(0.13, 0.18, 0.27, 0.65),
 		UiPalette.BORDER_BRIGHT
 	)
 	card_vbox.add_child(_btn_60)
 
-	# New Game - 90 Days (Omaha flavor: 8-district Metro Kingpin Campaign to Bellevue)
+	# New Game - 90 Days (Omaha flavor: tight & concise)
 	_btn_90 = _create_new_game_button(
 		"New Game - 90 Days",
-		"Metro Kingpin Campaign • Dominate all 8 districts from North O to Bellevue",
+		"North O to Bellevue • Own the Metro",
 		90,
-		UiPalette.CARD_BG,
+		Color(0.13, 0.18, 0.27, 0.65),
 		UiPalette.BORDER_BRIGHT
 	)
 	card_vbox.add_child(_btn_90)
 
-	# New Game - Endless (Omaha flavor: River City Cartel / Council Bluffs to West O)
+	# New Game - Endless (Omaha flavor: tight & concise)
 	_btn_endless = _create_new_game_button(
 		"New Game - Endless",
-		"River City Cartel • Endless hustle from Council Bluffs to West Omaha",
+		"River City Turf • No Deadlines",
 		0,
-		UiPalette.CARD_BG,
+		Color(0.13, 0.18, 0.27, 0.65),
 		UiPalette.PURPLE_VIP
 	)
 	card_vbox.add_child(_btn_endless)
@@ -200,7 +200,7 @@ func _build_ui() -> void:
 	hof_btn.text = "🏆 Hall of Fame"
 	hof_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hof_btn.custom_minimum_size = Vector2(0, 94)
-	UiPalette.style_button(hof_btn, UiPalette.CARD_BG, UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 30)
+	UiPalette.style_button(hof_btn, Color(0.13, 0.18, 0.27, 0.60), UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 30)
 	hof_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		hall_of_fame_requested.emit()
@@ -211,7 +211,7 @@ func _build_ui() -> void:
 	perks_btn.text = "🎖️ Perks"
 	perks_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	perks_btn.custom_minimum_size = Vector2(0, 94)
-	UiPalette.style_button(perks_btn, UiPalette.CARD_BG, UiPalette.BORDER_BRIGHT, UiPalette.BANK_CYAN, 30)
+	UiPalette.style_button(perks_btn, Color(0.13, 0.18, 0.27, 0.60), UiPalette.BORDER_BRIGHT, UiPalette.BANK_CYAN, 30)
 	perks_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		perks_requested.emit()
@@ -222,7 +222,7 @@ func _build_ui() -> void:
 	_audio_btn.text = "🔊 Sound"
 	_audio_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_audio_btn.custom_minimum_size = Vector2(0, 94)
-	UiPalette.style_button(_audio_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, 30)
+	UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.60), UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, 30)
 	_audio_btn.pressed.connect(func() -> void:
 		Audio.muted = not Audio.muted
 		_meta["muted"] = Audio.muted
