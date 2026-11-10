@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Outer Dark Contour for High Contrast -->
+  <g stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round">
+    <!-- Bottom Tiny Leaves -->
+    <path d="M 32 44 Q 20 45 14 41 Q 20 37 32 42" fill="#15803D"/>
+    <path d="M 32 44 Q 44 45 50 41 Q 44 37 32 42" fill="#15803D"/>
+    <!-- Lower Pair -->
+    <path d="M 32 42 Q 16 38 10 28 Q 22 28 32 38" fill="#16A34A"/>
+    <path d="M 32 42 Q 48 38 54 28 Q 42 28 32 38" fill="#16A34A"/>
+    <!-- Middle Pair -->
+    <path d="M 32 38 Q 18 24 16 12 Q 28 20 32 34" fill="#22C55E"/>
+    <path d="M 32 38 Q 46 24 48 12 Q 36 20 32 34" fill="#22C55E"/>
+    <!-- Center Main Leaflet -->
+    <path d="M 32 40 Q 24 18 32 5 Q 40 18 32 40" fill="#4ADE80"/>
+    <!-- Stem -->
+    <path d="M 32 40 L 32 58" stroke="#14532D" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+  <!-- Leaflet Rib Veins -->
+  <line x1="32" y1="40" x2="32" y2="10" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="32" y1="36" x2="20" y2="16" stroke="#86EFAC" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="32" y1="36" x2="44" y2="16" stroke="#86EFAC" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="32" y1="39" x2="16" y2="29" stroke="#4ADE80" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="32" y1="39" x2="48" y2="29" stroke="#4ADE80" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

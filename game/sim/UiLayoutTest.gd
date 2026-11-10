@@ -226,6 +226,26 @@ func _initialize() -> void:
 			await process_frame
 			await process_frame
 			_assert_tree_within_bounds(main._trade_overlay, "TradeOverlay (%s with DROP tab & board_rect)" % pid)
+
+			# Verify Market Price label is single line and horizontally rendered
+			var mkt_lbl_found := false
+			for node in main._trade_overlay.find_children("*", "Label", true, false):
+				var l := node as Label
+				if l.text.begins_with("Market Price:"):
+					mkt_lbl_found = true
+					if l.autowrap_mode != TextServer.AUTOWRAP_OFF:
+						push_error("FAIL [Market Price Horizontal]: Expected autowrap_mode == AUTOWRAP_OFF, got %d" % l.autowrap_mode)
+						quit(1)
+						return
+					if l.get_line_count() != 1:
+						push_error("FAIL [Market Price Horizontal]: Expected 1 line, got %d (height=%.1f)" % [l.get_line_count(), l.size.y])
+						quit(1)
+						return
+			if not mkt_lbl_found:
+				push_error("FAIL [Market Price Horizontal]: Could not find 'Market Price:' label in TradeOverlay")
+				quit(1)
+				return
+
 			main._trade_overlay.visible = false
 			main.state.inventory[pid] = {"qty": 0, "avg_paid": 0}
 			break

@@ -131,6 +131,14 @@ static func icon_for_district(district_id: String) -> String:
 			return "bank"
 
 
+static func icon_for_drug(product_id: String) -> String:
+	return "drug_%s" % product_id
+
+
+static func get_drug_icon(product_id: String, size_px: int = 64) -> Texture2D:
+	return get_icon("drug_%s" % product_id, size_px)
+
+
 static func cop_portrait_for_tier(tier: int) -> String:
 	match tier:
 		3:
@@ -467,6 +475,230 @@ static func _get_svg_markup(name: String) -> String:
 				<path d="M20 28 V18 A12 12 0 0 1 44 18 V28" stroke="#CBD5E1" stroke-width="4.5" fill="none"/>
 				<rect x="14" y="28" width="36" height="28" rx="6" fill="#FACC15" stroke="#0F172A" stroke-width="3"/>
 				<circle cx="32" cy="42" r="4" fill="#0F172A"/>
+			</svg>"""
+		"drug_adderall", "adderall":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<g transform="rotate(-45 32 32)">
+					<rect x="22" y="10" width="20" height="44" rx="10" fill="#0F172A"/>
+					<path d="M 24 32 V 20 A 8 8 0 0 1 40 20 V 32 Z" fill="#F97316" stroke="#0F172A" stroke-width="2"/>
+					<path d="M 27 16 A 5 5 0 0 1 37 16 V 26 H 27 Z" fill="#FB923C" opacity="0.6"/>
+					<path d="M 24 32 V 44 A 8 8 0 0 0 40 44 V 32 Z" fill="#0284C7" stroke="#0F172A" stroke-width="2"/>
+					<circle cx="28" cy="38" r="1.8" fill="#38BDF8"/>
+					<circle cx="35" cy="37" r="1.5" fill="#FACC15"/>
+					<circle cx="31" cy="42" r="1.8" fill="#F8FAFC"/>
+					<circle cx="36" cy="45" r="1.4" fill="#38BDF8"/>
+					<circle cx="27" cy="46" r="1.3" fill="#FB923C"/>
+					<rect x="22" y="30" width="20" height="4" rx="1" fill="#FEF08A" stroke="#0F172A" stroke-width="1.5"/>
+					<path d="M 26 14 Q 26 30 26 48" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.75" fill="none"/>
+				</g>
+			</svg>"""
+		"drug_meth", "meth":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<polygon points="32,4 48,18 56,42 42,58 20,58 8,40 14,18" fill="#082F49" stroke="#0F172A" stroke-width="2"/>
+				<polygon points="32,6 44,22 38,54 26,54 20,22" fill="#06B6D4" stroke="#0F172A" stroke-width="2"/>
+				<polygon points="32,6 38,54 26,54" fill="#22D3EE"/>
+				<polygon points="32,6 20,22 26,54" fill="#67E8F9"/>
+				<polygon points="12,24 24,18 22,46 10,42" fill="#0891B2" stroke="#0F172A" stroke-width="2"/>
+				<polygon points="12,24 24,18 20,38" fill="#22D3EE"/>
+				<polygon points="50,22 54,42 42,48 38,24" fill="#0E7490" stroke="#0F172A" stroke-width="2"/>
+				<polygon points="50,22 42,48 38,24" fill="#38BDF8"/>
+				<polygon points="42,20 50,22 44,34" fill="#A5F3FC"/>
+				<polygon points="26,46 38,46 32,60" fill="#E0F2FE" stroke="#0F172A" stroke-width="1.8"/>
+				<line x1="28" y1="12" x2="28" y2="34" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+				<polygon points="46,12 48,16 44,16" fill="#FFFFFF"/>
+				<polygon points="16,30 18,34 14,34" fill="#FFFFFF"/>
+			</svg>"""
+		"drug_vape_carts", "vape_carts":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<path d="M 28 6 L 36 6 L 38 18 L 26 18 Z" fill="#E2E8F0" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+				<rect x="25" y="18" width="14" height="4" rx="1.5" fill="#94A3B8" stroke="#0F172A" stroke-width="2"/>
+				<rect x="20" y="22" width="24" height="28" rx="2" fill="#1E293B" stroke="#0F172A" stroke-width="3"/>
+				<rect x="22" y="27" width="20" height="21" fill="#F59E0B"/>
+				<path d="M 22 27 Q 27 24 32 27 T 42 27 V 48 H 22 Z" fill="#FBBF24"/>
+				<rect x="30" y="22" width="4" height="26" fill="#CBD5E1" stroke="#0F172A" stroke-width="1.2"/>
+				<circle cx="32" cy="44" r="2" fill="#FFFFFF"/>
+				<circle cx="26" cy="36" r="2.2" fill="#FEF08A" stroke="#B45309" stroke-width="0.8"/>
+				<circle cx="38" cy="33" r="1.6" fill="#FEF08A" stroke="#B45309" stroke-width="0.8"/>
+				<circle cx="26" cy="43" r="1.2" fill="#FEF08A"/>
+				<line x1="23" y1="24" x2="23" y2="46" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+				<rect x="24" y="50" width="16" height="5" fill="#94A3B8" stroke="#0F172A" stroke-width="2"/>
+				<rect x="27" y="55" width="10" height="4" fill="#CBD5E1" stroke="#0F172A" stroke-width="1.5"/>
+				<line x1="24" y1="52.5" x2="40" y2="52.5" stroke="#475569" stroke-width="1.2"/>
+			</svg>"""
+		"drug_weed", "weed":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<g stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round">
+					<path d="M 32 44 Q 20 45 14 41 Q 20 37 32 42" fill="#15803D"/>
+					<path d="M 32 44 Q 44 45 50 41 Q 44 37 32 42" fill="#15803D"/>
+					<path d="M 32 42 Q 16 38 10 28 Q 22 28 32 38" fill="#16A34A"/>
+					<path d="M 32 42 Q 48 38 54 28 Q 42 28 32 38" fill="#16A34A"/>
+					<path d="M 32 38 Q 18 24 16 12 Q 28 20 32 34" fill="#22C55E"/>
+					<path d="M 32 38 Q 46 24 48 12 Q 36 20 32 34" fill="#22C55E"/>
+					<path d="M 32 40 Q 24 18 32 5 Q 40 18 32 40" fill="#4ADE80"/>
+					<path d="M 32 40 L 32 58" stroke="#14532D" stroke-width="3.5" stroke-linecap="round"/>
+				</g>
+				<line x1="32" y1="40" x2="32" y2="10" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+				<line x1="32" y1="36" x2="20" y2="16" stroke="#86EFAC" stroke-width="1.2" stroke-linecap="round"/>
+				<line x1="32" y1="36" x2="44" y2="16" stroke="#86EFAC" stroke-width="1.2" stroke-linecap="round"/>
+				<line x1="32" y1="39" x2="16" y2="29" stroke="#4ADE80" stroke-width="1.2" stroke-linecap="round"/>
+				<line x1="32" y1="39" x2="48" y2="29" stroke="#4ADE80" stroke-width="1.2" stroke-linecap="round"/>
+			</svg>"""
+		"drug_hashish", "hashish":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<polygon points="6,34 32,48 58,34 58,40 32,56 6,40" fill="#0F172A"/>
+				<polygon points="6,34 32,48 32,54 6,40" fill="#451A03" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+				<polygon points="32,48 58,34 58,40 32,54" fill="#78350F" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+				<polygon points="32,16 58,30 32,44 6,30" fill="#92400E" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+				<polygon points="32,19 54,30 32,41 10,30" fill="#B45309"/>
+				<polygon points="32,23 44,30 32,37 20,30" fill="#78350F" stroke="#D97706" stroke-width="1.5"/>
+				<circle cx="32" cy="30" r="3" fill="#FACC15"/>
+				<polygon points="32,26 34,29 37,30 34,31 32,34 30,31 27,30 30,29" fill="#FEF08A"/>
+				<line x1="14" y1="32" x2="22" y2="36" stroke="#451A03" stroke-width="1.2"/>
+				<line x1="42" y1="36" x2="50" y2="32" stroke="#B45309" stroke-width="1.2"/>
+			</svg>"""
+		"drug_oxy", "oxy":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<circle cx="32" cy="34" r="26" fill="#0F172A"/>
+				<circle cx="32" cy="32" r="26" fill="#047857" stroke="#0F172A" stroke-width="3"/>
+				<circle cx="32" cy="32" r="22" fill="#059669" stroke="#10B981" stroke-width="2.5"/>
+				<circle cx="32" cy="32" r="17" fill="#10B981"/>
+				<line x1="15" y1="32" x2="49" y2="32" stroke="#047857" stroke-width="3.5" stroke-linecap="round"/>
+				<line x1="15" y1="31" x2="49" y2="31" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+				<line x1="17" y1="33" x2="47" y2="33" stroke="#6EE7B7" stroke-width="1" stroke-linecap="round"/>
+				<path d="M 28 22 A 4 4 0 1 0 36 22 A 4 4 0 1 0 28 22 Z" stroke="#065F46" stroke-width="2" fill="none"/>
+				<circle cx="28" cy="40" r="2.2" stroke="#065F46" stroke-width="1.6" fill="none"/>
+				<circle cx="28" cy="44" r="2.4" stroke="#065F46" stroke-width="1.6" fill="none"/>
+				<circle cx="36" cy="42" r="3.5" stroke="#065F46" stroke-width="1.6" fill="none"/>
+				<path d="M 18 20 A 18 18 0 0 1 42 16" stroke="#A7F3D0" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+			</svg>"""
+		"drug_shrooms", "shrooms":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<path d="M 42 42 Q 44 48 48 56" stroke="#FEF3C7" stroke-width="5" stroke-linecap="round"/>
+				<path d="M 42 42 Q 44 48 48 56" stroke="#0F172A" stroke-width="2" fill="none"/>
+				<path d="M 34 42 C 34 32 54 32 54 42 Z" fill="#9333EA" stroke="#0F172A" stroke-width="2.2"/>
+				<circle cx="40" cy="37" r="1.8" fill="#FDE047"/>
+				<circle cx="48" cy="38" r="1.4" fill="#FDE047"/>
+				<path d="M 10 38 Q 28 44 46 38 Q 28 35 10 38 Z" fill="#581C87" stroke="#0F172A" stroke-width="2"/>
+				<path d="M 28 38 Q 26 48 24 58 L 34 58 Q 33 48 31 38 Z" fill="#FDF4DC" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+				<line x1="28" y1="43" x2="27" y2="54" stroke="#D97706" stroke-width="1.2" stroke-linecap="round"/>
+				<line x1="31" y1="44" x2="31" y2="52" stroke="#D97706" stroke-width="1.2" stroke-linecap="round"/>
+				<path d="M 8 38 C 8 16 48 16 48 38 C 36 39 20 39 8 38 Z" fill="#A855F7" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>
+				<path d="M 12 36 C 14 20 42 20 44 36" fill="#C084FC"/>
+				<circle cx="28" cy="22" r="3.8" fill="#FACC15" stroke="#78350F" stroke-width="1.2"/>
+				<circle cx="18" cy="27" r="2.8" fill="#FACC15" stroke="#78350F" stroke-width="1"/>
+				<circle cx="38" cy="28" r="2.8" fill="#FACC15" stroke="#78350F" stroke-width="1"/>
+				<circle cx="26" cy="33" r="2" fill="#FACC15"/>
+				<circle cx="14" cy="34" r="1.8" fill="#FDE047"/>
+				<circle cx="42" cy="34" r="1.8" fill="#FDE047"/>
+				<circle cx="8" cy="24" r="1.5" fill="#FACC15"/>
+				<circle cx="52" cy="24" r="1.5" fill="#FACC15"/>
+				<circle cx="34" cy="11" r="1.5" fill="#FDE047"/>
+			</svg>"""
+		"drug_acid", "acid":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<rect x="10" y="10" width="46" height="46" rx="4" fill="#0F172A"/>
+				<rect x="8" y="8" width="48" height="48" rx="3" fill="#EC4899" stroke="#0F172A" stroke-width="3"/>
+				<rect x="9" y="9" width="23" height="23" fill="#F472B6"/>
+				<rect x="32" y="32" width="23" height="23" fill="#DB2777"/>
+				<rect x="32" y="9" width="23" height="23" fill="#8B5CF6"/>
+				<rect x="9" y="32" width="23" height="23" fill="#6366F1"/>
+				<line x1="32" y1="8" x2="32" y2="56" stroke="#0F172A" stroke-width="2" stroke-dasharray="2,3"/>
+				<line x1="8" y1="32" x2="56" y2="32" stroke="#0F172A" stroke-width="2" stroke-dasharray="2,3"/>
+				<circle cx="8" cy="8" r="2" fill="#070A0F"/>
+				<circle cx="32" cy="8" r="2" fill="#070A0F"/>
+				<circle cx="56" cy="8" r="2" fill="#070A0F"/>
+				<circle cx="8" cy="32" r="2" fill="#070A0F"/>
+				<circle cx="32" cy="32" r="2" fill="#070A0F"/>
+				<circle cx="56" cy="32" r="2" fill="#070A0F"/>
+				<circle cx="8" cy="56" r="2" fill="#070A0F"/>
+				<circle cx="32" cy="56" r="2" fill="#070A0F"/>
+				<circle cx="56" cy="56" r="2" fill="#070A0F"/>
+				<line x1="32" y1="16" x2="32" y2="20" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/>
+				<line x1="32" y1="44" x2="32" y2="48" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/>
+				<line x1="18" y1="24" x2="21" y2="26" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/>
+				<line x1="46" y1="24" x2="43" y2="26" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/>
+				<path d="M 18 32 Q 32 20 46 32 Q 32 44 18 32 Z" fill="#F8FAFC" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+				<circle cx="32" cy="32" r="6" fill="#FACC15" stroke="#0F172A" stroke-width="1.8"/>
+				<circle cx="32" cy="32" r="3" fill="#0F172A"/>
+				<circle cx="34" cy="30" r="1.2" fill="#FFFFFF"/>
+			</svg>"""
+		"drug_pcp", "pcp":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<path d="M 22 14 Q 18 8 24 4" stroke="#4ADE80" stroke-width="2" stroke-linecap="round" fill="none"/>
+				<path d="M 40 14 Q 44 8 38 4" stroke="#4ADE80" stroke-width="2" stroke-linecap="round" fill="none"/>
+				<path d="M 26 18 C 26 12 38 12 38 18 Z" fill="#1E293B" stroke="#0F172A" stroke-width="2.5"/>
+				<rect x="23" y="18" width="18" height="6" rx="1.5" fill="#334155" stroke="#0F172A" stroke-width="2"/>
+				<rect x="18" y="24" width="28" height="34" rx="6" fill="#92400E" stroke="#0F172A" stroke-width="3"/>
+				<path d="M 20 38 Q 32 35 44 38 V 52 A 4 4 0 0 1 40 56 H 24 A 4 4 0 0 1 20 52 Z" fill="#22C55E"/>
+				<path d="M 21 40 Q 32 37 43 40 V 52 H 21 Z" fill="#4ADE80" opacity="0.6"/>
+				<rect x="23" y="29" width="18" height="15" rx="2" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.5"/>
+				<circle cx="32" cy="34" r="3" fill="#0F172A"/>
+				<circle cx="30" cy="34" r="1" fill="#FEF3C7"/>
+				<circle cx="34" cy="34" r="1" fill="#FEF3C7"/>
+				<rect x="30" y="38" width="4" height="3" fill="#0F172A"/>
+				<line x1="20" y1="26" x2="20" y2="52" stroke="#FDE68A" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+				<path d="M 49 42 C 49 42 45 47 45 50 A 4 4 0 0 0 53 50 C 53 47 49 42 49 42 Z" fill="#4ADE80" stroke="#0F172A" stroke-width="1.8"/>
+				<circle cx="48" cy="49" r="1" fill="#FFFFFF"/>
+			</svg>"""
+		"drug_molly", "molly":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<polygon points="12,12 14,8 16,12 20,14 16,16 14,20 12,16 8,14" fill="#FACC15"/>
+				<polygon points="50,16 51,13 52,16 55,17 52,18 51,21 50,18 47,17" fill="#38BDF8"/>
+				<polygon points="52,48 53,45 54,48 57,49 54,50 53,53 52,50 49,49" fill="#FACC15"/>
+				<circle cx="32" cy="35" r="23" fill="#0F172A"/>
+				<circle cx="32" cy="33" r="23" fill="#E11D48" stroke="#0F172A" stroke-width="3"/>
+				<circle cx="32" cy="33" r="19" fill="#F43F5E" stroke="#FDA4AF" stroke-width="2"/>
+				<circle cx="32" cy="33" r="15" fill="#FB7185"/>
+				<path d="M 32 40 C 32 40 22 34 22 27 C 22 23 25 21 28 21 C 30 21 31.5 22.5 32 24 C 32.5 22.5 34 21 36 21 C 39 21 42 23 42 27 C 42 34 32 40 32 40 Z" fill="#BE123C" stroke="#881337" stroke-width="1.8"/>
+				<path d="M 25 24 Q 28 22 29 25" stroke="#FDA4AF" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+				<path d="M 18 24 A 16 16 0 0 1 38 18" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.7"/>
+			</svg>"""
+		"drug_heroin", "heroin":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<g transform="rotate(-45 32 32)">
+					<line x1="32" y1="2" x2="32" y2="14" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+					<line x1="32" y1="2" x2="32" y2="14" stroke="#0F172A" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+					<polygon points="29,14 35,14 33,18 31,18" fill="#94A3B8" stroke="#0F172A" stroke-width="1.5"/>
+					<rect x="25" y="18" width="14" height="32" rx="2" fill="#1E293B" stroke="#0F172A" stroke-width="2.5"/>
+					<rect x="27" y="26" width="10" height="18" fill="#D97706"/>
+					<rect x="27" y="28" width="10" height="16" fill="#F59E0B" opacity="0.8"/>
+					<rect x="26" y="44" width="12" height="5" rx="1" fill="#0F172A"/>
+					<line x1="32" y1="48" x2="32" y2="62" stroke="#94A3B8" stroke-width="3.5"/>
+					<rect x="25" y="60" width="14" height="3" rx="1.5" fill="#E2E8F0" stroke="#0F172A" stroke-width="1.8"/>
+					<rect x="21" y="48" width="22" height="4" rx="1.5" fill="#CBD5E1" stroke="#0F172A" stroke-width="2"/>
+					<line x1="34" y1="22" x2="37" y2="22" stroke="#FFFFFF" stroke-width="1.5"/>
+					<line x1="35" y1="26" x2="37" y2="26" stroke="#FFFFFF" stroke-width="1.2"/>
+					<line x1="34" y1="30" x2="37" y2="30" stroke="#FFFFFF" stroke-width="1.5"/>
+					<line x1="35" y1="34" x2="37" y2="34" stroke="#FFFFFF" stroke-width="1.2"/>
+					<line x1="34" y1="38" x2="37" y2="38" stroke="#FFFFFF" stroke-width="1.5"/>
+					<line x1="35" y1="42" x2="37" y2="42" stroke="#FFFFFF" stroke-width="1.2"/>
+					<line x1="27" y1="20" x2="27" y2="46" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+					<circle cx="32" cy="2" r="1.5" fill="#F59E0B"/>
+				</g>
+			</svg>"""
+		"drug_cocaine", "cocaine":
+			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+				<line x1="8" y1="52" x2="34" y2="52" stroke="#F8FAFC" stroke-width="3.5" stroke-linecap="round"/>
+				<line x1="12" y1="58" x2="42" y2="58" stroke="#F8FAFC" stroke-width="3.5" stroke-linecap="round"/>
+				<line x1="8" y1="52" x2="34" y2="52" stroke="#38BDF8" stroke-width="1.5" stroke-linecap="round"/>
+				<line x1="12" y1="58" x2="42" y2="58" stroke="#38BDF8" stroke-width="1.5" stroke-linecap="round"/>
+				<g transform="rotate(-18 34 26)">
+					<rect x="11" y="11" width="46" height="26" rx="2" fill="#0F172A"/>
+					<rect x="9" y="9" width="46" height="26" rx="2" fill="#E2E8F0" stroke="#0F172A" stroke-width="2.5"/>
+					<rect x="11" y="11" width="42" height="22" rx="1.5" fill="#CBD5E1"/>
+					<line x1="9" y1="10" x2="55" y2="10" stroke="#FFFFFF" stroke-width="1.8"/>
+					<line x1="9" y1="34" x2="55" y2="34" stroke="#FFFFFF" stroke-width="1.8"/>
+					<rect x="17" y="20.5" width="30" height="3" fill="#0F172A"/>
+					<circle cx="32" cy="22" r="4.5" fill="#0F172A"/>
+					<circle cx="21" cy="22" r="2.8" fill="#0F172A"/>
+					<circle cx="43" cy="22" r="2.8" fill="#0F172A"/>
+					<rect x="8" y="19" width="3" height="6" rx="1" fill="#0F172A"/>
+					<rect x="53" y="19" width="3" height="6" rx="1" fill="#0F172A"/>
+					<polygon points="14,11 26,11 20,33 8,33" fill="#FFFFFF" opacity="0.35"/>
+				</g>
+				<polygon points="54,10 56,6 58,10 62,12 58,14 56,18 54,14 50,12" fill="#38BDF8"/>
+				<circle cx="56" cy="12" r="1.5" fill="#FFFFFF"/>
+				<polygon points="48,42 49,39 50,42 53,43 50,44 49,47 48,44 45,43" fill="#FACC15"/>
 			</svg>"""
 		"slider_grabber":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 64" width="160" height="64">

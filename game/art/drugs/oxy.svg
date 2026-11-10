@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Pill Outer Drop Shadow / Border -->
+  <circle cx="32" cy="34" r="26" fill="#0F172A"/>
+  <circle cx="32" cy="32" r="26" fill="#047857" stroke="#0F172A" stroke-width="3"/>
+  <!-- Chamfered Beveled Outer Ring -->
+  <circle cx="32" cy="32" r="22" fill="#059669" stroke="#10B981" stroke-width="2.5"/>
+  <!-- Top Face -->
+  <circle cx="32" cy="32" r="17" fill="#10B981"/>
+  <!-- Bisecting Score Line / Groove -->
+  <line x1="15" y1="32" x2="49" y2="32" stroke="#047857" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="15" y1="31" x2="49" y2="31" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="17" y1="33" x2="47" y2="33" stroke="#6EE7B7" stroke-width="1" stroke-linecap="round"/>
+  <!-- Debossed Text / Imprint "OC" on top, "80" on bottom -->
+  <path d="M 28 22 A 4 4 0 1 0 36 22 A 4 4 0 1 0 28 22 Z" stroke="#065F46" stroke-width="2" fill="none"/>
+  <!-- Number 80 in bottom half -->
+  <circle cx="28" cy="40" r="2.2" stroke="#065F46" stroke-width="1.6" fill="none"/>
+  <circle cx="28" cy="44" r="2.4" stroke="#065F46" stroke-width="1.6" fill="none"/>
+  <circle cx="36" cy="42" r="3.5" stroke="#065F46" stroke-width="1.6" fill="none"/>
+  <!-- Specular Reflection Arc -->
+  <path d="M 18 20 A 18 18 0 0 1 42 16" stroke="#A7F3D0" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Cut White Lines at Bottom -->
+  <line x1="8" y1="52" x2="34" y2="52" stroke="#F8FAFC" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="12" y1="58" x2="42" y2="58" stroke="#F8FAFC" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="8" y1="52" x2="34" y2="52" stroke="#38BDF8" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="12" y1="58" x2="42" y2="58" stroke="#38BDF8" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Razor Blade Drop Shadow -->
+  <g transform="rotate(-18 34 26)">
+    <rect x="11" y="11" width="46" height="26" rx="2" fill="#0F172A"/>
+    <!-- Blade Outer Body (Steel) -->
+    <rect x="9" y="9" width="46" height="26" rx="2" fill="#E2E8F0" stroke="#0F172A" stroke-width="2.5"/>
+    <!-- Polished Steel Bevel Face -->
+    <rect x="11" y="11" width="42" height="22" rx="1.5" fill="#CBD5E1"/>
+    <!-- Top & Bottom Razor Cutting Edges (Gleam) -->
+    <line x1="9" y1="10" x2="55" y2="10" stroke="#FFFFFF" stroke-width="1.8"/>
+    <line x1="9" y1="34" x2="55" y2="34" stroke="#FFFFFF" stroke-width="1.8"/>
+    <!-- Center Cutout (Classic Double-Edge Razor Slot) -->
+    <rect x="17" y="20.5" width="30" height="3" fill="#0F172A"/>
+    <circle cx="32" cy="22" r="4.5" fill="#0F172A"/>
+    <circle cx="21" cy="22" r="2.8" fill="#0F172A"/>
+    <circle cx="43" cy="22" r="2.8" fill="#0F172A"/>
+    <!-- Side Notches -->
+    <rect x="8" y="19" width="3" height="6" rx="1" fill="#0F172A"/>
+    <rect x="53" y="19" width="3" height="6" rx="1" fill="#0F172A"/>
+    <!-- Blade Reflection Sheen -->
+    <polygon points="14,11 26,11 20,33 8,33" fill="#FFFFFF" opacity="0.35"/>
+  </g>
+  <!-- Diamond Sparkle Highlights -->
+  <polygon points="54,10 56,6 58,10 62,12 58,14 56,18 54,14 50,12" fill="#38BDF8"/>
+  <circle cx="56" cy="12" r="1.5" fill="#FFFFFF"/>
+  <polygon points="48,42 49,39 50,42 53,43 50,44 49,47 48,44 45,43" fill="#FACC15"/>
+</svg>

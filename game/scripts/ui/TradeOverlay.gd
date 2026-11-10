@@ -158,7 +158,8 @@ func _rebuild() -> void:
 	price_row.add_theme_constant_override("separation", 14)
 	summary_vbox.add_child(price_row)
 
-	var mkt_lbl := UiPalette.add_label(price_row, "Market Price: %s" % mkt_str, 50, price_color, true, true)
+	var mkt_lbl := UiPalette.add_label(price_row, "Market Price: %s" % mkt_str, 50, price_color, false, true)
+	mkt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	mkt_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 	if price > 0:
@@ -186,13 +187,13 @@ func _rebuild() -> void:
 		pill_hbox.add_child(tag_lbl)
 
 	# Line 2: Normal Range context
-	UiPalette.add_label(summary_vbox, "Normal Market Range: %s – %s" % [Money.format(min_p), Money.format(max_p)], 40, UiPalette.TEXT_MUTED, true, false)
+	UiPalette.add_label(summary_vbox, "Normal Market Range: %s – %s" % [Money.format(min_p), Money.format(max_p)], 40, UiPalette.TEXT_MUTED, false, false)
 
 	# Line 3: Stash Held + Avg Paid (Large 44px stat)
-	UiPalette.add_label(summary_vbox, "Stash Held: %d  •  Avg Paid: %s" % [held, avg_str], 44, UiPalette.BANK_CYAN, true, false)
+	UiPalette.add_label(summary_vbox, "Stash Held: %d  •  Avg Paid: %s" % [held, avg_str], 44, UiPalette.BANK_CYAN, false, false)
 
 	# Line 4: Coat Space Free (Large 44px stat)
-	UiPalette.add_label(summary_vbox, "Coat Free Space: %d" % _state.get_free_capacity(), 44, UiPalette.TEXT_SECONDARY, true, false)
+	UiPalette.add_label(summary_vbox, "Coat Free Space: %d" % _state.get_free_capacity(), 44, UiPalette.TEXT_SECONDARY, false, false)
 
 	# 3. Mode Toggle Buttons: [BUY] | [SELL] | [🗑️ DROP]
 	var mode_row := HBoxContainer.new()
@@ -258,7 +259,8 @@ func _rebuild() -> void:
 		mode_row.add_child(drop_tab)
 
 	# 4. Quantity Readout & Chunky Slider (58px quantity title, tactile grabber)
-	_qty_label = UiPalette.add_label(main_vbox, "Quantity: 0", 58, UiPalette.GOLD_ACCENT)
+	_qty_label = UiPalette.add_label(main_vbox, "Quantity: 0", 58, UiPalette.GOLD_ACCENT, false, true)
+	_qty_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	_qty_slider = HSlider.new()

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- 3D Brick Perspective -->
+  <!-- Bottom Shadow -->
+  <polygon points="6,34 32,48 58,34 58,40 32,56 6,40" fill="#0F172A"/>
+  <!-- Front Left Face -->
+  <polygon points="6,34 32,48 32,54 6,40" fill="#451A03" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Front Right Face -->
+  <polygon points="32,48 58,34 58,40 32,54" fill="#78350F" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Top Pressed Surface -->
+  <polygon points="32,16 58,30 32,44 6,30" fill="#92400E" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Top Surface Highlight Rim -->
+  <polygon points="32,19 54,30 32,41 10,30" fill="#B45309"/>
+  <!-- Center Embossed Stamp / Seal -->
+  <polygon points="32,23 44,30 32,37 20,30" fill="#78350F" stroke="#D97706" stroke-width="1.5"/>
+  <!-- Golden Lion / Crown / Star Emboss Symbol in Center -->
+  <circle cx="32" cy="30" r="3" fill="#FACC15"/>
+  <polygon points="32,26 34,29 37,30 34,31 32,34 30,31 27,30 30,29" fill="#FEF08A"/>
+  <!-- Texture Scratches / Break Line -->
+  <line x1="14" y1="32" x2="22" y2="36" stroke="#451A03" stroke-width="1.2"/>
+  <line x1="42" y1="36" x2="50" y2="32" stroke="#B45309" stroke-width="1.2"/>
+</svg>

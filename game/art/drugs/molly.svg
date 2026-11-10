@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Sparkles / Glints -->
+  <polygon points="12,12 14,8 16,12 20,14 16,16 14,20 12,16 8,14" fill="#FACC15"/>
+  <polygon points="50,16 51,13 52,16 55,17 52,18 51,21 50,18 47,17" fill="#38BDF8"/>
+  <polygon points="52,48 53,45 54,48 57,49 54,50 53,53 52,50 49,49" fill="#FACC15"/>
+  <!-- Shadow / Contour -->
+  <circle cx="32" cy="35" r="23" fill="#0F172A"/>
+  <!-- Main Tablet Body -->
+  <circle cx="32" cy="33" r="23" fill="#E11D48" stroke="#0F172A" stroke-width="3"/>
+  <!-- Beveled Chamfer Ring -->
+  <circle cx="32" cy="33" r="19" fill="#F43F5E" stroke="#FDA4AF" stroke-width="2"/>
+  <!-- Tablet Face -->
+  <circle cx="32" cy="33" r="15" fill="#FB7185"/>
+  <!-- Stamped Heart Impression / Logo -->
+  <path d="M 32 40 C 32 40 22 34 22 27 C 22 23 25 21 28 21 C 30 21 31.5 22.5 32 24 C 32.5 22.5 34 21 36 21 C 39 21 42 23 42 27 C 42 34 32 40 32 40 Z" fill="#BE123C" stroke="#881337" stroke-width="1.8"/>
+  <path d="M 25 24 Q 28 22 29 25" stroke="#FDA4AF" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  <!-- Pill Highlight Sheen -->
+  <path d="M 18 24 A 16 16 0 0 1 38 18" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.7"/>
+</svg>
