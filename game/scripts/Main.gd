@@ -825,9 +825,9 @@ func _open_travel_modal() -> void:
 						(hc as Label).add_theme_font_size_override("font_size", UiPalette.FONT_TITLE)
 
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
-	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Choose a destination to drive or stay for a day (advances 1 Day)." % [
+	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Choose a destination to travel or stay for a day (advances 1 Day)." % [
 		cur_d["icon"], cur_d["name"]
-	], UiPalette.FONT_ROW_MAIN, UiPalette.TEXT_SECONDARY)
+	], 36, UiPalette.TEXT_SECONDARY)
 
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -856,10 +856,10 @@ func _open_travel_modal() -> void:
 		card.add_child(cv)
 
 		var title_str := ("📍 %s (HERE)" % d_def["name"]) if is_here else ("%s %s" % [d_def["icon"], d_def["name"]])
-		UiPalette.add_label(cv, title_str, UiPalette.FONT_HEADER, UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY, true, true)
+		UiPalette.add_label(cv, title_str, 42, UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY, true, true)
 
 		var spot_str := String(d_def["facility_btn"])
-		UiPalette.add_label(cv, spot_str, UiPalette.FONT_BUTTON, UiPalette.BANK_CYAN, true, true)
+		UiPalette.add_label(cv, spot_str, 34, UiPalette.BANK_CYAN, true, true)
 
 		var affinities_vbox := VBoxContainer.new()
 		affinities_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -882,19 +882,19 @@ func _open_travel_modal() -> void:
 				high_ids.append(pid)
 		var cheap_str := _format_product_list_travel(cheap_ids)
 		var high_str := _format_product_list_travel(high_ids)
-		UiPalette.add_rich_label(affinities_vbox, "🏷️ Cheap: %s" % cheap_str, 28, UiPalette.CASH_EMERALD, true)
-		UiPalette.add_rich_label(affinities_vbox, "📈 Pricy: %s" % high_str, 28, UiPalette.SPIKE_AMBER, true)
+		UiPalette.add_rich_label(affinities_vbox, "🏷️ Cheap: %s" % cheap_str, 32, UiPalette.CASH_EMERALD, true)
+		UiPalette.add_rich_label(affinities_vbox, "📈 Pricy: %s" % high_str, 32, UiPalette.SPIKE_AMBER, true)
 
 		var go_btn := Button.new()
-		go_btn.text = "📅 STAY FOR A DAY" if is_here else "🚗 DRIVE HERE"
-		go_btn.custom_minimum_size = Vector2(0, 96)
+		go_btn.text = "📅 STAY FOR A DAY" if is_here else "🚗 TRAVEL HERE"
+		go_btn.custom_minimum_size = Vector2(0, 102)
 		go_btn.disabled = state.is_final_day()
 		UiPalette.style_button(
 			go_btn,
 			UiPalette.BTN_PRIMARY if is_here else UiPalette.BTN_SUCCESS,
 			UiPalette.GOLD_ACCENT if is_here else UiPalette.CASH_EMERALD,
 			UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY,
-			UiPalette.FONT_SUBHEAD,
+			38,
 			14
 		)
 		go_btn.pressed.connect(func() -> void:
@@ -903,6 +903,7 @@ func _open_travel_modal() -> void:
 		)
 		cv.add_child(go_btn)
 
+	_travel_overlay.move_to_front()
 	_travel_overlay.visible = true
 
 
