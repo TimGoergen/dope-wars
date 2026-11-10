@@ -253,6 +253,18 @@ func _initialize() -> void:
 				quit(1)
 				return
 
+			# Verify Large Drug SVG icon is present and >= 144px
+			var drug_svg_found := false
+			for node in main._trade_overlay.find_children("*", "TextureRect", true, false):
+				var tr := node as TextureRect
+				if tr.texture != null and tr.texture.get_width() >= 144:
+					drug_svg_found = true
+					break
+			if not drug_svg_found:
+				push_error("FAIL [Large Drug SVG]: Could not find large (>=144px) drug SVG icon in TradeOverlay")
+				quit(1)
+				return
+
 			main._trade_overlay.visible = false
 			main.state.inventory[pid] = {"qty": 0, "avg_paid": 0}
 			break

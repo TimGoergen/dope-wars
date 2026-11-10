@@ -81,49 +81,6 @@ func _rebuild() -> void:
 	var avg_paid := int(entry["avg_paid"])
 	var max_buy := _state.get_max_buyable(_product_id)
 
-	var main_vbox := VBoxContainer.new()
-	main_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	main_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	main_vbox.add_theme_constant_override("separation", 18)
-	panel.add_child(main_vbox)
-
-	# 1. Header Row: Big Product Name + Top-right X button
-	var header := HBoxContainer.new()
-	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_theme_constant_override("separation", 12)
-	main_vbox.add_child(header)
-
-	var title_lbl := UiPalette.add_label(header, String(p_def["name"]), 62, UiPalette.GOLD_ACCENT, false, true)
-	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var close_btn := Button.new()
-	close_btn.text = ""
-	close_btn.icon = UiIcons.get_icon("close_x", 62)
-	close_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	close_btn.custom_minimum_size = Vector2(90, 90)
-	close_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	UiPalette.style_close_button(close_btn)
-	close_btn.pressed.connect(func() -> void:
-		Audio.play(&"tap")
-		visible = false
-	)
-	header.add_child(close_btn)
-
-	var div := ColorRect.new()
-	div.color = UiPalette.BORDER_SLATE
-	div.custom_minimum_size = Vector2(0, 3)
-	div.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	main_vbox.add_child(div)
-
-	# 2. Market & Stash Summary with Price Rating / Tag Info
-	var summary_vbox := VBoxContainer.new()
-	summary_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	summary_vbox.add_theme_constant_override("separation", 10)
-	main_vbox.add_child(summary_vbox)
-
-	var mkt_str := Money.format(price) if price > 0 else "No Local Buyers"
-	var avg_str := Money.format(avg_paid) if held > 0 else "—"
-
 	var min_p := int(_state.tuning.get(String(p_def["min_prop"])))
 	var max_p := int(_state.tuning.get(String(p_def["max_prop"])))
 	var sig := String(_state.market_signals.get(_product_id, "normal"))
@@ -151,6 +108,78 @@ func _rebuild() -> void:
 		price_color = UiPalette.CASH_EMERALD
 	elif a_cnt >= 4:
 		price_color = UiPalette.SPIKE_AMBER
+
+	var main_vbox := VBoxContainer.new()
+	main_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	main_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	main_vbox.add_theme_constant_override("separation", 18)
+	panel.add_child(main_vbox)
+
+	# 1. Header Row: Large Drug SVG Art Card + Product Name & Category + Close X button
+	var header := HBoxContainer.new()
+	header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_theme_constant_override("separation", 18)
+	main_vbox.add_child(header)
+
+	var art_card := PanelContainer.new()
+	art_card.custom_minimum_size = Vector2(160, 160)
+	art_card.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var card_border: Color = UiPalette.BORDER_BRIGHT
+	if sig == "spike":
+		card_border = UiPalette.SPIKE_AMBER
+	elif sig == "flood":
+		card_border = UiPalette.FLOOD_CYAN
+	art_card.add_theme_stylebox_override("panel", UiPalette.make_box(Color("#0C131F"), card_border, 16, 2, 8, 8))
+	header.add_child(art_card)
+
+	var drug_icon_rect := TextureRect.new()
+	drug_icon_rect.texture = UiIcons.get_drug_icon(_product_id, 144)
+	drug_icon_rect.custom_minimum_size = Vector2(144, 144)
+	drug_icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	drug_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	drug_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	art_card.add_child(drug_icon_rect)
+
+	var title_vbox := VBoxContainer.new()
+	title_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	title_vbox.add_theme_constant_override("separation", 4)
+	header.add_child(title_vbox)
+
+	var title_lbl := UiPalette.add_label(title_vbox, String(p_def["name"]), 62, UiPalette.GOLD_ACCENT, false, true)
+	title_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+
+	var cat_str := "Tier %d Contraband" % int(p_def.get("row", 1))
+	var cat_lbl := UiPalette.add_label(title_vbox, cat_str, 32, UiPalette.TEXT_MUTED, false, false)
+	cat_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+
+	var close_btn := Button.new()
+	close_btn.text = ""
+	close_btn.icon = UiIcons.get_icon("close_x", 62)
+	close_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	close_btn.custom_minimum_size = Vector2(90, 90)
+	close_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	UiPalette.style_close_button(close_btn)
+	close_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		visible = false
+	)
+	header.add_child(close_btn)
+
+	var div := ColorRect.new()
+	div.color = UiPalette.BORDER_SLATE
+	div.custom_minimum_size = Vector2(0, 3)
+	div.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	main_vbox.add_child(div)
+
+	# 2. Market & Stash Summary with Price Rating & Dollar Sign Meter
+	var summary_vbox := VBoxContainer.new()
+	summary_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	summary_vbox.add_theme_constant_override("separation", 10)
+	main_vbox.add_child(summary_vbox)
+
+	var mkt_str := Money.format(price) if price > 0 else "No Local Buyers"
+	var avg_str := Money.format(avg_paid) if held > 0 else "—"
 
 	# Line 1: Market Price (Large 50px stat)
 	var mkt_lbl := UiPalette.add_label(summary_vbox, "Market Price: %s" % mkt_str, 50, price_color, false, true)
