@@ -518,7 +518,7 @@ func hire_lawyer(clear_all: bool) -> Dictionary:
 	else:
 		var drop := heat * tuning.lawyer_relative_suppress_pct
 		_reduce_heat(drop)
-		log_scanner("⚖️ Farnam St. Attorney suppressed 10%% of warrants (Heat: %.1f%%)." % heat)
+		log_scanner("⚖️ Farnam St. Attorney suppressed %.0f%% of warrants (Heat: %.1f%%)." % [tuning.lawyer_relative_suppress_pct * 100.0, heat])
 	return {"ok": true, "cost": cost, "heat": heat}
 
 

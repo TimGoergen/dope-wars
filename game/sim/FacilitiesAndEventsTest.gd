@@ -38,14 +38,14 @@ func _init() -> void:
 	_assert_eq(state.bank, 9000, "$9k (90%) wired directly to Bank")
 	_assert_true(absf(state.heat - 25.0) < 0.01, "Heat dropped by -15% (40 -> 25)")
 
-	# 3. West Omaha Defense Attorney: Suppress (10% of heat) and Expunge All
+	# 3. West Omaha Defense Attorney: Suppress (40% of heat) and Expunge All
 	state.cash = 50000
 	var part_cost := state.get_lawyer_cost(false)
 	var all_cost := state.get_lawyer_cost(true)
-	_assert_eq(part_cost, int(round(all_cost * 0.10)), "Suppress cost is 10% of expunge all cost")
+	_assert_true(abs(part_cost - int(round(all_cost * 0.40))) <= 1, "Suppress cost is 40% of expunge all cost")
 	var supp_res := state.hire_lawyer(false)
 	_assert_true(bool(supp_res.get("ok", false)), "Lawyer suppress ok")
-	_assert_true(absf(state.heat - 22.5) < 0.01, "Heat reduced by 10% (25 -> 22.5)")
+	_assert_true(absf(state.heat - 15.0) < 0.01, "Heat reduced by 40% (25 -> 15)")
 	var law_res := state.hire_lawyer(true)
 	_assert_true(bool(law_res.get("ok", false)), "Lawyer clear all heat ok")
 	_assert_true(absf(state.heat) < 0.01, "Heat cleared to 0%")

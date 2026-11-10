@@ -426,7 +426,8 @@ static func build_lawyer_card(vbox: VBoxContainer, state: GameState, on_action: 
 
 	var cost_part := state.get_lawyer_cost(false)
 	var cost_all := state.get_lawyer_cost(true)
-	var drop_pct := state.heat * 0.10
+	var supp_pct_int := int(round(state.tuning.lawyer_relative_suppress_pct * 100.0))
+	var drop_pct := state.heat * state.tuning.lawyer_relative_suppress_pct
 
 	UiPalette.add_label(inner, "⚖️ West O Defense Attorney", 44, UiPalette.POLICE_RED, false, true)
 	UiPalette.add_label(inner, "Police Heat: %.1f%% (%s)" % [
@@ -435,7 +436,7 @@ static func build_lawyer_card(vbox: VBoxContainer, state: GameState, on_action: 
 	], 34, UiPalette.TEXT_SECONDARY)
 
 	var part_btn := Button.new()
-	part_btn.text = "📂 Suppress Warrants (-10%% • -%.1f%% Heat) — %s" % [drop_pct, Money.format(cost_part)]
+	part_btn.text = "📂 Suppress Warrants (-%d%% • -%.1f%% Heat) — %s" % [supp_pct_int, drop_pct, Money.format(cost_part)]
 	part_btn.custom_minimum_size = Vector2(0, 104)
 	part_btn.disabled = (state.heat <= 0.1) or (state.cash < cost_part)
 	UiPalette.style_button(part_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, 36)
