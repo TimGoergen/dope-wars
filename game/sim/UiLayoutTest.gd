@@ -208,9 +208,9 @@ func _initialize() -> void:
 	_assert_tree_within_bounds(main, "Tab 2 (Kingpin)")
 
 	# 5. Check TradeOverlay (both unowned and owned with 3rd DROP tab), LegacyOverlay, RunSummaryOverlay, DevTuningOverlay
-	var grabber_tex := UiIcons.get_icon("slider_grabber", 48)
-	if grabber_tex == null or grabber_tex.get_height() != 48 or grabber_tex.get_width() < 96:
-		push_error("FAIL [Slider Grabber Rectangular]: Expected height=48, width>=96, got %dx%d" % [
+	var grabber_tex := UiIcons.get_icon("slider_grabber", 56)
+	if grabber_tex == null or grabber_tex.get_height() != 56 or grabber_tex.get_width() < 112:
+		push_error("FAIL [Slider Grabber Rectangular]: Expected height=56, width>=112, got %dx%d" % [
 			grabber_tex.get_width() if grabber_tex else 0,
 			grabber_tex.get_height() if grabber_tex else 0
 		])

@@ -328,7 +328,7 @@ func _rebuild() -> void:
 	_qty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	_qty_slider = HSlider.new()
-	_qty_slider.custom_minimum_size = Vector2(0, 56)
+	_qty_slider.custom_minimum_size = Vector2(0, 60)
 	_qty_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_qty_slider.step = 1
 	UiPalette.style_slider(_qty_slider)
