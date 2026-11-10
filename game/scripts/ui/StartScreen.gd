@@ -9,6 +9,7 @@ signal continue_requested()
 signal start_new_run_requested(mode_days: int)
 signal hall_of_fame_requested()
 signal perks_requested()
+signal tuning_requested()
 signal meta_updated()
 
 var _meta: Dictionary = {}
@@ -190,17 +191,17 @@ func _build_ui() -> void:
 	)
 	card_vbox.add_child(_btn_endless)
 
-	# Utility Row: Hall of Fame, Perks & Street Cred, Audio Toggle (20% larger: 25px -> 30px)
+	# Utility Row: Hall of Fame, Perks & Street Cred, Dev Tuning, Audio Toggle
 	var util_row := HBoxContainer.new()
 	util_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	util_row.add_theme_constant_override("separation", 12)
+	util_row.add_theme_constant_override("separation", 10)
 	main_vbox.add_child(util_row)
 
 	var hof_btn := Button.new()
 	hof_btn.text = "🏆 Hall of Fame"
 	hof_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hof_btn.custom_minimum_size = Vector2(0, 94)
-	UiPalette.style_button(hof_btn, Color(0.13, 0.18, 0.27, 0.60), UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 30)
+	hof_btn.custom_minimum_size = Vector2(0, 92)
+	UiPalette.style_button(hof_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 28)
 	hof_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		hall_of_fame_requested.emit()
@@ -210,30 +211,53 @@ func _build_ui() -> void:
 	var perks_btn := Button.new()
 	perks_btn.text = "🎖️ Perks"
 	perks_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	perks_btn.custom_minimum_size = Vector2(0, 94)
-	UiPalette.style_button(perks_btn, Color(0.13, 0.18, 0.27, 0.60), UiPalette.BORDER_BRIGHT, UiPalette.BANK_CYAN, 30)
+	perks_btn.custom_minimum_size = Vector2(0, 92)
+	UiPalette.style_button(perks_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, 28)
 	perks_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		perks_requested.emit()
 	)
 	util_row.add_child(perks_btn)
 
+	var tune_btn := Button.new()
+	tune_btn.text = "⚙️ Tuning"
+	tune_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tune_btn.custom_minimum_size = Vector2(0, 92)
+	UiPalette.style_button(tune_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_SECONDARY, 28)
+	tune_btn.pressed.connect(func() -> void:
+		Audio.play(&"tap")
+		tuning_requested.emit()
+	)
+	util_row.add_child(tune_btn)
+
 	_audio_btn = Button.new()
-	_audio_btn.text = "🔊 Sound"
 	_audio_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_audio_btn.custom_minimum_size = Vector2(0, 94)
-	UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.60), UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, 30)
+	_audio_btn.custom_minimum_size = Vector2(0, 92)
+	_update_audio_btn_visual()
 	_audio_btn.pressed.connect(func() -> void:
 		Audio.muted = not Audio.muted
 		_meta["muted"] = Audio.muted
 		SaveManager.save_data(_meta)
+		if not Audio.muted:
+			Audio.play(&"cash_register")
 		meta_updated.emit()
-		_refresh_display()
+		_update_audio_btn_visual()
 	)
 	util_row.add_child(_audio_btn)
 
 	# 4. Confirmation Dialog Modal (for abandoning active run)
 	_build_confirm_modal()
+
+
+func _update_audio_btn_visual() -> void:
+	if _audio_btn == null:
+		return
+	if Audio.muted:
+		_audio_btn.text = "🔇 Muted"
+		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, 28)
+	else:
+		_audio_btn.text = "🔊 Sound"
+		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.CASH_EMERALD, UiPalette.CASH_EMERALD, 28)
 
 
 func _create_new_game_button(title: String, subtitle: String, days: int, bg_col: Color, border_col: Color) -> Button:
@@ -405,5 +429,4 @@ func _refresh_display() -> void:
 		var nw := cash_val + bank_val - debt_val
 		_continue_info_lbl.text = "ACTIVE RUN: %s • %s • Net Worth: %s" % [d_str, dist_name, Money.format_short(nw)]
 
-	if _audio_btn != null:
-		_audio_btn.text = "🔇 Muted" if Audio.muted else "🔊 Sound"
+	_update_audio_btn_visual()

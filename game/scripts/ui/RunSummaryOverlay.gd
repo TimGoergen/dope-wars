@@ -19,6 +19,7 @@ func _init() -> void:
 func open_summary(state: GameState, meta: Dictionary, show_run_banner: bool = true) -> void:
 	_state = state
 	_meta = meta
+	move_to_front()
 	for c in get_children():
 		c.queue_free()
 

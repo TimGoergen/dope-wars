@@ -37,6 +37,7 @@ func _init() -> void:
 func open_panel(tuning: TuningConfig) -> void:
 	_tuning = tuning
 	_inputs.clear()
+	move_to_front()
 	for c in get_children():
 		c.queue_free()
 

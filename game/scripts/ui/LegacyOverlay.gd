@@ -19,6 +19,7 @@ func _init() -> void:
 func open_modal(meta: Dictionary) -> void:
 	_meta = meta
 	_rebuild()
+	move_to_front()
 	visible = true
 
 

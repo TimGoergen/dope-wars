@@ -1018,20 +1018,32 @@ func _build_start_screen() -> void:
 		return
 	_start_screen = StartScreen.new()
 	_start_screen.continue_requested.connect(func() -> void:
+		_summary_overlay.visible = false
+		_legacy_overlay.visible = false
+		_dev_tuning_overlay.visible = false
 		hide_start_screen()
 		_show_tab(0)
 		_refresh_all()
 	)
 	_start_screen.start_new_run_requested.connect(func(mode_days: int) -> void:
+		_summary_overlay.visible = false
+		_legacy_overlay.visible = false
+		_dev_tuning_overlay.visible = false
 		_start_new_run(mode_days)
 		hide_start_screen()
 		_show_tab(0)
 	)
 	_start_screen.hall_of_fame_requested.connect(func() -> void:
 		_summary_overlay.open_summary(state, meta, false)
+		_summary_overlay.move_to_front()
 	)
 	_start_screen.perks_requested.connect(func() -> void:
 		_legacy_overlay.open_modal(meta)
+		_legacy_overlay.move_to_front()
+	)
+	_start_screen.tuning_requested.connect(func() -> void:
+		_dev_tuning_overlay.open_panel(tuning)
+		_dev_tuning_overlay.move_to_front()
 	)
 	_start_screen.meta_updated.connect(func() -> void:
 		_rebuild_kingpin_tab()
@@ -1042,8 +1054,12 @@ func _build_start_screen() -> void:
 func show_start_screen() -> void:
 	if _start_screen == null:
 		_build_start_screen()
+	_summary_overlay.visible = false
+	_legacy_overlay.visible = false
+	_dev_tuning_overlay.visible = false
 	_start_screen.open_start_screen(meta, state)
 	_start_screen.visible = true
+	_start_screen.move_to_front()
 
 
 func hide_start_screen() -> void:
