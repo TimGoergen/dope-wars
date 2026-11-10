@@ -453,12 +453,13 @@ func _build_market_tab() -> Control:
 		var row_hbox := HBoxContainer.new()
 		row_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		row_hbox.add_theme_constant_override("separation", 12)
+		row_hbox.add_theme_constant_override("separation", 30)
 		row_panel.add_child(row_hbox)
 
 		# Left/Middle clickable area to open the Trade Slider Modal
 		var row_tap_btn := Button.new()
 		UiPalette.style_flat_inert_button(row_tap_btn)
+		row_tap_btn.clip_contents = true
 		row_tap_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row_tap_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		row_tap_btn.gui_input.connect(_on_market_scroll_input)
@@ -486,9 +487,11 @@ func _build_market_tab() -> Control:
 		left_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 		left_vbox.add_theme_constant_override("separation", 2)
 		left_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		left_vbox.clip_contents = true
 		info_hbox.add_child(left_vbox)
 
 		var name_row := HBoxContainer.new()
+		name_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_row.add_theme_constant_override("separation", 8)
 		name_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		left_vbox.add_child(name_row)
@@ -500,6 +503,10 @@ func _build_market_tab() -> Control:
 
 		var name_lbl := UiPalette.add_label(name_row, String(p_def["name"]), UiPalette.FONT_DRUG_NAME, UiPalette.TEXT_PRIMARY, false, true)
 		name_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		name_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+		name_lbl.clip_text = true
+		name_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 		# 5-Tier "$$$$$" Price Meter + Companion Pill Badge (Above Norm: $X–$Y)
 		var meter_row := HBoxContainer.new()
@@ -541,17 +548,24 @@ func _build_market_tab() -> Control:
 
 		var sub_lbl := UiPalette.add_label(left_vbox, "", UiPalette.FONT_DRUG_SUB, UiPalette.TEXT_SECONDARY, false, false)
 		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		sub_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+		sub_lbl.clip_text = true
+		sub_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		sub_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 		# Big Price Display
 		var price_lbl := UiPalette.add_label(info_hbox, "$0", UiPalette.FONT_DRUG_PRICE, UiPalette.TEXT_PRIMARY, false, true)
 		price_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		price_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		price_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		price_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+		price_lbl.size_flags_horizontal = Control.SIZE_SHRINK_END
 
 		# Right-edge 1-Tap Quick Action Button ([BUY N] / [SELL] / [DUMP N])
 		var quick_btn := Button.new()
-		quick_btn.custom_minimum_size = Vector2(296, 0)
+		quick_btn.custom_minimum_size = Vector2(250, 0)
 		quick_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		quick_btn.clip_text = true
 		UiPalette.style_button(quick_btn, UiPalette.BTN_PRIMARY, UiPalette.BANK_CYAN, UiPalette.TEXT_PRIMARY, UiPalette.FONT_DRUG_BTN, 12)
 		quick_btn.gui_input.connect(_on_market_scroll_input)
 		quick_btn.pressed.connect(func() -> void:

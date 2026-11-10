@@ -36,6 +36,56 @@ func _initialize() -> void:
 	main._refresh_all()
 	await process_frame
 	await process_frame
+
+	# Verify BUY button spacing and no-overlap with price label on Market list
+	for p_def in OmahaCatalog.PRODUCTS:
+		var pid := String(p_def["id"])
+		var ui_row: Dictionary = main._product_rows[pid]
+		var p_lbl: Label = ui_row["price_lbl"]
+		var q_btn: Button = ui_row["quick_btn"]
+		var p_rect := p_lbl.get_global_rect()
+		var q_rect := q_btn.get_global_rect()
+		var gap := q_rect.position.x - p_rect.end.x
+		if gap < 24.0:
+			push_error("FAIL [Market Row Spacing (BUY)]: pid=%s gap=%.1f < 24.0 (price_end=%.1f btn_start=%.1f)" % [pid, gap, p_rect.end.x, q_rect.position.x])
+			quit(1)
+			return
+
+	# Verify SELL button spacing and no-overlap when inventory is held under high price / spike
+	main.state.market_signals["cocaine"] = "spike"
+	main.state.market_prices["cocaine"] = 125000
+	main.state.inventory["cocaine"] = {"qty": 100, "avg_paid": 28000}
+	main.state.market_signals["pcp"] = "flood"
+	main.state.market_prices["pcp"] = 262
+	main.state.inventory["pcp"] = {"qty": 50, "avg_paid": 1800}
+	main._refresh_all()
+	await process_frame
+	await process_frame
+
+	for test_pid in ["cocaine", "pcp"]:
+		var ui_row: Dictionary = main._product_rows[test_pid]
+		var p_lbl: Label = ui_row["price_lbl"]
+		var q_btn: Button = ui_row["quick_btn"]
+		var p_rect := p_lbl.get_global_rect()
+		var q_rect := q_btn.get_global_rect()
+		var gap := q_rect.position.x - p_rect.end.x
+		if gap < 24.0:
+			push_error("FAIL [Market Row Spacing (SELL)]: pid=%s gap=%.1f < 24.0 (price_end=%.1f btn_start=%.1f)" % [test_pid, gap, p_rect.end.x, q_rect.position.x])
+			quit(1)
+			return
+		if q_btn.text != "SELL":
+			push_error("FAIL [Market Row SELL btn]: expected 'SELL', got '%s'" % q_btn.text)
+			quit(1)
+			return
+
+	main.state.inventory.clear()
+	main.state.market_signals.erase("cocaine")
+	main.state.market_signals.erase("pcp")
+	for p_def in OmahaCatalog.PRODUCTS:
+		main.state.market_prices[String(p_def["id"])] = 100
+	main._refresh_all()
+	await process_frame
+	await process_frame
 	var vbar: VScrollBar = main._market_scroll.get_v_scroll_bar()
 	var max_scroll: float = vbar.max_value - vbar.page
 	if max_scroll <= 1.0:
