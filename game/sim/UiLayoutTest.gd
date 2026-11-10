@@ -267,7 +267,27 @@ func _initialize() -> void:
 
 			main._trade_overlay.visible = false
 			main.state.inventory[pid] = {"qty": 0, "avg_paid": 0}
-			break
+
+	# Specifically verify PCP with 1/4 FLOOD event (user scenario bounds check)
+	main.state.market_signals["pcp"] = "flood"
+	main.state.market_prices["pcp"] = 262
+	var b_rect := (main._market_board as Control).get_global_rect()
+	main._trade_overlay.open_for_product(main.state, "pcp", b_rect)
+	await process_frame
+	await process_frame
+	_assert_tree_within_bounds(main._trade_overlay, "TradeOverlay (PCP 1/4 FLOOD)")
+	main._trade_overlay.visible = false
+
+	# Specifically verify Cocaine with 4x SPIKE event (maximum price length bounds check)
+	main.state.market_signals["cocaine"] = "spike"
+	main.state.market_prices["cocaine"] = 125000
+	main.state.inventory["cocaine"] = {"qty": 100, "avg_paid": 28000}
+	main._trade_overlay.open_for_product(main.state, "cocaine", b_rect)
+	await process_frame
+	await process_frame
+	_assert_tree_within_bounds(main._trade_overlay, "TradeOverlay (Cocaine 4x SPIKE)")
+	main._trade_overlay.visible = false
+	main.state.inventory.erase("cocaine")
 
 	main._legacy_overlay.open_modal(main.meta)
 	await process_frame

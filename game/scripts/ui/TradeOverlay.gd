@@ -68,9 +68,11 @@ func _rebuild() -> void:
 	add_child(panel)
 
 	if _board_rect.size.x > 0.0 and _board_rect.size.y > 0.0:
-		panel.position = _board_rect.position
-		panel.size = _board_rect.size
-		panel.custom_minimum_size = _board_rect.size
+		var target_w := mini(int(_board_rect.size.x), 1040)
+		var target_x := clampi(int(_board_rect.position.x), 20, 1080 - target_w - 20)
+		panel.position = Vector2(target_x, _board_rect.position.y)
+		panel.size = Vector2(target_w, _board_rect.size.y)
+		panel.custom_minimum_size = Vector2(target_w, _board_rect.size.y)
 	else:
 		panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -185,7 +187,7 @@ func _rebuild() -> void:
 	var mkt_lbl := UiPalette.add_label(summary_vbox, "Market Price: %s" % mkt_str, 50, price_color, false, true)
 	mkt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 
-	# Line 2: Dollar Sign Rating Meter ($$$$$) + Companion Price Tag Pill + Normal Range
+	# Line 2: Dollar Sign Rating Meter ($$$$$) + Companion Price Tag Pill
 	var rating_row := HBoxContainer.new()
 	rating_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rating_row.add_theme_constant_override("separation", 12)
@@ -234,28 +236,24 @@ func _rebuild() -> void:
 		tag_lbl.add_theme_font_size_override("font_size", 32)
 		tag_lbl.add_theme_color_override("font_color", t_col)
 		pill.add_child(tag_lbl)
-
-		var norm_lbl := Label.new()
-		norm_lbl.text = "• Norm: %s–%s" % [Money.format(min_p), Money.format(max_p)]
-		norm_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-		norm_lbl.add_theme_font_size_override("font_size", 36)
-		norm_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
-		norm_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		rating_row.add_child(norm_lbl)
 	else:
 		var no_buy_lbl := Label.new()
-		no_buy_lbl.text = "NO LOCAL BUYERS (Norm: %s–%s)" % [Money.format(min_p), Money.format(max_p)]
+		no_buy_lbl.text = "NO LOCAL BUYERS"
 		no_buy_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
 		no_buy_lbl.add_theme_font_size_override("font_size", 36)
 		no_buy_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
 		no_buy_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		rating_row.add_child(no_buy_lbl)
 
-	# Line 3: Stash Held + Avg Paid (Large 44px stat)
+	# Line 3: Normal Market Range context
+	var norm_lbl := UiPalette.add_label(summary_vbox, "Normal Market Range: %s – %s" % [Money.format(min_p), Money.format(max_p)], 38, UiPalette.TEXT_MUTED, false, false)
+	norm_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+
+	# Line 4: Stash Held + Avg Paid (Large 44px stat)
 	var stash_lbl := UiPalette.add_label(summary_vbox, "Stash Held: %d  •  Avg Paid: %s" % [held, avg_str], 44, UiPalette.BANK_CYAN, false, false)
 	stash_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 
-	# Line 4: Coat Space Free (Large 44px stat)
+	# Line 5: Coat Space Free (Large 44px stat)
 	var coat_lbl := UiPalette.add_label(summary_vbox, "Coat Free Space: %d" % _state.get_free_capacity(), 44, UiPalette.TEXT_SECONDARY, false, false)
 	coat_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 
@@ -269,6 +267,7 @@ func _rebuild() -> void:
 	buy_tab.text = "BUY (%d)" % max_buy
 	buy_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	buy_tab.custom_minimum_size = Vector2(0, 104)
+	buy_tab.clip_text = true
 	buy_tab.disabled = (max_buy <= 0)
 	UiPalette.style_button(
 		buy_tab,
@@ -288,6 +287,7 @@ func _rebuild() -> void:
 	sell_tab.text = "SELL (%d)" % held
 	sell_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sell_tab.custom_minimum_size = Vector2(0, 104)
+	sell_tab.clip_text = true
 	sell_tab.disabled = (held <= 0) or (price <= 0)
 	UiPalette.style_button(
 		sell_tab,
@@ -308,6 +308,7 @@ func _rebuild() -> void:
 		drop_tab.text = "🗑️ DROP (%d)" % held
 		drop_tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		drop_tab.custom_minimum_size = Vector2(0, 104)
+		drop_tab.clip_text = true
 		UiPalette.style_button(
 			drop_tab,
 			UiPalette.BTN_DANGER if _mode == "dump" else UiPalette.CARD_BG,
