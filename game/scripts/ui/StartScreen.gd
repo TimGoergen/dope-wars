@@ -236,17 +236,40 @@ func _build_ui() -> void:
 func _create_new_game_button(title: String, subtitle: String, days: int, bg_col: Color, border_col: Color) -> Button:
 	var btn := Button.new()
 	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn.custom_minimum_size = Vector2(0, 114)
+	btn.custom_minimum_size = Vector2(0, 118)
 	# 20% larger base button font: 38px -> 46px
 	UiPalette.style_button(btn, bg_col, border_col, UiPalette.TEXT_PRIMARY, 46)
-	btn.text = "" # Cleared so internal 2-line VBox handles both bold title & Omaha flavor line
+	btn.text = "" # Cleared so internal HBox/VBox handles both bold title & Omaha flavor line with icon
 
+	var inner_hbox := HBoxContainer.new()
+	inner_hbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	inner_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	inner_hbox.add_theme_constant_override("separation", 16)
+	inner_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(inner_hbox)
+
+	# Left Icon: Dope Wars GTA cel-shaded game icon
+	var icon_margin := MarginContainer.new()
+	icon_margin.add_theme_constant_override("margin_left", 18)
+	icon_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inner_hbox.add_child(icon_margin)
+
+	var icon_rect := TextureRect.new()
+	icon_rect.texture = load("res://art/branding/dope_wars_icon.png")
+	icon_rect.custom_minimum_size = Vector2(84, 84)
+	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon_margin.add_child(icon_rect)
+
+	# Center Text Column: Title + Omaha flavor subtitle
 	var inner_vbox := VBoxContainer.new()
-	inner_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	inner_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inner_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	inner_vbox.add_theme_constant_override("separation", 3)
 	inner_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	btn.add_child(inner_vbox)
+	inner_hbox.add_child(inner_vbox)
 
 	var title_lbl := Label.new()
 	title_lbl.text = title
@@ -270,6 +293,12 @@ func _create_new_game_button(title: String, subtitle: String, days: int, bg_col:
 		sub_lbl.add_theme_constant_override("outline_size", 4)
 		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		inner_vbox.add_child(sub_lbl)
+
+	# Right Spacer: Matches left icon width + margin so centered text stays perfectly centered
+	var right_spacer := Control.new()
+	right_spacer.custom_minimum_size = Vector2(84 + 18, 0)
+	right_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inner_hbox.add_child(right_spacer)
 
 	btn.pressed.connect(func() -> void:
 		_on_new_game_pressed(days)
