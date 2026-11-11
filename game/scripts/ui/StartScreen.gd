@@ -77,11 +77,11 @@ func _build_ui() -> void:
 	scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(scrim)
 
-	# 3. Main Action Container pinned to lower screen
+	# 3. Main Action Container pinned to lower screen (reduced by 20% width, horizontally centered)
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 32)
-	margin.add_theme_constant_override("margin_right", 32)
+	margin.add_theme_constant_override("margin_left", 134)
+	margin.add_theme_constant_override("margin_right", 134)
 	margin.add_theme_constant_override("margin_top", 980)
 	margin.add_theme_constant_override("margin_bottom", 96)
 	add_child(margin)
@@ -132,6 +132,7 @@ func _build_ui() -> void:
 	# 20% larger: 26px -> 31px
 	_continue_info_lbl = UiPalette.add_label(cont_inner_vbox, "ACTIVE RUN IN PROGRESS", 31, UiPalette.GOLD_ACCENT, false)
 	_continue_info_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_continue_info_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	# 20% larger: 38px -> 46px
 	_continue_btn = Button.new()
@@ -250,13 +251,13 @@ func _create_new_game_button(title: String, subtitle: String, days: int, bg_col:
 
 	# Left Icon: Dope Wars GTA cel-shaded game icon
 	var icon_margin := MarginContainer.new()
-	icon_margin.add_theme_constant_override("margin_left", 18)
+	icon_margin.add_theme_constant_override("margin_left", 12)
 	icon_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	inner_hbox.add_child(icon_margin)
 
 	var icon_rect := TextureRect.new()
 	icon_rect.texture = load("res://art/branding/dope_wars_icon.png")
-	icon_rect.custom_minimum_size = Vector2(84, 84)
+	icon_rect.custom_minimum_size = Vector2(76, 76)
 	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -275,7 +276,7 @@ func _create_new_game_button(title: String, subtitle: String, days: int, bg_col:
 	title_lbl.text = title
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-	title_lbl.add_theme_font_size_override("font_size", 46) # 20% larger: 38 * 1.2 = 46px
+	title_lbl.add_theme_font_size_override("font_size", 44)
 	title_lbl.add_theme_color_override("font_color", UiPalette.TEXT_PRIMARY)
 	title_lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	title_lbl.add_theme_constant_override("outline_size", 5)
@@ -287,18 +288,18 @@ func _create_new_game_button(title: String, subtitle: String, days: int, bg_col:
 		sub_lbl.text = subtitle
 		sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		sub_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-		sub_lbl.add_theme_font_size_override("font_size", 28) # Clean, legible Omaha flavor line
+		sub_lbl.add_theme_font_size_override("font_size", 26)
 		sub_lbl.add_theme_color_override("font_color", border_col.lightened(0.2) if border_col.a > 0.0 else UiPalette.TEXT_SECONDARY)
 		sub_lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 		sub_lbl.add_theme_constant_override("outline_size", 4)
 		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		inner_vbox.add_child(sub_lbl)
 
-	# Right Spacer: Matches left icon width + margin so centered text stays perfectly centered
-	var right_spacer := Control.new()
-	right_spacer.custom_minimum_size = Vector2(84 + 18, 0)
-	right_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	inner_hbox.add_child(right_spacer)
+	# Trailing Margin to balance icon offset
+	var right_margin := MarginContainer.new()
+	right_margin.add_theme_constant_override("margin_right", 12)
+	right_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inner_hbox.add_child(right_margin)
 
 	btn.pressed.connect(func() -> void:
 		_on_new_game_pressed(days)
@@ -316,8 +317,8 @@ func _build_confirm_modal() -> void:
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 40)
-	margin.add_theme_constant_override("margin_right", 40)
+	margin.add_theme_constant_override("margin_left", 140)
+	margin.add_theme_constant_override("margin_right", 140)
 	margin.add_theme_constant_override("margin_top", 680)
 	margin.add_theme_constant_override("margin_bottom", 680)
 	_confirm_overlay.add_child(margin)
