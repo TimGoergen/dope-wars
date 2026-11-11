@@ -843,7 +843,7 @@ func _open_travel_modal() -> void:
 		var card := PanelContainer.new()
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		var card_bg := UiPalette.CARD_BG
+		var card_bg := UiPalette.CARD_BG.lightened(0.22) if is_here else UiPalette.CARD_BG
 		var card_border := UiPalette.GOLD_ACCENT if is_here else UiPalette.BORDER_BRIGHT
 		card.add_theme_stylebox_override("panel", UiPalette.make_box(card_bg, card_border, 18, 4, 18, 16))
 		grid.add_child(card)
@@ -855,7 +855,7 @@ func _open_travel_modal() -> void:
 		cv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(cv)
 
-		var title_str := ("📍 %s (HERE)" % d_def["name"]) if is_here else ("%s %s" % [d_def["icon"], d_def["name"]])
+		var title_str := ("📍 %s" % d_def["name"]) if is_here else ("%s %s" % [d_def["icon"], d_def["name"]])
 		UiPalette.add_label(cv, title_str, 42, UiPalette.GOLD_ACCENT if is_here else UiPalette.TEXT_PRIMARY, true, true)
 
 		var spot_str := String(d_def["facility_btn"])
@@ -886,7 +886,7 @@ func _open_travel_modal() -> void:
 		UiPalette.add_rich_label(affinities_vbox, "📈 Pricy: %s" % high_str, 32, UiPalette.SPIKE_AMBER, true)
 
 		var go_btn := Button.new()
-		go_btn.text = "📅 STAY FOR A DAY" if is_here else "🚗 TRAVEL HERE"
+		go_btn.text = "📅 STAY FOR A DAY" if is_here else "📍 TRAVEL HERE"
 		go_btn.custom_minimum_size = Vector2(0, 102)
 		go_btn.disabled = state.is_final_day()
 		UiPalette.style_button(
