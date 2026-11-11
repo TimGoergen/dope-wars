@@ -84,7 +84,7 @@ func _build_ui() -> void:
 	margin.add_theme_constant_override("margin_left", 32)
 	margin.add_theme_constant_override("margin_right", 32)
 	margin.add_theme_constant_override("margin_top", 980)
-	margin.add_theme_constant_override("margin_bottom", 48)
+	margin.add_theme_constant_override("margin_bottom", 96)
 	add_child(margin)
 
 	var main_vbox := VBoxContainer.new()
@@ -200,8 +200,8 @@ func _build_ui() -> void:
 	var hof_btn := Button.new()
 	hof_btn.text = "🏆 Hall of Fame"
 	hof_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hof_btn.custom_minimum_size = Vector2(0, 92)
-	UiPalette.style_button(hof_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 28)
+	hof_btn.custom_minimum_size = Vector2(0, 138)
+	UiPalette.style_button(hof_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 30)
 	hof_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		hall_of_fame_requested.emit()
@@ -211,8 +211,8 @@ func _build_ui() -> void:
 	var perks_btn := Button.new()
 	perks_btn.text = "🎖️ Perks"
 	perks_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	perks_btn.custom_minimum_size = Vector2(0, 92)
-	UiPalette.style_button(perks_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, 28)
+	perks_btn.custom_minimum_size = Vector2(0, 138)
+	UiPalette.style_button(perks_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, 30)
 	perks_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		perks_requested.emit()
@@ -222,8 +222,8 @@ func _build_ui() -> void:
 	var tune_btn := Button.new()
 	tune_btn.text = "⚙️ Tuning"
 	tune_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tune_btn.custom_minimum_size = Vector2(0, 92)
-	UiPalette.style_button(tune_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_SECONDARY, 28)
+	tune_btn.custom_minimum_size = Vector2(0, 138)
+	UiPalette.style_button(tune_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_SECONDARY, 30)
 	tune_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		tuning_requested.emit()
@@ -232,7 +232,7 @@ func _build_ui() -> void:
 
 	_audio_btn = Button.new()
 	_audio_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_audio_btn.custom_minimum_size = Vector2(0, 92)
+	_audio_btn.custom_minimum_size = Vector2(0, 138)
 	_update_audio_btn_visual()
 	_audio_btn.pressed.connect(func() -> void:
 		Audio.muted = not Audio.muted
@@ -254,10 +254,10 @@ func _update_audio_btn_visual() -> void:
 		return
 	if Audio.muted:
 		_audio_btn.text = "🔇 Muted"
-		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, 28)
+		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, 30)
 	else:
 		_audio_btn.text = "🔊 Sound"
-		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.CASH_EMERALD, UiPalette.CASH_EMERALD, 28)
+		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.CASH_EMERALD, UiPalette.CASH_EMERALD, 30)
 
 
 func _create_new_game_button(title: String, subtitle: String, days: int, bg_col: Color, border_col: Color) -> Button:
