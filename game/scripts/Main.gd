@@ -66,6 +66,7 @@ var _encounter_overlay: EncounterOverlay
 var _legacy_overlay: LegacyOverlay
 var _summary_overlay: RunSummaryOverlay
 var _dev_tuning_overlay: DevTuningOverlay
+var _settings_overlay: SettingsOverlay
 var _start_screen: StartScreen
 
 
@@ -190,6 +191,20 @@ func _build_dashboard_ui() -> void:
 		_refresh_all()
 	)
 	add_child(_dev_tuning_overlay)
+
+	_settings_overlay = SettingsOverlay.new()
+	_settings_overlay.tuning_requested.connect(func() -> void:
+		_dev_tuning_overlay.open_panel(tuning, func() -> void:
+			_settings_overlay.visible = true
+			_settings_overlay.move_to_front()
+		)
+		_dev_tuning_overlay.move_to_front()
+	)
+	_settings_overlay.settings_closed.connect(func() -> void:
+		_rebuild_kingpin_tab()
+		_refresh_all()
+	)
+	add_child(_settings_overlay)
 
 	# Click-to-Open Recent Transactions Popup (stays open until X button or outside click)
 	_news_overlay = Control.new()
@@ -959,29 +974,16 @@ func _rebuild_kingpin_tab() -> void:
 	)
 	util_row.add_child(hof_btn)
 
-	var tune_btn := Button.new()
-	tune_btn.text = "⚙️ Tuning"
-	tune_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tune_btn.custom_minimum_size = Vector2(0, 84)
-	UiPalette.style_button(tune_btn, UiPalette.CARD_BG, UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, UiPalette.FONT_SMALL)
-	tune_btn.pressed.connect(func() -> void:
+	var settings_btn := Button.new()
+	settings_btn.text = "⚙️ Settings"
+	settings_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	settings_btn.custom_minimum_size = Vector2(0, 84)
+	UiPalette.style_button(settings_btn, UiPalette.CARD_BG, UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, UiPalette.FONT_SMALL)
+	settings_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
-		_dev_tuning_overlay.open_panel(tuning)
+		_open_settings_modal("kingpin")
 	)
-	util_row.add_child(tune_btn)
-
-	var mute_btn := Button.new()
-	mute_btn.text = "🔇 Muted" if Audio.muted else "🔊 Audio ON"
-	mute_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mute_btn.custom_minimum_size = Vector2(0, 84)
-	UiPalette.style_button(mute_btn, UiPalette.CARD_BG, UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, UiPalette.FONT_SMALL)
-	mute_btn.pressed.connect(func() -> void:
-		Audio.muted = not Audio.muted
-		meta["muted"] = Audio.muted
-		SaveManager.save_data(meta)
-		_rebuild_kingpin_tab()
-	)
-	util_row.add_child(mute_btn)
+	util_row.add_child(settings_btn)
 
 	var legacy_card := PanelContainer.new()
 	legacy_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1023,6 +1025,7 @@ func _build_start_screen() -> void:
 		_summary_overlay.visible = false
 		_legacy_overlay.visible = false
 		_dev_tuning_overlay.visible = false
+		_settings_overlay.visible = false
 		hide_start_screen()
 		_show_tab(0)
 		_refresh_all()
@@ -1031,6 +1034,7 @@ func _build_start_screen() -> void:
 		_summary_overlay.visible = false
 		_legacy_overlay.visible = false
 		_dev_tuning_overlay.visible = false
+		_settings_overlay.visible = false
 		_start_new_run(mode_days)
 		hide_start_screen()
 		_show_tab(0)
@@ -1043,14 +1047,18 @@ func _build_start_screen() -> void:
 		_legacy_overlay.open_modal(meta)
 		_legacy_overlay.move_to_front()
 	)
-	_start_screen.tuning_requested.connect(func() -> void:
-		_dev_tuning_overlay.open_panel(tuning)
-		_dev_tuning_overlay.move_to_front()
+	_start_screen.settings_requested.connect(func() -> void:
+		_open_settings_modal("start_screen")
 	)
 	_start_screen.meta_updated.connect(func() -> void:
 		_rebuild_kingpin_tab()
 	)
 	add_child(_start_screen)
+
+
+func _open_settings_modal(source: String) -> void:
+	_settings_overlay.open_settings(meta, tuning, source)
+	_settings_overlay.move_to_front()
 
 
 func show_start_screen() -> void:
@@ -1059,6 +1067,7 @@ func show_start_screen() -> void:
 	_summary_overlay.visible = false
 	_legacy_overlay.visible = false
 	_dev_tuning_overlay.visible = false
+	_settings_overlay.visible = false
 	_start_screen.open_start_screen(meta, state)
 	_start_screen.visible = true
 	_start_screen.move_to_front()

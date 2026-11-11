@@ -8,6 +8,7 @@ signal tuning_applied()
 
 var _tuning: TuningConfig
 var _inputs: Dictionary = {}
+var _on_close_cb: Callable = Callable()
 
 const TUNABLE_KEYS := [
 	["starting_cash", "Starting Cash ($)", true],
@@ -34,14 +35,15 @@ func _init() -> void:
 	visible = false
 
 
-func open_panel(tuning: TuningConfig) -> void:
+func open_panel(tuning: TuningConfig, on_close: Callable = Callable()) -> void:
 	_tuning = tuning
+	_on_close_cb = on_close
 	_inputs.clear()
 	move_to_front()
 	for c in get_children():
 		c.queue_free()
 
-	var vbox := UiPalette.build_modal_shell(self, "⚙️ BALANCE TUNING", UiPalette.BANK_CYAN, true)
+	var vbox := UiPalette.build_modal_shell(self, "⚙️ BALANCE TUNING", UiPalette.BANK_CYAN, true, _close_panel)
 
 	for item in TUNABLE_KEYS:
 		var key := String(item[0])
@@ -83,8 +85,8 @@ func open_panel(tuning: TuningConfig) -> void:
 				_tuning.set(key, val)
 		TuningOverrides.save(overrides)
 		Audio.play(&"cash_register")
-		visible = false
 		tuning_applied.emit()
+		_close_panel()
 	)
 	btn_row.add_child(save_btn)
 
@@ -100,9 +102,17 @@ func open_panel(tuning: TuningConfig) -> void:
 			var k := String(item[0])
 			_tuning.set(k, fresh.get(k))
 		Audio.play(&"sell_loss")
-		visible = false
 		tuning_applied.emit()
+		_close_panel()
 	)
 	btn_row.add_child(reset_btn)
 
 	visible = true
+
+
+func _close_panel() -> void:
+	visible = false
+	if _on_close_cb.is_valid():
+		var cb := _on_close_cb
+		_on_close_cb = Callable()
+		cb.call()

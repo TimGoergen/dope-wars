@@ -379,6 +379,12 @@ func _initialize() -> void:
 	_assert_tree_within_bounds(main._dev_tuning_overlay, "DevTuningOverlay")
 	main._dev_tuning_overlay.visible = false
 
+	main._settings_overlay.open_settings(main.meta, main.tuning, "kingpin")
+	await process_frame
+	await process_frame
+	_assert_tree_within_bounds(main._settings_overlay, "SettingsOverlay")
+	main._settings_overlay.visible = false
+
 	# Test StartScreen with an active run
 	main.meta["current_run"] = main.state.to_dict()
 	main.show_start_screen()

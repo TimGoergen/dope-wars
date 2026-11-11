@@ -9,7 +9,7 @@ signal continue_requested()
 signal start_new_run_requested(mode_days: int)
 signal hall_of_fame_requested()
 signal perks_requested()
-signal tuning_requested()
+signal settings_requested()
 signal meta_updated()
 
 var _meta: Dictionary = {}
@@ -26,7 +26,6 @@ var _btn_31: Button
 var _btn_60: Button
 var _btn_90: Button
 var _btn_endless: Button
-var _audio_btn: Button
 var _confirm_overlay: ColorRect
 var _confirm_msg_lbl: Label
 var _abandon_btn: Button
@@ -191,7 +190,7 @@ func _build_ui() -> void:
 	)
 	card_vbox.add_child(_btn_endless)
 
-	# Utility Row: Hall of Fame, Perks & Street Cred, Dev Tuning, Audio Toggle
+	# Utility Row: Hall of Fame, Perks & Street Cred, Settings
 	var util_row := HBoxContainer.new()
 	util_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	util_row.add_theme_constant_override("separation", 10)
@@ -219,45 +218,19 @@ func _build_ui() -> void:
 	)
 	util_row.add_child(perks_btn)
 
-	var tune_btn := Button.new()
-	tune_btn.text = "⚙️ Tuning"
-	tune_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tune_btn.custom_minimum_size = Vector2(0, 138)
-	UiPalette.style_button(tune_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_SECONDARY, 30)
-	tune_btn.pressed.connect(func() -> void:
+	var settings_btn := Button.new()
+	settings_btn.text = "⚙️ Settings"
+	settings_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	settings_btn.custom_minimum_size = Vector2(0, 138)
+	UiPalette.style_button(settings_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, 30)
+	settings_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
-		tuning_requested.emit()
+		settings_requested.emit()
 	)
-	util_row.add_child(tune_btn)
-
-	_audio_btn = Button.new()
-	_audio_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_audio_btn.custom_minimum_size = Vector2(0, 138)
-	_update_audio_btn_visual()
-	_audio_btn.pressed.connect(func() -> void:
-		Audio.muted = not Audio.muted
-		_meta["muted"] = Audio.muted
-		SaveManager.save_data(_meta)
-		if not Audio.muted:
-			Audio.play(&"cash_register")
-		meta_updated.emit()
-		_update_audio_btn_visual()
-	)
-	util_row.add_child(_audio_btn)
+	util_row.add_child(settings_btn)
 
 	# 4. Confirmation Dialog Modal (for abandoning active run)
 	_build_confirm_modal()
-
-
-func _update_audio_btn_visual() -> void:
-	if _audio_btn == null:
-		return
-	if Audio.muted:
-		_audio_btn.text = "🔇 Muted"
-		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_MUTED, 30)
-	else:
-		_audio_btn.text = "🔊 Sound"
-		UiPalette.style_button(_audio_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.CASH_EMERALD, UiPalette.CASH_EMERALD, 30)
 
 
 func _create_new_game_button(title: String, subtitle: String, days: int, bg_col: Color, border_col: Color) -> Button:
@@ -428,5 +401,3 @@ func _refresh_display() -> void:
 		var debt_val := int(saved.get("debt", 0))
 		var nw := cash_val + bank_val - debt_val
 		_continue_info_lbl.text = "ACTIVE RUN: %s • %s • Net Worth: %s" % [d_str, dist_name, Money.format_short(nw)]
-
-	_update_audio_btn_visual()
