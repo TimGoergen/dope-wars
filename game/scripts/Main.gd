@@ -359,7 +359,7 @@ func _build_hero_header(parent: VBoxContainer) -> void:
 	_scanner_card.add_child(news_hold_btn)
 
 	# Middle: Wide Location Name (no pin icon, horizontally & vertically centered)
-	_loc_lbl = UiPalette.add_hero_label(top_strip, "North Omaha", 54, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
+	_loc_lbl = UiPalette.add_hero_label(top_strip, "Florence", 54, UiPalette.GOLD_ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	_loc_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_loc_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_loc_lbl.size_flags_stretch_ratio = 3.0
@@ -423,6 +423,7 @@ func _build_market_tab() -> Control:
 	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.follow_focus = false
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.gui_input.connect(_on_market_scroll_input)
@@ -1146,8 +1147,6 @@ func _on_quick_action_pressed(product_id: String) -> void:
 			return
 
 	_auto_save()
-	if _market_scroll != null:
-		_market_scroll.scroll_vertical = 0
 	_refresh_all()
 
 
@@ -1212,6 +1211,7 @@ func _set_news_expanded(expanded: bool) -> void:
 
 
 func _refresh_all() -> void:
+	var saved_market_scroll := _market_scroll.scroll_vertical if _market_scroll != null else 0
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
 
 	# 1. Hero Header (icons are dedicated SVG TextureRects beside each label)
@@ -1397,6 +1397,9 @@ func _refresh_all() -> void:
 	# 6. Refresh Active Modals (Combat or Street Encounter)
 	_combat_overlay.refresh(state)
 	_encounter_overlay.refresh(state)
+
+	if _market_scroll != null and _market_scroll.scroll_vertical != saved_market_scroll:
+		_market_scroll.scroll_vertical = saved_market_scroll
 
 	call_deferred(&"_update_market_scroll_fading")
 

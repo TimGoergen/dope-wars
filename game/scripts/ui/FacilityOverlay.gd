@@ -121,7 +121,7 @@ static func build_banking_card(vbox: VBoxContainer, state: GameState, on_action:
 
 	var can_wd := state.can_withdraw_bank()
 	if not can_wd:
-		UiPalette.add_label(inner, "🔒 Withdrawals require visiting North Omaha Branch (or VIP Perk)", 30, UiPalette.TEXT_MUTED)
+		UiPalette.add_label(inner, "🔒 Withdrawals require visiting Florence Branch (or VIP Perk)", 30, UiPalette.TEXT_MUTED)
 	var wd_row := HBoxContainer.new()
 	wd_row.add_theme_constant_override("separation", 14)
 	inner.add_child(wd_row)

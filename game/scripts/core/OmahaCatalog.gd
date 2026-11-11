@@ -7,8 +7,8 @@ const DISTRICTS := [
 	{
 		"id": "north_omaha",
 		"index": 0,
-		"name": "North Omaha",
-		"short_name": "1. North O",
+		"name": "Florence",
+		"short_name": "1. Florence",
 		"icon": "🏦🦈",
 		"facility_id": "bank_and_loans",
 		"facility_name": "First National Bank & Big Sal's Loans",
@@ -20,7 +20,7 @@ const DISTRICTS := [
 		"pricy_products": [],
 		"west_o_pricy": false,
 		"bellevue_chill": false,
-		"flavor": "30th & Ames corridor — home to First National and Big Sal."
+		"flavor": "Historic Florence strip — home to First National and Big Sal."
 	},
 	{
 		"id": "south_omaha",

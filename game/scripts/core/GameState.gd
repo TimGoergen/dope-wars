@@ -122,7 +122,7 @@ func new_run(mode_days: int = 31, perks: Array = [], seed_val: int = 0) -> void:
 	street_cred_earned = 0
 	cops_killed_total = 0
 
-	log_scanner("📍 Day 1: Parked in North Omaha. Pay Big Sal before Day %d!" % (max_days if not is_endless else 99))
+	log_scanner("📍 Day 1: Parked in Florence. Pay Big Sal before Day %d!" % (max_days if not is_endless else 99))
 	_roll_market_for_current_district()
 	_roll_scanner_perk_forecast_if_needed()
 
@@ -310,7 +310,7 @@ func can_withdraw_bank() -> bool:
 
 func withdraw_bank(amount: int) -> Dictionary:
 	if not can_withdraw_bank():
-		return {"ok": false, "reason": "Must visit First National in North Omaha (or unlock VIP Perk)"}
+		return {"ok": false, "reason": "Must visit First National in Florence (or unlock VIP Perk)"}
 	var actual := clampi(amount, 0, bank)
 	if actual <= 0:
 		return {"ok": false, "reason": "No bank funds"}
@@ -322,7 +322,7 @@ func withdraw_bank(amount: int) -> Dictionary:
 
 func pay_loan(amount: int) -> Dictionary:
 	if current_district_id != "north_omaha":
-		return {"ok": false, "reason": "Big Sal is in North Omaha"}
+		return {"ok": false, "reason": "Big Sal is in Florence"}
 	var actual := clampi(amount, 0, mini(cash, debt))
 	if actual <= 0:
 		return {"ok": false, "reason": "Nothing to pay"}
@@ -351,7 +351,7 @@ func get_max_credit_line() -> int:
 
 func borrow_loan(amount: int) -> Dictionary:
 	if current_district_id != "north_omaha":
-		return {"ok": false, "reason": "Big Sal is in North Omaha"}
+		return {"ok": false, "reason": "Big Sal is in Florence"}
 	if not initial_debt_cleared:
 		return {"ok": false, "reason": "Pay off your initial $5,500 debt first"}
 	var avail := get_max_credit_line()

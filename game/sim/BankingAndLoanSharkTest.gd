@@ -1,6 +1,6 @@
 extends SceneTree
 
-# Gate 4: BankingAndLoanSharkTest — verifies Street ATM 5% fee vs North Omaha 0% fee,
+# Gate 4: BankingAndLoanSharkTest — verifies Street ATM 5% fee vs Florence 0% fee,
 # Bank 5% & Loan 10% compounding, Dynamic Big Sal Credit Line, 7-day Enforcer rule,
 # and Final Day 1.5x unpaid debt penalty.
 
@@ -12,10 +12,10 @@ func _init() -> void:
 	var state := GameState.new(tuning, 2002)
 	state.new_run(31, [], 2002)
 
-	# 1. In North Omaha, deposit fee is 0%
+	# 1. In Florence, deposit fee is 0%
 	state.cash = 10000
 	var d_north := state.deposit_bank(1000)
-	_assert_eq(int(d_north.get("fee", -1)), 0, "0% fee in North Omaha")
+	_assert_eq(int(d_north.get("fee", -1)), 0, "0% fee in Florence")
 	_assert_eq(state.bank, 1000, "Bank 1000")
 
 	# 2. Drive to South Omaha: Bank (+5%) -> 1050, Debt (+10% on 5500) -> 6050
@@ -26,11 +26,11 @@ func _init() -> void:
 
 	# 3. In South Omaha, Street ATM charges 5% deposit fee, and withdrawal is blocked without VIP perk
 	var d_atm := state.deposit_bank(1000)
-	_assert_eq(int(d_atm.get("fee", 0)), 50, "5% Street ATM fee outside North Omaha")
+	_assert_eq(int(d_atm.get("fee", 0)), 50, "5% Street ATM fee outside Florence")
 	_assert_eq(int(d_atm.get("deposited", 0)), 950, "950 credited after 5% fee")
-	_assert_true(not state.can_withdraw_bank(), "Cannot withdraw outside North Omaha without VIP perk")
+	_assert_true(not state.can_withdraw_bank(), "Cannot withdraw outside Florence without VIP perk")
 
-	# 4. Return to North Omaha, pay off Big Sal in full -> unlocks Dynamic Credit Line
+	# 4. Return to Florence, pay off Big Sal in full -> unlocks Dynamic Credit Line
 	state.drive_to_district("north_omaha")
 	state.active_combat = {}
 	state.cash = 200000

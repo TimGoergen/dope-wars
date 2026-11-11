@@ -155,6 +155,17 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	# Verify that purchasing a drug does not scroll or move the market list
+	main._market_scroll.scroll_vertical = 120
+	main._update_market_scroll_fading()
+	main._on_quick_action_pressed("weed")
+	await process_frame
+	await process_frame
+	if main._market_scroll.scroll_vertical != 120:
+		push_error("FAIL [Market Scroll Retention]: Expected scroll_vertical to stay at 120 after purchase, got %d" % main._market_scroll.scroll_vertical)
+		quit(1)
+		return
+
 	main._market_scroll.scroll_vertical = 0
 	main._update_market_scroll_fading()
 	main.state.inventory.clear()

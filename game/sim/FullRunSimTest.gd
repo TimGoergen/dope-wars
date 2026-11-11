@@ -89,7 +89,7 @@ func _init() -> void:
 					if qty > 0:
 						state.buy_product(pid, qty)
 
-			# 7. Choose next district (visit North Omaha if debt needs paying, Benson if wounded)
+			# 7. Choose next district (visit Florence if debt needs paying, Benson if wounded)
 			var next_id := ""
 			if need_to_pay_sal and state.current_district_id != "north_omaha":
 				next_id = "north_omaha"

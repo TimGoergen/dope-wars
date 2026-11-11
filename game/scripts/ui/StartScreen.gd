@@ -174,7 +174,7 @@ func _build_ui() -> void:
 	# New Game - 90 Days (Omaha flavor: tight & concise)
 	_btn_90 = _create_new_game_button(
 		"New Game - 90 Days",
-		"North O to Bellevue • Own the Metro",
+		"Florence to Bellevue • Own the Metro",
 		90,
 		Color(0.13, 0.18, 0.27, 0.65),
 		UiPalette.BORDER_BRIGHT
