@@ -19,6 +19,7 @@ var _mute_btn: Button
 var _vol_slider: HSlider
 var _vol_val_lbl: Label
 var _haptic_btn: Button
+var _version_lbl: Label
 
 
 func _init() -> void:
@@ -175,6 +176,26 @@ func open_settings(meta: Dictionary, tuning: TuningConfig, source: String = "", 
 		tuning_requested.emit()
 	)
 	tuning_vbox.add_child(open_tuning_btn)
+
+	# 3. APP VERSION PINNED TO BOTTOM LEFT
+	var card_vbox := vbox.get_parent().get_parent() as VBoxContainer
+	if card_vbox != null:
+		var footer_hbox := HBoxContainer.new()
+		footer_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		footer_hbox.alignment = BoxContainer.ALIGNMENT_BEGIN
+		card_vbox.add_child(footer_hbox)
+
+		var ver_raw := String(ProjectSettings.get_setting("application/config/version", "0.0.0.0001"))
+		var ver_text := ver_raw if ver_raw.begins_with("v") else ("v%s" % ver_raw)
+
+		_version_lbl = Label.new()
+		_version_lbl.text = ver_text
+		_version_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		_version_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+		_version_lbl.add_theme_font_size_override("font_size", 28)
+		_version_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
+		_version_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		footer_hbox.add_child(_version_lbl)
 
 	visible = true
 

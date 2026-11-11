@@ -383,6 +383,10 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_assert_tree_within_bounds(main._settings_overlay, "SettingsOverlay")
+	if main._settings_overlay._version_lbl == null or not main._settings_overlay._version_lbl.text.begins_with("v"):
+		push_error("FAIL [SettingsOverlay]: Expected version label in bottom left corner with 'v' prefix")
+		quit(1)
+		return
 	main._settings_overlay.visible = false
 
 	# Test StartScreen with an active run
