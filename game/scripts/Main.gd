@@ -795,7 +795,7 @@ func _format_product_list_travel(ids: Array) -> String:
 		var entry: Dictionary = state.inventory.get(pid, {})
 		var qty := int(entry.get("qty", 0))
 		if qty > 0:
-			names.append("[b]%s[/b]" % pname)
+			names.append("[color=#FFFFFF][b]%s[/b][/color]" % pname)
 		else:
 			names.append(pname)
 	return ", ".join(names)
@@ -825,7 +825,7 @@ func _open_travel_modal() -> void:
 						(hc as Label).add_theme_font_size_override("font_size", UiPalette.FONT_TITLE)
 
 	var cur_d := OmahaCatalog.get_district(state.current_district_id)
-	UiPalette.add_label(vbox, "Current Neighborhood: %s %s  •  Choose a destination to travel or stay for a day (advances 1 Day)." % [
+	UiPalette.add_label(vbox, "Current: %s %s  •  White text = drugs in your inventory  •  Advances 1 Day." % [
 		cur_d["icon"], cur_d["name"]
 	], 36, UiPalette.TEXT_SECONDARY)
 

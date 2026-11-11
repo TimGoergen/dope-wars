@@ -225,8 +225,8 @@ func _initialize() -> void:
 
 	main.state.inventory["weed"] = {"qty": 5, "avg_paid": 100}
 	var test_str: String = main._format_product_list_travel(["weed", "cocaine"])
-	if not test_str.contains("[b]Weed[/b]") or test_str.contains("[b]Cocaine[/b]"):
-		push_error("FAIL [Travel Screen]: Expected [b]Weed[/b] and unbolded Cocaine, got '%s'" % test_str)
+	if not test_str.contains("[b]Weed[/b]") or not test_str.contains("[color=#FFFFFF]") or test_str.contains("[b]Cocaine[/b]"):
+		push_error("FAIL [Travel Screen]: Expected highlighted [b]Weed[/b] and unbolded Cocaine, got '%s'" % test_str)
 		quit(1)
 		return
 	main._open_travel_modal()
