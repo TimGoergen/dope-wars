@@ -338,7 +338,7 @@ static func build_lounge_card(vbox: VBoxContainer, state: GameState, on_action: 
 	box.add_child(inner)
 
 	var cost := state.get_next_crew_cost()
-	UiPalette.add_label(inner, "🍸 Old Market Crew Lounge", 44, UiPalette.GOLD_ACCENT, false, true)
+	UiPalette.add_label(inner, "🍸 Boys Town (Hire Crew)", 44, UiPalette.GOLD_ACCENT, false, true)
 	UiPalette.add_label(inner, "Active Crew: %d / %d Runners\n+10 Coat Space, +1 Gun Slot, 30 HP shared combat shield." % [
 		state.crew_count, state.tuning.crew_max_count
 	], 32, UiPalette.TEXT_SECONDARY)

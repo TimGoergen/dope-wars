@@ -164,7 +164,7 @@ func _build_ui() -> void:
 	# New Game - 60 Days (Omaha flavor: tight & concise)
 	_btn_60 = _create_new_game_button(
 		"New Game - 60 Days",
-		"South O to West O • Run 24th St",
+		"South O to West Dodge • Run 24th St",
 		60,
 		Color(0.13, 0.18, 0.27, 0.65),
 		UiPalette.BORDER_BRIGHT

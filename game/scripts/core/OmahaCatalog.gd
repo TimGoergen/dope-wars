@@ -61,12 +61,12 @@ const DISTRICTS := [
 	{
 		"id": "west_omaha",
 		"index": 3,
-		"name": "West Omaha",
-		"short_name": "4. West O",
+		"name": "West Dodge",
+		"short_name": "4. W. Dodge",
 		"icon": "🍸",
 		"facility_id": "lounge",
-		"facility_name": "The Regency Lounge",
-		"facility_btn": "🍸 The Regency Lounge (Hire Crew)",
+		"facility_name": "Boys Town",
+		"facility_btn": "🍸 Boys Town (Hire Crew)",
 		"base_cop_pct": 22.0,
 		"cheap_products": [],
 		"very_cheap_products": [],
@@ -74,7 +74,7 @@ const DISTRICTS := [
 		"pricy_products": ["cocaine", "molly", "oxy", "adderall", "meth", "vape_carts", "heroin"],
 		"west_o_pricy": true,
 		"bellevue_chill": false,
-		"flavor": "Regency & Village Pointe money — top-dollar buyers, heavy OPD."
+		"flavor": "West Dodge & Boys Town corridor — top-dollar buyers, heavy OPD."
 	},
 	{
 		"id": "council_bluffs",

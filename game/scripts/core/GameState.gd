@@ -455,7 +455,7 @@ func hire_crew() -> Dictionary:
 		return {"ok": false, "reason": "Insufficient cash"}
 	cash -= cost
 	crew_count += 1
-	log_scanner("🍸 Hired Runner #%d at The Regency Lounge (+%d Space, +1 Gun Slot, 30 HP Shield)." % [crew_count, tuning.crew_capacity_bonus])
+	log_scanner("🍸 Hired Runner #%d at Boys Town (+%d Space, +1 Gun Slot, 30 HP Shield)." % [crew_count, tuning.crew_capacity_bonus])
 	return {"ok": true, "crew_count": crew_count, "cost": cost}
 
 
@@ -1253,7 +1253,7 @@ func _compute_victory_fate(nw: int) -> String:
 	if nw >= 10000000:
 		return "Penthouse Suite in the Old Market"
 	if nw >= 1000000:
-		return "Retired a West Omaha Millionaire"
+		return "Retired a West Dodge Millionaire"
 	if nw >= 100000:
 		return "Paid Off Big Sal & Stacked Solid Paper"
 	return "Survived the Streets of Omaha"
