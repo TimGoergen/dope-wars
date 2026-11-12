@@ -1,0 +1,38 @@
+name: Manage Firebase Testers
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Tester email to add"
+        required: true
+        default: "agoergen@gmail.com"
+      group:
+        description: "Group alias (leave blank to add to project only)"
+        required: false
+        default: "testers"
+
+jobs:
+  add-tester:
+    name: Add Tester to Firebase App Distribution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add Tester
+        env:
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+          TESTER_EMAIL: ${{ github.event.inputs.email }}
+          GROUP_ALIAS: ${{ github.event.inputs.group }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > /tmp/sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json
+          
+          if [ -n "$GROUP_ALIAS" ]; then
+            echo "Adding $TESTER_EMAIL to group '$GROUP_ALIAS' in project american-tycoon..."
+            npx -y firebase-tools appdistribution:testers:add "$TESTER_EMAIL" --group-alias "$GROUP_ALIAS" --project american-tycoon
+          else
+            echo "Adding $TESTER_EMAIL to project american-tycoon..."
+            npx -y firebase-tools appdistribution:testers:add "$TESTER_EMAIL" --project american-tycoon
+          fi
+          
+          rm -f /tmp/sa.json
