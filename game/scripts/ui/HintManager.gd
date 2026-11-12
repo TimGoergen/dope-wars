@@ -2,17 +2,17 @@ class_name HintManager
 extends Node
 
 # Interactive Element Onboarding & Tutorial Toasts.
-# Shows clean, off-white speech-bubble toasts with a small triangular arrow
-# pointing directly to the interactive elements being explained.
+# Displays compact, square-cornered, off-white callout toasts with elongated
+# directional triangular pointer arrows positioned asymmetrically near interactive UI controls.
 
 const HINT_AUTOCLOSE_SEC: float = 6.0
 
-const BG_COLOR := Color(0.97, 0.98, 0.99, 0.98) # Crisp off-white (#F8FAFC)
-const BORDER_COLOR := Color(0.60, 0.65, 0.72, 1.0) # Slate border (#94A3B8)
-const TEXT_TITLE := Color(0.06, 0.09, 0.16, 1.0) # Deep slate black (#0F172A)
+const BG_COLOR := Color(0.97, 0.98, 0.99, 0.99) # Plain off-white (#F8FAFC)
+const BORDER_COLOR := Color(0.55, 0.60, 0.68, 1.0) # Slate border (#8C99A8)
+const TEXT_TITLE := Color(0.06, 0.09, 0.16, 1.0) # Slate black (#0F172A)
 const TEXT_BODY := Color(0.12, 0.16, 0.24, 1.0) # Readable dark slate (#1E293B)
 const TEXT_MUTED := Color(0.40, 0.46, 0.54, 1.0) # Slate-500 (#64748B)
-const TEXT_LINK := Color(0.10, 0.38, 0.85, 1.0) # Vibrant tutorial blue (#1D4ED8)
+const TEXT_LINK := Color(0.10, 0.38, 0.85, 1.0) # Vibrant link blue (#1D4ED8)
 
 const SCREEN_HINTS: Dictionary = {
 	"start_screen": [
@@ -20,17 +20,19 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "RUN DURATION",
 			"icon": "calendar",
 			"body": "Select 31, 60, 90 Days or Endless mode to launch your hustle across Omaha.",
+			"align": "left",
 			"arrow_dir": "down",
-			"arrow_x": 0.5,
-			"top_y": 740
+			"arrow_x": 0.68,
+			"top_y": 660
 		},
 		{
 			"title": "KINGPIN UTILITIES",
 			"icon": "crown",
 			"body": "View high scores in Hall of Fame, unlock persistent Street Cred perks, or configure Settings.",
+			"align": "left",
 			"arrow_dir": "down",
-			"arrow_x": 0.5,
-			"top_y": 1940
+			"arrow_x": 0.55,
+			"top_y": 1800
 		}
 	],
 	"market_tab": [
@@ -38,25 +40,28 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "STATUS HERO HEADER",
 			"icon": "heart",
 			"body": "Monitors your Cash, shark Debt, Coat capacity, Health, and District police danger.",
+			"align": "left",
 			"arrow_dir": "up",
-			"arrow_x": 0.5,
-			"top_y": 310
+			"arrow_x": 0.28,
+			"top_y": 280
 		},
 		{
 			"title": "BUY & SELL DRUGS",
 			"icon": "scales",
 			"body": "Tap BUY to purchase drugs from locals. Tap SELL to cash in. Buy low, sell high across Omaha!",
-			"arrow_dir": "up",
-			"arrow_x": 0.82,
-			"top_y": 660
+			"align": "right",
+			"arrow_dir": "down",
+			"arrow_x": 0.78,
+			"top_y": 520
 		},
 		{
 			"title": "METRO TRAVEL",
 			"icon": "car",
 			"body": "Tap TRAVEL to ride the subway to a new district. Each trip advances 1 day and resets prices.",
+			"align": "left",
 			"arrow_dir": "down",
-			"arrow_x": 0.5,
-			"top_y": 1840
+			"arrow_x": 0.68,
+			"top_y": 1720
 		}
 	],
 	"locals_tab": [
@@ -64,17 +69,19 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "BANK & LOAN SHARK",
 			"icon": "bank",
 			"body": "Deposit cash to earn daily interest and protect it from muggers. Repay loan shark debt before interest piles up!",
+			"align": "left",
 			"arrow_dir": "up",
-			"arrow_x": 0.5,
-			"top_y": 300
+			"arrow_x": 0.35,
+			"top_y": 280
 		},
 		{
 			"title": "HOSPITAL & STREET DEALERS",
 			"icon": "hospital",
 			"body": "Visit the Clinic to restore HP from gunfights. Find trunk vendors to buy weapons and expand your coat capacity.",
+			"align": "right",
 			"arrow_dir": "up",
-			"arrow_x": 0.5,
-			"top_y": 1150
+			"arrow_x": 0.50,
+			"top_y": 1020
 		}
 	],
 	"kingpin_tab": [
@@ -82,17 +89,19 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "STREET CRED & PERKS",
 			"icon": "trophy",
 			"body": "Every finished run awards permanent Street Cred. Spend it here to unlock powerful starting advantages.",
+			"align": "left",
 			"arrow_dir": "up",
-			"arrow_x": 0.5,
-			"top_y": 300
+			"arrow_x": 0.35,
+			"top_y": 280
 		},
 		{
 			"title": "FACILITIES & EMPIRE",
 			"icon": "bank",
 			"body": "Purchase stash houses, safehouses, and grow labs across Omaha for daily passive revenue and storage.",
+			"align": "left",
 			"arrow_dir": "up",
-			"arrow_x": 0.5,
-			"top_y": 920
+			"arrow_x": 0.50,
+			"top_y": 800
 		}
 	],
 	"trade_overlay": [
@@ -100,9 +109,10 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "TRADE CONTROLS",
 			"icon": "scales",
 			"body": "Use the quantity slider or MIN / MAX buttons to set units, then tap CONFIRM to execute the trade.",
+			"align": "left",
 			"arrow_dir": "down",
-			"arrow_x": 0.5,
-			"top_y": 800
+			"arrow_x": 0.68,
+			"top_y": 680
 		}
 	],
 	"travel_overlay": [
@@ -110,9 +120,10 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "DISTRICT TRANSIT",
 			"icon": "car",
 			"body": "Pick an Omaha neighborhood. Check police presence ratings — high heat raises the risk of DEA busts!",
+			"align": "left",
 			"arrow_dir": "down",
-			"arrow_x": 0.5,
-			"top_y": 240
+			"arrow_x": 0.45,
+			"top_y": 200
 		}
 	],
 	"combat_overlay": [
@@ -120,20 +131,21 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "POLICE INTERCEPTION",
 			"icon": "siren",
 			"body": "Cops caught you! Tap RUN to flee, FIGHT to shoot back if armed, or BRIBE with cash to walk away.",
+			"align": "left",
 			"arrow_dir": "down",
-			"arrow_x": 0.5,
-			"top_y": 1640
+			"arrow_x": 0.55,
+			"top_y": 1480
 		}
 	]
 }
 
 
-# Custom lightweight control to draw the triangular callout pointer arrow
+# Custom lightweight control to draw the elongated triangular callout pointer arrow (4x longer: 72px)
 class ArrowPointer extends Control:
 	var points_up: bool = false
 	var arrow_x_pct: float = 0.5
-	var arrow_width: float = 30.0
-	var arrow_height: float = 16.0
+	var arrow_width: float = 38.0
+	var arrow_height: float = 72.0
 
 	func _init(up: bool, x_pct: float) -> void:
 		points_up = up
@@ -145,7 +157,7 @@ class ArrowPointer extends Control:
 	func _draw() -> void:
 		var center_x := size.x * arrow_x_pct
 		var half_w := arrow_width / 2.0
-		var x_left := clampf(center_x - half_w, 24.0, size.x - 24.0 - arrow_width)
+		var x_left := clampf(center_x - half_w, 20.0, size.x - 20.0 - arrow_width)
 		var x_right := x_left + arrow_width
 		var x_tip := x_left + half_w
 
@@ -168,8 +180,8 @@ class ArrowPointer extends Control:
 		# Fill triangle with matching off-white
 		draw_colored_polygon(pts, BG_COLOR)
 		# Draw clean outer borders on angled sides
-		draw_line(pts[0], pts[1], BORDER_COLOR, 2.5, true)
-		draw_line(pts[1], pts[2], BORDER_COLOR, 2.5, true)
+		draw_line(pts[0], pts[1], BORDER_COLOR, 3.0, true)
+		draw_line(pts[1], pts[2], BORDER_COLOR, 3.0, true)
 
 
 static func show_screen_hints(screen_id: String, parent_control: Control, meta: Dictionary) -> void:
@@ -208,8 +220,6 @@ static func _start_toast_sequence(screen_id: String, parent_control: Control, ti
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	overlay.add_theme_constant_override("margin_left", 32)
-	overlay.add_theme_constant_override("margin_right", 32)
 	parent_control.add_child(overlay)
 
 	_show_tip_step(overlay, tips, 0)
@@ -233,9 +243,19 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 	var arrow_dir := String(tip_data.get("arrow_dir", "down"))
 	var arrow_x := float(tip_data.get("arrow_x", 0.5))
 	var top_y := int(tip_data.get("top_y", 320))
+	var align_mode := String(tip_data.get("align", "left"))
 
-	# Update overlay margin_top to place the toast near the target item
+	# Asymmetric, narrower positioning:
+	# Toast width is ~720px (out of 1080px screen width), distinctly narrower than full UI (812-1040px)
+	# Left-aligned: margin_left = 44, margin_right = 316
+	# Right-aligned: margin_left = 316, margin_right = 44
 	overlay.add_theme_constant_override("margin_top", top_y)
+	if align_mode == "right":
+		overlay.add_theme_constant_override("margin_left", 316)
+		overlay.add_theme_constant_override("margin_right", 44)
+	else:
+		overlay.add_theme_constant_override("margin_left", 44)
+		overlay.add_theme_constant_override("margin_right", 316)
 
 	# Main vertical stack containing the speech bubble card + arrow
 	var bubble_stack := VBoxContainer.new()
@@ -249,7 +269,7 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 		var arrow_top := ArrowPointer.new(true, arrow_x)
 		bubble_stack.add_child(arrow_top)
 
-	# The off-white speech bubble card
+	# The off-white speech bubble card with SQUARE CORNERS
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var sb := StyleBoxFlat.new()
@@ -259,18 +279,19 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 	sb.border_width_right = 3
 	sb.border_width_top = 3
 	sb.border_width_bottom = 3
-	sb.corner_radius_top_left = 14
-	sb.corner_radius_top_right = 14
-	sb.corner_radius_bottom_left = 14
-	sb.corner_radius_bottom_right = 14
-	sb.content_margin_left = 22
-	sb.content_margin_right = 22
-	sb.content_margin_top = 18
-	sb.content_margin_bottom = 16
-	# Subtle shadow to pop out distinctly against any game background
-	sb.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
-	sb.shadow_size = 8
-	sb.shadow_offset = Vector2(0, 4)
+	# SQUARE CORNERS: 0px radius on all corners
+	sb.corner_radius_top_left = 0
+	sb.corner_radius_top_right = 0
+	sb.corner_radius_bottom_left = 0
+	sb.corner_radius_bottom_right = 0
+	sb.content_margin_left = 24
+	sb.content_margin_right = 24
+	sb.content_margin_top = 22
+	sb.content_margin_bottom = 20
+	# Subtle drop shadow
+	sb.shadow_color = Color(0.0, 0.0, 0.0, 0.40)
+	sb.shadow_size = 10
+	sb.shadow_offset = Vector2(0, 5)
 	card.add_theme_stylebox_override("panel", sb)
 	bubble_stack.add_child(card)
 
@@ -281,14 +302,14 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 
 	var hbox := HBoxContainer.new()
 	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_theme_constant_override("separation", 18)
+	hbox.add_theme_constant_override("separation", 20)
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(hbox)
 
-	# Left Icon
+	# Left Icon (larger 64x64)
 	var icon_rect := TextureRect.new()
-	icon_rect.texture = UiIcons.get_icon(icon_name, 56)
-	icon_rect.custom_minimum_size = Vector2(56, 56)
+	icon_rect.texture = UiIcons.get_icon(icon_name, 64)
+	icon_rect.custom_minimum_size = Vector2(64, 64)
 	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -298,7 +319,7 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 	# Center text column
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 6)
+	vbox.add_theme_constant_override("separation", 8)
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_child(vbox)
 
@@ -309,37 +330,37 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 	vbox.add_child(hdr_row)
 
 	var title_lbl := Label.new()
-	title_lbl.text = "💡  " + title_str
+	title_lbl.text = "💡 " + title_str
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-	title_lbl.add_theme_font_size_override("font_size", 28)
+	title_lbl.add_theme_font_size_override("font_size", 34)
 	title_lbl.add_theme_color_override("font_color", TEXT_TITLE)
 	title_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hdr_row.add_child(title_lbl)
 
 	var step_lbl := Label.new()
 	step_lbl.text = "%d of %d" % [index + 1, tips.size()]
-	step_lbl.add_theme_font_size_override("font_size", 22)
+	step_lbl.add_theme_font_size_override("font_size", 24)
 	step_lbl.add_theme_color_override("font_color", TEXT_MUTED)
 	step_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hdr_row.add_child(step_lbl)
 
-	# Body explanation
+	# Body explanation (larger 28px font)
 	var body_lbl := Label.new()
 	body_lbl.text = body_str
 	body_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body_lbl.add_theme_font_size_override("font_size", 24)
+	body_lbl.add_theme_font_size_override("font_size", 28)
 	body_lbl.add_theme_color_override("font_color", TEXT_BODY)
 	body_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(body_lbl)
 
-	# Action prompt footer
+	# Action prompt footer (larger 22px font)
 	var is_last := (index + 1 >= tips.size())
 	var action_lbl := Label.new()
 	action_lbl.text = "[ Tap anywhere to dismiss ✕ ]" if is_last else "[ Tap anywhere for next tip ▶ ]"
 	action_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-	action_lbl.add_theme_font_size_override("font_size", 19)
+	action_lbl.add_theme_font_size_override("font_size", 22)
 	action_lbl.add_theme_color_override("font_color", TEXT_LINK)
 	action_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(action_lbl)
