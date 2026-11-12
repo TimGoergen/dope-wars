@@ -197,33 +197,21 @@ func _build_ui() -> void:
 	util_row.add_theme_constant_override("separation", 10)
 	main_vbox.add_child(util_row)
 
-	var hof_btn := Button.new()
-	hof_btn.text = "🏆 Hall of Fame"
-	hof_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hof_btn.custom_minimum_size = Vector2(0, 138)
-	UiPalette.style_button(hof_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT, 30)
+	var hof_btn := _create_util_button("Hall of Fame", "trophy", UiPalette.GOLD_ACCENT, UiPalette.GOLD_ACCENT)
 	hof_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		hall_of_fame_requested.emit()
 	)
 	util_row.add_child(hof_btn)
 
-	var perks_btn := Button.new()
-	perks_btn.text = "🎖️ Perks"
-	perks_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	perks_btn.custom_minimum_size = Vector2(0, 138)
-	UiPalette.style_button(perks_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, 30)
+	var perks_btn := _create_util_button("Perks", "crown", UiPalette.BANK_CYAN, UiPalette.BANK_CYAN)
 	perks_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		perks_requested.emit()
 	)
 	util_row.add_child(perks_btn)
 
-	var settings_btn := Button.new()
-	settings_btn.text = "⚙️ Settings"
-	settings_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	settings_btn.custom_minimum_size = Vector2(0, 138)
-	UiPalette.style_button(settings_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY, 30)
+	var settings_btn := _create_util_button("Settings", "gear", UiPalette.BORDER_SLATE, UiPalette.TEXT_PRIMARY)
 	settings_btn.pressed.connect(func() -> void:
 		Audio.play(&"tap")
 		settings_requested.emit()
@@ -232,6 +220,44 @@ func _build_ui() -> void:
 
 	# 4. Confirmation Dialog Modal (for abandoning active run)
 	_build_confirm_modal()
+
+
+func _create_util_button(title: String, icon_name: String, border_col: Color, text_col: Color) -> Button:
+	var btn := Button.new()
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.custom_minimum_size = Vector2(0, 138)
+	UiPalette.style_button(btn, Color(0.13, 0.18, 0.27, 0.65), border_col, text_col, 28)
+	btn.text = ""
+	btn.icon = null
+
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 6)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(vbox)
+
+	var icon_rect := TextureRect.new()
+	icon_rect.texture = UiIcons.get_icon(icon_name, 52)
+	icon_rect.custom_minimum_size = Vector2(52, 52)
+	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(icon_rect)
+
+	var lbl := Label.new()
+	lbl.text = title
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+	lbl.add_theme_font_size_override("font_size", 26)
+	lbl.add_theme_color_override("font_color", text_col)
+	lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	lbl.add_theme_constant_override("outline_size", 4)
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.add_child(lbl)
+
+	return btn
 
 
 func _create_new_game_button(title: String, subtitle: String, days: int, bg_col: Color, border_col: Color) -> Button:

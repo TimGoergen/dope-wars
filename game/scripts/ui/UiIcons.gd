@@ -426,8 +426,11 @@ static func _get_svg_markup(name: String) -> String:
 			</svg>"""
 		"gear":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-				<circle cx="32" cy="32" r="20" fill="#38BDF8" stroke="#0F172A" stroke-width="4"/>
-				<circle cx="32" cy="32" r="9" fill="#0F172A"/>
+				<path d="M 27.61,13.0 L 28.08,5.79 L 35.92,5.79 L 36.39,13.0 L 42.33,15.46 L 47.76,10.7 L 53.3,16.24 L 48.54,21.67 L 51.0,27.61 L 58.21,28.08 L 58.21,35.92 L 51.0,36.39 L 48.54,42.33 L 53.3,47.76 L 47.76,53.3 L 42.33,48.54 L 36.39,51.0 L 35.92,58.21 L 28.08,58.21 L 27.61,51.0 L 21.67,48.54 L 16.24,53.3 L 10.7,47.76 L 15.46,42.33 L 13.0,36.39 L 5.79,35.92 L 5.79,28.08 L 13.0,27.61 L 15.46,21.67 L 10.7,16.24 L 16.24,10.7 L 21.67,15.46 Z" fill="#38BDF8" stroke="#0F172A" stroke-width="3.5" stroke-linejoin="round"/>
+				<circle cx="32" cy="32" r="14" fill="#0284C7" stroke="#0F172A" stroke-width="2.5"/>
+				<circle cx="32" cy="32" r="7.5" fill="#0F172A"/>
+				<line x1="28.5" y1="6.8" x2="35.5" y2="6.8" stroke="#BAE6FD" stroke-width="2.2" stroke-linecap="round"/>
+				<path d="M 23 27 A 10 10 0 0 1 37 21" stroke="#BAE6FD" stroke-width="2" stroke-linecap="round" fill="none"/>
 			</svg>"""
 		"speaker_on":
 			return """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
