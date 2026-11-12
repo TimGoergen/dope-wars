@@ -43,6 +43,7 @@ func open_start_screen(meta: Dictionary, state: GameState) -> void:
 	_confirm_overlay.visible = false
 	_refresh_display()
 	visible = true
+	HintManager.show_screen_hints("start_screen", self, _meta)
 
 
 func has_active_run() -> bool:

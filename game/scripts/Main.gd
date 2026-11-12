@@ -487,6 +487,7 @@ func _build_market_tab() -> Control:
 			Audio.play(&"tap")
 			var b_rect := _market_board.get_global_rect() if _market_board != null else Rect2()
 			_trade_overlay.open_for_product(state, pid, b_rect)
+			HintManager.show_screen_hints("trade_overlay", _trade_overlay, meta)
 		)
 		row_hbox.add_child(row_tap_btn)
 
@@ -791,6 +792,15 @@ func _show_tab(tab_idx: int) -> void:
 	elif _current_tab == 2:
 		_rebuild_kingpin_tab()
 
+	if _start_screen == null or not _start_screen.visible:
+		match _current_tab:
+			0:
+				HintManager.show_screen_hints("market_tab", self, meta)
+			1:
+				HintManager.show_screen_hints("locals_tab", self, meta)
+			2:
+				HintManager.show_screen_hints("kingpin_tab", self, meta)
+
 
 func _format_product_list_short(ids: Array) -> String:
 	var names: Array[String] = []
@@ -921,6 +931,7 @@ func _open_travel_modal() -> void:
 
 	_travel_overlay.move_to_front()
 	_travel_overlay.visible = true
+	HintManager.show_screen_hints("travel_overlay", _travel_overlay, meta)
 
 
 func _rebuild_spot_tab() -> void:
@@ -1153,6 +1164,7 @@ func _on_quick_action_pressed(product_id: String) -> void:
 		else:
 			var b_rect := _market_board.get_global_rect() if _market_board != null else Rect2()
 			_trade_overlay.open_for_product(state, product_id, b_rect)
+			HintManager.show_screen_hints("trade_overlay", _trade_overlay, meta)
 			return
 
 	_auto_save()
@@ -1405,6 +1417,8 @@ func _refresh_all() -> void:
 
 	# 6. Refresh Active Modals (Combat or Street Encounter)
 	_combat_overlay.refresh(state)
+	if _combat_overlay.visible and not state.active_combat.is_empty():
+		HintManager.show_screen_hints("combat_overlay", _combat_overlay, meta)
 	_encounter_overlay.refresh(state)
 
 	if _market_scroll != null and _market_scroll.scroll_vertical != saved_market_scroll:

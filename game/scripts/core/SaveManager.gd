@@ -18,6 +18,7 @@ static func create_default_meta() -> Dictionary:
 		"muted": false,
 		"haptics_enabled": true,
 		"hall_of_fame": [],
+		"seen_screen_hints": [],
 		"current_run": {}
 	}
 
@@ -36,6 +37,8 @@ static func load_save(custom_path: String = SAVE_PATH) -> Dictionary:
 	var meta := create_default_meta()
 	for k in parsed.keys():
 		meta[k] = parsed[k]
+	if not ("seen_screen_hints" in meta) or not (meta["seen_screen_hints"] is Array):
+		meta["seen_screen_hints"] = []
 	return meta
 
 

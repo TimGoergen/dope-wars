@@ -177,7 +177,51 @@ func open_settings(meta: Dictionary, tuning: TuningConfig, source: String = "", 
 	)
 	tuning_vbox.add_child(open_tuning_btn)
 
-	# 3. APP VERSION PINNED TO BOTTOM LEFT
+	# 3. INTERACTIVE ON-SCREEN HINTS CARD
+	var hints_card := PanelContainer.new()
+	hints_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hints_card.add_theme_stylebox_override(
+		"panel",
+		UiPalette.make_box(UiPalette.CARD_BG, UiPalette.BANK_CYAN, 18, 3, 22, 20)
+	)
+	vbox.add_child(hints_card)
+
+	var hints_vbox := VBoxContainer.new()
+	hints_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hints_vbox.add_theme_constant_override("separation", 16)
+	hints_card.add_child(hints_vbox)
+
+	UiPalette.add_label(hints_vbox, "💡 ON-SCREEN TUTORIAL HINTS", 40, UiPalette.BANK_CYAN, false, true)
+	UiPalette.add_label(
+		hints_vbox,
+		"Small toast popups explain interactive buttons and game elements the first time each screen is viewed.",
+		30,
+		UiPalette.TEXT_SECONDARY
+	)
+
+	var reset_hints_btn := Button.new()
+	reset_hints_btn.text = "🔄 RESET ON-SCREEN HINTS"
+	reset_hints_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	reset_hints_btn.custom_minimum_size = Vector2(0, 96)
+	UiPalette.style_button(reset_hints_btn, Color(0.13, 0.18, 0.27, 0.65), UiPalette.BANK_CYAN, UiPalette.BANK_CYAN, 30)
+
+	var status_lbl := Label.new()
+	status_lbl.text = ""
+	status_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status_lbl.add_theme_font_size_override("font_size", 24)
+	status_lbl.add_theme_color_override("font_color", UiPalette.CASH_EMERALD)
+
+	reset_hints_btn.pressed.connect(func() -> void:
+		Audio.play(&"cash_register")
+		HintManager.reset_all_hints(_meta)
+		status_lbl.text = "✓ Hints reset! They will reappear as you visit each screen."
+		if Haptics.scale > 0.01:
+			Haptics.pulse(30.0)
+	)
+	hints_vbox.add_child(reset_hints_btn)
+	hints_vbox.add_child(status_lbl)
+
+	# 4. APP VERSION PINNED TO BOTTOM LEFT
 	var card_vbox := vbox.get_parent().get_parent() as VBoxContainer
 	if card_vbox != null:
 		var footer_hbox := HBoxContainer.new()
