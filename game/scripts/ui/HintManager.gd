@@ -2,10 +2,17 @@ class_name HintManager
 extends Node
 
 # Interactive Element Onboarding & Tutorial Toasts.
-# Shows small, stylized cel-shaded toast popups explaining interactive controls
-# the first time a user views each screen in Dope Wars: Omaha.
+# Shows clean, off-white speech-bubble toasts with a small triangular arrow
+# pointing directly to the interactive elements being explained.
 
 const HINT_AUTOCLOSE_SEC: float = 6.0
+
+const BG_COLOR := Color(0.97, 0.98, 0.99, 0.98) # Crisp off-white (#F8FAFC)
+const BORDER_COLOR := Color(0.60, 0.65, 0.72, 1.0) # Slate border (#94A3B8)
+const TEXT_TITLE := Color(0.06, 0.09, 0.16, 1.0) # Deep slate black (#0F172A)
+const TEXT_BODY := Color(0.12, 0.16, 0.24, 1.0) # Readable dark slate (#1E293B)
+const TEXT_MUTED := Color(0.40, 0.46, 0.54, 1.0) # Slate-500 (#64748B)
+const TEXT_LINK := Color(0.10, 0.38, 0.85, 1.0) # Vibrant tutorial blue (#1D4ED8)
 
 const SCREEN_HINTS: Dictionary = {
 	"start_screen": [
@@ -13,13 +20,17 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "RUN DURATION",
 			"icon": "calendar",
 			"body": "Select 31, 60, 90 Days or Endless mode to launch your hustle across Omaha.",
-			"color": Color(0.98, 0.80, 0.08) # Gold
+			"arrow_dir": "down",
+			"arrow_x": 0.5,
+			"top_y": 740
 		},
 		{
 			"title": "KINGPIN UTILITIES",
 			"icon": "crown",
 			"body": "View high scores in Hall of Fame, unlock persistent Street Cred perks, or configure Settings.",
-			"color": Color(0.22, 0.74, 0.97) # Cyan
+			"arrow_dir": "down",
+			"arrow_x": 0.5,
+			"top_y": 1940
 		}
 	],
 	"market_tab": [
@@ -27,19 +38,25 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "STATUS HERO HEADER",
 			"icon": "heart",
 			"body": "Monitors your Cash, shark Debt, Coat capacity, Health, and District police danger.",
-			"color": Color(0.13, 0.77, 0.37) # Emerald
+			"arrow_dir": "up",
+			"arrow_x": 0.5,
+			"top_y": 310
 		},
 		{
-			"title": "BUY & SELL CONTRABAND",
+			"title": "BUY & SELL DRUGS",
 			"icon": "scales",
 			"body": "Tap BUY to purchase drugs from locals. Tap SELL to cash in. Buy low, sell high across Omaha!",
-			"color": Color(0.98, 0.80, 0.08) # Gold
+			"arrow_dir": "up",
+			"arrow_x": 0.82,
+			"top_y": 660
 		},
 		{
 			"title": "METRO TRAVEL",
 			"icon": "car",
 			"body": "Tap TRAVEL to ride the subway to a new district. Each trip advances 1 day and resets prices.",
-			"color": Color(0.22, 0.74, 0.97) # Cyan
+			"arrow_dir": "down",
+			"arrow_x": 0.5,
+			"top_y": 1840
 		}
 	],
 	"locals_tab": [
@@ -47,13 +64,17 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "BANK & LOAN SHARK",
 			"icon": "bank",
 			"body": "Deposit cash to earn daily interest and protect it from muggers. Repay loan shark debt before interest piles up!",
-			"color": Color(0.22, 0.74, 0.97) # Cyan
+			"arrow_dir": "up",
+			"arrow_x": 0.5,
+			"top_y": 300
 		},
 		{
 			"title": "HOSPITAL & STREET DEALERS",
 			"icon": "hospital",
 			"body": "Visit the Clinic to restore HP from gunfights. Find trunk vendors to buy weapons and expand your coat capacity.",
-			"color": Color(0.75, 0.52, 0.99) # Purple
+			"arrow_dir": "up",
+			"arrow_x": 0.5,
+			"top_y": 1150
 		}
 	],
 	"kingpin_tab": [
@@ -61,13 +82,17 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "STREET CRED & PERKS",
 			"icon": "trophy",
 			"body": "Every finished run awards permanent Street Cred. Spend it here to unlock powerful starting advantages.",
-			"color": Color(0.98, 0.80, 0.08) # Gold
+			"arrow_dir": "up",
+			"arrow_x": 0.5,
+			"top_y": 300
 		},
 		{
 			"title": "FACILITIES & EMPIRE",
 			"icon": "bank",
 			"body": "Purchase stash houses, safehouses, and grow labs across Omaha for daily passive revenue and storage.",
-			"color": Color(0.13, 0.77, 0.37) # Emerald
+			"arrow_dir": "up",
+			"arrow_x": 0.5,
+			"top_y": 920
 		}
 	],
 	"trade_overlay": [
@@ -75,7 +100,9 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "TRADE CONTROLS",
 			"icon": "scales",
 			"body": "Use the quantity slider or MIN / MAX buttons to set units, then tap CONFIRM to execute the trade.",
-			"color": Color(0.98, 0.80, 0.08) # Gold
+			"arrow_dir": "down",
+			"arrow_x": 0.5,
+			"top_y": 800
 		}
 	],
 	"travel_overlay": [
@@ -83,7 +110,9 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "DISTRICT TRANSIT",
 			"icon": "car",
 			"body": "Pick an Omaha neighborhood. Check police presence ratings — high heat raises the risk of DEA busts!",
-			"color": Color(0.22, 0.74, 0.97) # Cyan
+			"arrow_dir": "down",
+			"arrow_x": 0.5,
+			"top_y": 240
 		}
 	],
 	"combat_overlay": [
@@ -91,10 +120,56 @@ const SCREEN_HINTS: Dictionary = {
 			"title": "POLICE INTERCEPTION",
 			"icon": "siren",
 			"body": "Cops caught you! Tap RUN to flee, FIGHT to shoot back if armed, or BRIBE with cash to walk away.",
-			"color": Color(0.94, 0.27, 0.27) # Red
+			"arrow_dir": "down",
+			"arrow_x": 0.5,
+			"top_y": 1640
 		}
 	]
 }
+
+
+# Custom lightweight control to draw the triangular callout pointer arrow
+class ArrowPointer extends Control:
+	var points_up: bool = false
+	var arrow_x_pct: float = 0.5
+	var arrow_width: float = 30.0
+	var arrow_height: float = 16.0
+
+	func _init(up: bool, x_pct: float) -> void:
+		points_up = up
+		arrow_x_pct = x_pct
+		custom_minimum_size = Vector2(0, arrow_height)
+		size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var center_x := size.x * arrow_x_pct
+		var half_w := arrow_width / 2.0
+		var x_left := clampf(center_x - half_w, 24.0, size.x - 24.0 - arrow_width)
+		var x_right := x_left + arrow_width
+		var x_tip := x_left + half_w
+
+		var pts: PackedVector2Array
+		if points_up:
+			# Triangle pointing upwards: apex at top (y=0), base at bottom (y=arrow_height)
+			pts = PackedVector2Array([
+				Vector2(x_left, arrow_height),
+				Vector2(x_tip, 0.0),
+				Vector2(x_right, arrow_height)
+			])
+		else:
+			# Triangle pointing downwards: base at top (y=0), apex at bottom (y=arrow_height)
+			pts = PackedVector2Array([
+				Vector2(x_left, 0.0),
+				Vector2(x_tip, arrow_height),
+				Vector2(x_right, 0.0)
+			])
+
+		# Fill triangle with matching off-white
+		draw_colored_polygon(pts, BG_COLOR)
+		# Draw clean outer borders on angled sides
+		draw_line(pts[0], pts[1], BORDER_COLOR, 2.5, true)
+		draw_line(pts[1], pts[2], BORDER_COLOR, 2.5, true)
 
 
 static func show_screen_hints(screen_id: String, parent_control: Control, meta: Dictionary) -> void:
@@ -132,15 +207,7 @@ static func _start_toast_sequence(screen_id: String, parent_control: Control, ti
 	overlay.name = "HintToastOverlay"
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	# Anchor toast in upper third below headers
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	var top_offset := 310
-	if screen_id == "start_screen":
-		top_offset = 240
-	elif screen_id in ["trade_overlay", "travel_overlay", "combat_overlay"]:
-		top_offset = 170
-
-	overlay.add_theme_constant_override("margin_top", top_offset)
 	overlay.add_theme_constant_override("margin_left", 32)
 	overlay.add_theme_constant_override("margin_right", 32)
 	parent_control.add_child(overlay)
@@ -155,48 +222,87 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 		overlay.queue_free()
 		return
 
-	# Clear previous card
+	# Clear previous contents
 	for c in overlay.get_children():
 		c.queue_free()
 
 	var tip_data: Dictionary = tips[index]
-	var title_str := String(tip_data.get("title", "HINT"))
+	var title_str := String(tip_data.get("title", "TUTORIAL"))
 	var icon_name := String(tip_data.get("icon", "gem"))
 	var body_str := String(tip_data.get("body", ""))
-	var border_col: Color = tip_data.get("color", UiPalette.BANK_CYAN)
+	var arrow_dir := String(tip_data.get("arrow_dir", "down"))
+	var arrow_x := float(tip_data.get("arrow_x", 0.5))
+	var top_y := int(tip_data.get("top_y", 320))
 
+	# Update overlay margin_top to place the toast near the target item
+	overlay.add_theme_constant_override("margin_top", top_y)
+
+	# Main vertical stack containing the speech bubble card + arrow
+	var bubble_stack := VBoxContainer.new()
+	bubble_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bubble_stack.add_theme_constant_override("separation", -1) # Overlap by 1px so arrow seamlessly connects to border
+	bubble_stack.mouse_filter = Control.MOUSE_FILTER_PASS
+	overlay.add_child(bubble_stack)
+
+	# If arrow points up, arrow sits on TOP of the card
+	if arrow_dir == "up":
+		var arrow_top := ArrowPointer.new(true, arrow_x)
+		bubble_stack.add_child(arrow_top)
+
+	# The off-white speech bubble card
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override(
-		"panel",
-		UiPalette.make_box(Color(0.07, 0.10, 0.16, 0.96), border_col, 16, 3, 20, 16)
-	)
-	overlay.add_child(card)
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = BG_COLOR
+	sb.border_color = BORDER_COLOR
+	sb.border_width_left = 3
+	sb.border_width_right = 3
+	sb.border_width_top = 3
+	sb.border_width_bottom = 3
+	sb.corner_radius_top_left = 14
+	sb.corner_radius_top_right = 14
+	sb.corner_radius_bottom_left = 14
+	sb.corner_radius_bottom_right = 14
+	sb.content_margin_left = 22
+	sb.content_margin_right = 22
+	sb.content_margin_top = 18
+	sb.content_margin_bottom = 16
+	# Subtle shadow to pop out distinctly against any game background
+	sb.shadow_color = Color(0.0, 0.0, 0.0, 0.45)
+	sb.shadow_size = 8
+	sb.shadow_offset = Vector2(0, 4)
+	card.add_theme_stylebox_override("panel", sb)
+	bubble_stack.add_child(card)
+
+	# If arrow points down, arrow sits at the BOTTOM of the card
+	if arrow_dir == "down":
+		var arrow_bottom := ArrowPointer.new(false, arrow_x)
+		bubble_stack.add_child(arrow_bottom)
 
 	var hbox := HBoxContainer.new()
 	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_theme_constant_override("separation", 16)
+	hbox.add_theme_constant_override("separation", 18)
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(hbox)
 
-	# Icon
+	# Left Icon
 	var icon_rect := TextureRect.new()
-	icon_rect.texture = UiIcons.get_icon(icon_name, 52)
-	icon_rect.custom_minimum_size = Vector2(52, 52)
+	icon_rect.texture = UiIcons.get_icon(icon_name, 56)
+	icon_rect.custom_minimum_size = Vector2(56, 56)
 	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_child(icon_rect)
 
-	# Content column
+	# Center text column
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 4)
+	vbox.add_theme_constant_override("separation", 6)
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_child(vbox)
 
-	# Header row with title & step counter
+	# Header row (Title + Step Counter)
 	var hdr_row := HBoxContainer.new()
 	hdr_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hdr_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -206,36 +312,35 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 	title_lbl.text = "💡  " + title_str
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
-	title_lbl.add_theme_font_size_override("font_size", 26)
-	title_lbl.add_theme_color_override("font_color", border_col)
-	title_lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
-	title_lbl.add_theme_constant_override("outline_size", 4)
+	title_lbl.add_theme_font_size_override("font_size", 28)
+	title_lbl.add_theme_color_override("font_color", TEXT_TITLE)
 	title_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hdr_row.add_child(title_lbl)
 
 	var step_lbl := Label.new()
-	step_lbl.text = "%d / %d" % [index + 1, tips.size()]
+	step_lbl.text = "%d of %d" % [index + 1, tips.size()]
 	step_lbl.add_theme_font_size_override("font_size", 22)
-	step_lbl.add_theme_color_override("font_color", UiPalette.TEXT_MUTED)
+	step_lbl.add_theme_color_override("font_color", TEXT_MUTED)
 	step_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hdr_row.add_child(step_lbl)
 
-	# Body text
+	# Body explanation
 	var body_lbl := Label.new()
 	body_lbl.text = body_str
 	body_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body_lbl.add_theme_font_size_override("font_size", 24)
-	body_lbl.add_theme_color_override("font_color", UiPalette.TEXT_PRIMARY)
+	body_lbl.add_theme_color_override("font_color", TEXT_BODY)
 	body_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(body_lbl)
 
-	# Bottom action hint
+	# Action prompt footer
 	var is_last := (index + 1 >= tips.size())
 	var action_lbl := Label.new()
 	action_lbl.text = "[ Tap anywhere to dismiss ✕ ]" if is_last else "[ Tap anywhere for next tip ▶ ]"
-	action_lbl.add_theme_font_size_override("font_size", 18)
-	action_lbl.add_theme_color_override("font_color", border_col.lightened(0.2))
+	action_lbl.add_theme_font_override("font", UiPalette.make_bold_font())
+	action_lbl.add_theme_font_size_override("font_size", 19)
+	action_lbl.add_theme_color_override("font_color", TEXT_LINK)
 	action_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(action_lbl)
 
@@ -254,9 +359,9 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 		advanced[0] = true
 		if is_tap:
 			Audio.play(&"tap")
-		if is_instance_valid(card):
-			var tw := card.create_tween()
-			tw.tween_property(card, "modulate:a", 0.0, 0.18)
+		if is_instance_valid(bubble_stack):
+			var tw := bubble_stack.create_tween()
+			tw.tween_property(bubble_stack, "modulate:a", 0.0, 0.16)
 			tw.tween_callback(func() -> void:
 				_show_tip_step(overlay, tips, index + 1)
 			)
@@ -271,7 +376,7 @@ static func _show_tip_step(overlay: MarginContainer, tips: Array, index: int) ->
 		var timer := tree.create_timer(HINT_AUTOCLOSE_SEC)
 		timer.timeout.connect(func() -> void: advance_callable.call(false))
 
-	# Entry fade animation
-	card.modulate.a = 0.0
-	var enter_tw := card.create_tween()
-	enter_tw.tween_property(card, "modulate:a", 1.0, 0.22)
+	# Entry fade & slide-in animation
+	bubble_stack.modulate.a = 0.0
+	var enter_tw := bubble_stack.create_tween()
+	enter_tw.tween_property(bubble_stack, "modulate:a", 1.0, 0.20)
