@@ -371,6 +371,24 @@ func _initialize() -> void:
 	await process_frame
 	await process_frame
 	_assert_tree_within_bounds(main._summary_overlay, "RunSummaryOverlay")
+
+	# Test all mode tabs on RunSummaryOverlay
+	for m_key in SaveManager.MODE_KEYS:
+		main._summary_overlay._select_mode(m_key)
+		await process_frame
+		await process_frame
+		_assert_tree_within_bounds(main._summary_overlay, "RunSummaryOverlay (Tab: %s)" % m_key)
+
+	# Test standalone Hall of Fame leaderboard (without run banner)
+	main._summary_overlay.open_summary(main.state, main.meta, false)
+	await process_frame
+	await process_frame
+	_assert_tree_within_bounds(main._summary_overlay, "RunSummaryOverlay (Standalone Leaderboard)")
+	for m_key in SaveManager.MODE_KEYS:
+		main._summary_overlay._select_mode(m_key)
+		await process_frame
+		await process_frame
+		_assert_tree_within_bounds(main._summary_overlay, "RunSummaryOverlay Standalone (Tab: %s)" % m_key)
 	main._summary_overlay.visible = false
 
 	main._dev_tuning_overlay.open_panel(main.tuning)
